@@ -1,13 +1,14 @@
 import {
   isRouteErrorResponse,
   Links,
-  Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
 } from "react-router";
 
 import type { Route } from "./+types/root";
+import { Navigation } from "./components/Navigation";
+import { AuthProvider } from "./contexts/AuthContext";
 import "./app.css";
 
 export const links: Route.LinksFunction = () => [
@@ -29,11 +30,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <Meta />
+        <title>WeTransfer Clone - Send large files</title>
         <Links />
       </head>
       <body>
-        {children}
+        <AuthProvider>
+          <Navigation />
+          {children}
+        </AuthProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
