@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from './ui/select';
 import { useAuth } from '../contexts/AuthContext';
+import { Logo } from './Logo';
 
 export function Navigation() {
   const location = useLocation();
@@ -20,6 +21,10 @@ export function Navigation() {
     if (location.pathname === '/download') return 'download';
     return 'transfer';
   });
+
+  if (location.pathname === '/') {
+    return null;
+  }
 
            const tabs = [
            {
@@ -55,8 +60,8 @@ export function Navigation() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex justify-between h-16">
                            <div className="flex items-center">
-                   <Link to="/send" className="flex items-center space-x-3 text-xl font-bold text-gray-900">
-                     <span>CloudChat</span>
+                   <Link to="/send" className="flex items-center space-x-3">
+                     <Logo size="md" />
                    </Link>
                  </div>
           
