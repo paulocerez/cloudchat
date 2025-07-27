@@ -5,3 +5,10 @@ public/
 # React Router
 /.react-router/
 /build/
+# Environment files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env*.local
