@@ -14,7 +14,6 @@ import { Logo } from './Logo';
 export function Navigation() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout, isAuthenticated } = useAuth();
   const [activeTab, setActiveTab] = useState(() => {
     if (location.pathname === '/send') return 'transfer';
     if (location.pathname === '/storage') return 'storage';
@@ -67,7 +66,6 @@ export function Navigation() {
           
                            {/* Navigation Selector */}
                  <div className="flex items-center space-x-4">
-                   {isAuthenticated && (
                      <Select value={activeTab} onValueChange={handleTabChange}>
                        <SelectTrigger className="w-48">
                          <SelectValue />
@@ -86,34 +84,6 @@ export function Navigation() {
                          })}
                        </SelectContent>
                      </Select>
-                   )}
-
-                   {/* User Menu */}
-                   {isAuthenticated && user && (
-                     <div className="flex items-center space-x-3">
-                       <div className="flex items-center space-x-2 text-sm text-gray-700">
-                         <User className="h-4 w-4" />
-                         <span>{user.name || user.email}</span>
-                       </div>
-                       <button
-                         onClick={logout}
-                         className="text-gray-600 hover:text-gray-900 transition-colors p-2"
-                         title="Sign out"
-                       >
-                         <LogOut className="h-4 w-4" />
-                       </button>
-                     </div>
-                   )}
-
-                   {/* Login Link for unauthenticated users */}
-                   {!isAuthenticated && (
-                     <Link 
-                       to="/login" 
-                       className="bg-gray-900 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition-colors text-sm"
-                     >
-                       Sign In
-                     </Link>
-                   )}
                  </div>
         </div>
       </div>
