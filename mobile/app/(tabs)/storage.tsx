@@ -1,18 +1,14 @@
 import React from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text, ScrollView } from 'react-native';
 import FileUpload from '../components/FileUpload';
 import FileList from '../components/FileList';
 
 export default function StorageScreen() {
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Cloud Storage</Text>
-        <Text style={styles.headerSubtitle}>Manage and organize your files</Text>
-      </View>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <FileUpload />
       <FileList />
-    </View>
+    </ScrollView>
   );
 }
 

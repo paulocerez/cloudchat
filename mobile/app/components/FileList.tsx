@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Alert, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useCloudStorage } from '../contexts/CloudStorageContext';
 
@@ -32,8 +32,8 @@ export default function FileList() {
     );
   };
 
-  const renderFileItem = ({ item }: { item: any }) => (
-    <View style={styles.fileItem}>
+  const renderFileItem = (item: any) => (
+    <View key={item.id} style={styles.fileItem}>
       <View style={styles.fileInfo}>
         <View style={styles.fileIconContainer}>
           <Ionicons 
@@ -71,8 +71,8 @@ export default function FileList() {
     </View>
   );
 
-  const renderGridItem = ({ item }: { item: any }) => (
-    <View style={styles.gridItem}>
+  const renderGridItem = (item: any) => (
+    <View key={item.id} style={styles.gridItem}>
       <View style={styles.gridThumbnail}>
         <View style={styles.gridIconContainer}>
           <Ionicons 
@@ -145,30 +145,19 @@ export default function FileList() {
             style={[styles.toggleButton, viewMode === 'list' && styles.toggleButtonActive]}
             onPress={() => setViewMode('list')}
           >
-            <Ionicons name="list-outline" size={20} color={viewMode === 'list' ? '#1F2937' : '#6B7280'} />
+            <Ionicons name="list-outline" size={20} color={viewMode === 'grid' ? '#1F2937' : '#6B7280'} />
           </TouchableOpacity>
         </View>
       </View>
       
       {viewMode === 'grid' ? (
-        <FlatList
-          key="grid"
-          data={files}
-          renderItem={renderGridItem}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.gridContainer}
-        />
+        <View style={styles.gridContainer}>
+          {files.map(renderGridItem)}
+        </View>
       ) : (
-        <FlatList
-          key="list"
-          data={files}
-          renderItem={renderFileItem}
-          keyExtractor={(item) => item.id}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.listContainer}
-        />
+        <View style={styles.listContainer}>
+          {files.map(renderFileItem)}
+        </View>
       )}
     </View>
   );
