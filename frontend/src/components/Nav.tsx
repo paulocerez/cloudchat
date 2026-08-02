@@ -23,6 +23,7 @@ export default function Nav() {
             {[
               { to: '/', label: 'Timeline' },
               { to: '/summaries', label: 'Summaries' },
+              { to: '/settings', label: 'Settings' },
             ].map(({ to, label }) => (
               <Link
                 key={to}

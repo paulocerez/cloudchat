@@ -4,6 +4,7 @@ import { loginRoute } from './routes/login';
 import { entryDateRoute } from './routes/entry.$date';
 import { summariesRoute } from './routes/summaries';
 import { summaryRoute } from './routes/summary.$period.$year.$index';
+import { settingsRoute } from './routes/settings';
 
 export const routeTree = rootRoute.addChildren([
   indexRoute,
@@ -11,4 +12,5 @@ export const routeTree = rootRoute.addChildren([
   entryDateRoute,
   summariesRoute,
   summaryRoute,
+  settingsRoute,
 ]);

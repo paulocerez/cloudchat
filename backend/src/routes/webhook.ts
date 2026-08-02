@@ -9,17 +9,19 @@ import {
 } from '../services/firestore';
 import { downloadMedia } from '../services/whatsapp';
 import { transcribeAudio } from '../services/groq';
+import { getWhatsappVerifyToken } from '../services/config';
 import { TextMessage, VoiceMemo, JournalImage, WhatsAppMessage } from '../types';
 
 const router = Router();
 
 // WhatsApp webhook verification
-router.get('/', (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response) => {
   const mode = req.query['hub.mode'];
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
+  const verifyToken = await getWhatsappVerifyToken();
 
-  if (mode === 'subscribe' && token === process.env.WHATSAPP_VERIFY_TOKEN) {
+  if (mode === 'subscribe' && token === verifyToken) {
     res.status(200).send(challenge);
   } else {
     res.sendStatus(403);

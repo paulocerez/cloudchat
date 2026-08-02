@@ -7,6 +7,7 @@ import { startScheduler } from './services/scheduler';
 import webhookRouter from './routes/webhook';
 import entriesRouter from './routes/entries';
 import summariesRouter from './routes/summaries';
+import configRouter from './routes/config';
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
@@ -19,6 +20,7 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 app.use('/webhook', webhookRouter);
 app.use('/api/entries', entriesRouter);
 app.use('/api/summaries', summariesRouter);
+app.use('/api/config', configRouter);
 
 async function bootstrap() {
   initFirestore();

@@ -1,20 +1,19 @@
 import cron from 'node-cron';
 import { sendTextMessage, getDailyPrompt } from './whatsapp';
-import { getOrCreateEntry } from './firestore';
+import { getOrCreateEntry, addTextMessage } from './firestore';
+import { getCronSchedule, getTimezone, getUserPhoneNumber } from './config';
 import { TextMessage } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
-export function startScheduler() {
-  // Send daily prompt at 8 PM in the configured timezone
-  // CRON_SCHEDULE env var overrides the default (e.g. "0 20 * * *")
-  const schedule = process.env.CRON_SCHEDULE ?? '0 20 * * *';
-  const timezone = process.env.TZ ?? 'UTC';
+export async function startScheduler() {
+  const schedule = await getCronSchedule();
+  const timezone = await getTimezone();
 
   cron.schedule(
     schedule,
     async () => {
       try {
-        const userPhone = process.env.USER_PHONE_NUMBER;
+        const userPhone = await getUserPhoneNumber();
         if (!userPhone) {
           console.error('USER_PHONE_NUMBER not configured');
           return;
@@ -32,8 +31,6 @@ export function startScheduler() {
           timestamp: new Date().toISOString(),
           fromUser: false,
         };
-
-        const { addTextMessage } = await import('./firestore');
         await addTextMessage(date, systemMsg);
 
         console.log(`Daily prompt sent for ${date}`);
@@ -44,5 +41,5 @@ export function startScheduler() {
     { timezone }
   );
 
-  console.log(`Scheduler started: daily prompt at schedule "${schedule}" (${timezone})`);
+  console.log(`Scheduler started: "${schedule}" (${timezone})`);
 }

@@ -31,6 +31,16 @@ export interface JournalImage {
   timestamp: string;
 }
 
+export interface AppConfig {
+  whatsappToken: string;
+  whatsappPhoneNumberId: string;
+  whatsappVerifyToken: string;
+  userPhoneNumber: string;
+  cronSchedule: string;
+  timezone: string;
+  _sources: Record<string, 'db' | 'env' | 'unset'>;
+}
+
 export interface AISummary {
   id: string;
   period: 'week' | 'month';
