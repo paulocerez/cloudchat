@@ -22,7 +22,7 @@ export default function Nav() {
   return (
     <>
       {/* ── Top bar — logo only, generous height ─────────── */}
-      <header className="sticky top-0 z-10 border-b border-gray-200/60">
+      <header className="sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-6 flex items-center h-16">
           <Link to="/" className="transition-opacity hover:opacity-70">
             <Logo size="md" />
