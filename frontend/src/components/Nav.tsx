@@ -40,7 +40,7 @@ export default function Nav() {
 
       {/* ── Floating bottom nav ───────────────────────────── */}
       <nav className="fixed bottom-6 inset-x-0 z-20 flex justify-center pointer-events-none">
-        <div className="pointer-events-auto flex items-center gap-1 bg-white/90 backdrop-blur-md border border-gray-200 rounded-full shadow-lg shadow-black/5 px-2 py-2">
+        <div className="pointer-events-auto flex items-center gap-1 bg-white/90 backdrop-blur-md border border-gray-200 rounded-sm shadow-lg shadow-black/5 px-2 py-2">
           {TABS.map(({ to, label, Icon }) => {
             const active = to === '/' ? pathname === '/' : pathname.startsWith(to);
             return (
