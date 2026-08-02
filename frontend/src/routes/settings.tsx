@@ -34,13 +34,6 @@ const FIELDS: {
     placeholder: '123456789012345',
   },
   {
-    key: 'whatsappVerifyToken',
-    label: 'Webhook Verify Token',
-    hint: 'The token you set in Meta webhook configuration',
-    sensitive: true,
-    placeholder: 'journal2025',
-  },
-  {
     key: 'userPhoneNumber',
     label: 'Your WhatsApp Number',
     hint: 'With country code, no + (e.g. 4917612345678)',
@@ -84,7 +77,6 @@ export default function SettingsPage() {
       setForm({
         whatsappToken: '',
         whatsappPhoneNumberId: cfg.whatsappPhoneNumberId,
-        whatsappVerifyToken: '',
         userPhoneNumber: cfg.userPhoneNumber,
         cronSchedule: cfg.cronSchedule,
         timezone: cfg.timezone,

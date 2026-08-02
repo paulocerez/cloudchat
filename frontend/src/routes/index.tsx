@@ -1,5 +1,6 @@
 import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
+import { MessageCircle } from 'lucide-react';
 import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
 import type { JournalEntry, TextMessage, VoiceMemo } from '@cloudchat/shared';
@@ -103,9 +104,17 @@ function ErrorState() {
 
 function EmptyState() {
   return (
-    <div className="text-center py-20 animate-fade-up">
-      <p className="text-gray-900 font-medium mb-1">No entries yet</p>
-      <p className="text-gray-400 text-sm">Your daily WhatsApp prompts will appear here</p>
+    <div className="flex flex-col items-center justify-center py-24 animate-fade-up select-none">
+      <div className="relative mb-6">
+        <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center">
+          <MessageCircle size={28} strokeWidth={1.5} className="text-gray-400" />
+        </div>
+        <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-400 border-2 border-white" />
+      </div>
+      <p className="text-gray-900 font-semibold text-base mb-1.5">Nothing here yet</p>
+      <p className="text-gray-400 text-sm max-w-[220px] text-center leading-relaxed">
+        Send yourself a WhatsApp message and it'll show up here
+      </p>
     </div>
   );
 }
