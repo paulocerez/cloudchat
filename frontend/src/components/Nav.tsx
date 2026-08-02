@@ -24,7 +24,7 @@ export default function Nav() {
     <>
       {/* ── Top bar ───────────────────────────────────────── */}
       <header className="sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto px-6 flex items-center justify-between h-16">
+        <div className="max-w-2xl mx-auto px-6 md:px-8 flex items-center justify-between h-16">
           <Link to="/" className="transition-opacity hover:opacity-70">
             <Logo size="md" />
           </Link>

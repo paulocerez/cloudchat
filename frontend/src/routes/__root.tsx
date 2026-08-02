@@ -11,7 +11,7 @@ export const rootRoute = createRootRoute({
   component: () => (
     <div className="min-h-screen text-gray-900">
       <Nav />
-      <main className="max-w-2xl mx-auto px-4 md:px-6 py-8 pb-28">
+      <main className="max-w-2xl mx-auto px-6 md:px-8 py-8 pb-28">
         <Outlet />
       </main>
     </div>
