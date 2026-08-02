@@ -31,10 +31,9 @@ export default function Nav() {
           <button
             onClick={handleLogout}
             title="Logout"
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-all duration-150"
+            className="p-1.5 rounded-sm bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-all duration-150"
           >
-            <LogOut size={14} strokeWidth={1.75} />
-            <span className="text-xs font-medium">Logout</span>
+            <LogOut size={15} strokeWidth={1.75} />
           </button>
         </div>
       </header>
@@ -49,13 +48,14 @@ export default function Nav() {
                 key={to}
                 to={to}
                 title={label}
-                className={`p-2.5 rounded-lg transition-all duration-150 ${
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
                   active
                     ? 'bg-gray-900 text-white'
                     : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
                 }`}
               >
-                <Icon size={18} strokeWidth={active ? 2 : 1.5} />
+                <Icon size={16} strokeWidth={active ? 2 : 1.5} />
+                {label}
               </Link>
             );
           })}
