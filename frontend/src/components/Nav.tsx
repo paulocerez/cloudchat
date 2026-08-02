@@ -1,4 +1,5 @@
 import { Link, useRouter, useRouterState } from '@tanstack/react-router';
+import { LogOut } from 'lucide-react';
 import { Logo } from './Logo';
 import { isAuthenticated, logout } from '~/lib/auth';
 
@@ -21,12 +22,19 @@ export default function Nav() {
 
   return (
     <>
-      {/* ── Top bar — logo only, generous height ─────────── */}
+      {/* ── Top bar ───────────────────────────────────────── */}
       <header className="sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto px-6 flex items-center h-16">
+        <div className="max-w-2xl mx-auto px-6 flex items-center justify-between h-16">
           <Link to="/" className="transition-opacity hover:opacity-70">
             <Logo size="md" />
           </Link>
+          <button
+            onClick={handleLogout}
+            className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-white/60 transition-all duration-150"
+            title="Logout"
+          >
+            <LogOut size={18} strokeWidth={1.75} />
+          </button>
         </div>
       </header>
 
@@ -49,13 +57,6 @@ export default function Nav() {
               </Link>
             );
           })}
-          <div className="w-px h-5 bg-gray-200 mx-1" />
-          <button
-            onClick={handleLogout}
-            className="px-4 py-2 rounded-xl text-sm font-medium text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition-all duration-150"
-          >
-            Logout
-          </button>
         </div>
       </nav>
     </>
