@@ -9,9 +9,9 @@
 body {
   background-color: #fff;
   background-image:
-    linear-gradient(to right,  #e5e7eb 1px, transparent 1px),
-    linear-gradient(to bottom, #e5e7eb 1px, transparent 1px);
-  background-size: 24px 24px;
+    linear-gradient(to right,  #ebebeb 1px, transparent 1px),
+    linear-gradient(to bottom, #ebebeb 1px, transparent 1px);
+  background-size: 40px 40px;
   /* iOS rubber-band overscroll stays white */
   overscroll-behavior: none;
 }
