@@ -1,13 +1,13 @@
 import cron from 'node-cron';
 import { sendTextMessage, getDailyPrompt } from './whatsapp';
 import { getOrCreateEntry, addTextMessage } from './firestore';
-import { getCronSchedule, getTimezone, getUserPhoneNumber } from './config';
+import { getCronSchedule, getUserPhoneNumber } from './config';
 import { TextMessage } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
 export async function startScheduler() {
   const schedule = await getCronSchedule();
-  const timezone = await getTimezone();
+  const timezone = 'Europe/Berlin';
 
   cron.schedule(
     schedule,
