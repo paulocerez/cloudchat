@@ -20,7 +20,7 @@ export default function Nav() {
   }
 
   return (
-    <header className="sticky top-0 z-10 border-b border-gray-100 bg-white/80 backdrop-blur-md">
+    <header className="sticky top-0 z-10">
       <div className="max-w-2xl mx-auto px-6 md:px-8 flex items-center justify-between h-14">
         {/* Logo */}
         <Link to="/" className="transition-opacity hover:opacity-70 shrink-0">
