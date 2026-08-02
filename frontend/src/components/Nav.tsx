@@ -30,10 +30,11 @@ export default function Nav() {
           </Link>
           <button
             onClick={handleLogout}
-            className="p-2 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-white/60 transition-all duration-150"
             title="Logout"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600 transition-all duration-150"
           >
-            <LogOut size={18} strokeWidth={1.75} />
+            <LogOut size={14} strokeWidth={1.75} />
+            <span className="text-xs font-medium">Logout</span>
           </button>
         </div>
       </header>
