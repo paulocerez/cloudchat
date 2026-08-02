@@ -46,18 +46,6 @@ const FIELDS: {
     hint: 'With country code, no + (e.g. 4917612345678)',
     placeholder: '4917612345678',
   },
-  {
-    key: 'cronSchedule',
-    label: 'Daily Prompt Schedule',
-    hint: 'Cron expression (default: 0 20 * * * = 8 PM every day)',
-    placeholder: '0 20 * * *',
-  },
-  {
-    key: 'timezone',
-    label: 'Timezone',
-    hint: 'IANA timezone name (e.g. Europe/Berlin, America/New_York)',
-    placeholder: 'Europe/Berlin',
-  },
 ];
 
 function sourceBadge(source: 'db' | 'env' | 'unset') {
