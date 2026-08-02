@@ -37,8 +37,7 @@ function LoginPage() {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center overflow-hidden">
-      {/* Card — white fill so it lifts off the grid */}
-      <div className="relative w-full max-w-sm px-6 animate-fade-up">
+      <div className="relative w-full max-w-sm px-4 sm:px-6 animate-fade-up">
 
         <div className="bg-white border border-gray-200 rounded-2xl shadow-sm px-8 py-10">
           <div className="mb-8 flex flex-col items-center gap-4">

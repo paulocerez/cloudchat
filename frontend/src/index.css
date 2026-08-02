@@ -12,7 +12,13 @@ body {
     linear-gradient(to right,  #e5e7eb 1px, transparent 1px),
     linear-gradient(to bottom, #e5e7eb 1px, transparent 1px);
   background-size: 24px 24px;
+  /* iOS rubber-band overscroll stays white */
+  overscroll-behavior: none;
 }
+
+/* ── Safe area helpers ───────────────────────────────────────── */
+.safe-top    { padding-top:    env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
 
 /* ── Page fade-in ──────────────────────────────────────────── */
 @keyframes fade-up {
