@@ -1,11 +1,11 @@
 import { Link, useRouter, useRouterState } from '@tanstack/react-router';
-import { LogOut, BookOpen, Sparkles, Settings } from 'lucide-react';
+import { LogOut, BookOpen, WandSparkles, Settings } from 'lucide-react';
 import { Logo } from './Logo';
 import { isAuthenticated, logout } from '~/lib/auth';
 
 const TABS = [
   { to: '/',          label: 'Timeline',  Icon: BookOpen  },
-  { to: '/summaries', label: 'Summaries', Icon: Sparkles  },
+  { to: '/summaries', label: 'Summaries', Icon: WandSparkles },
   { to: '/settings',  label: 'Settings',  Icon: Settings  },
 ] as const;
 
@@ -49,7 +49,7 @@ export default function Nav() {
                 key={to}
                 to={to}
                 title={label}
-                className={`p-2.5 rounded-full transition-all duration-150 ${
+                className={`p-2.5 rounded-lg transition-all duration-150 ${
                   active
                     ? 'bg-gray-900 text-white'
                     : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
