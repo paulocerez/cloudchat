@@ -45,7 +45,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
     <Link
       to="/entry/$date"
       params={{ date: entry.date }}
-      className="flex items-start justify-between gap-4 py-4 -mx-3 px-3 rounded-lg transition-all duration-200 hover:bg-gray-50 group cursor-pointer"
+      className="flex items-start justify-between gap-3 sm:gap-4 py-4 -mx-3 px-3 rounded-lg transition-all duration-200 hover:bg-gray-50 group cursor-pointer"
     >
       {/* Left accent bar */}
       <span className="mt-1 w-0.5 h-12 rounded-full bg-gray-200 shrink-0 transition-colors duration-200 group-hover:bg-gray-400" />
@@ -64,7 +64,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
           <p className="text-gray-400 text-sm italic">No content yet</p>
         )}
         {entry.images.length > 0 && (
-          <div className="flex items-center gap-1.5 mt-2">
+          <div className="flex flex-wrap items-center gap-1.5 mt-2">
             {entry.images.map((img: JournalImage) => (
               <img
                 key={img.id}

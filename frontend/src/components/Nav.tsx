@@ -21,7 +21,7 @@ export default function Nav() {
 
   return (
     <header className="sticky top-0 z-10">
-      <div className="max-w-2xl mx-auto px-6 md:px-8 flex items-center justify-between h-14">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 md:px-8 flex items-center justify-between h-14">
         {/* Logo */}
         <Link to="/" className="transition-opacity hover:opacity-70 shrink-0">
           <Logo size="md" />
@@ -35,14 +35,14 @@ export default function Nav() {
               <Link
                 key={to}
                 to={to}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 ${
+                className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 ${
                   active
                     ? 'bg-gray-900 text-white'
                     : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
                 }`}
               >
                 <Icon size={14} strokeWidth={active ? 2 : 1.5} />
-                {label}
+                <span className="hidden sm:inline">{label}</span>
               </Link>
             );
           })}
