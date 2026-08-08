@@ -13,7 +13,14 @@ const app = express();
 const PORT = process.env.PORT ?? 3001;
 
 app.use(cors({ origin: process.env.FRONTEND_URL ?? 'http://localhost:5173' }));
-app.use(express.json());
+app.use(
+  express.json({
+    type: () => true,
+    verify: (req, _res, buf) => {
+      (req as unknown as { rawBody: string }).rawBody = buf.toString();
+    },
+  })
+);
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 

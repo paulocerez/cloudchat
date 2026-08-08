@@ -41,6 +41,8 @@ router.post('/', async (req: Request, res: Response) => {
   try {
     const body = req.body as UnipileMessageWebhook;
 
+    console.log('[webhook] content-type:', req.headers['content-type']);
+    console.log('[webhook] raw:', (req as unknown as { rawBody?: string }).rawBody);
     console.log('[webhook] incoming:', JSON.stringify(req.body));
 
     if (body?.event !== 'message_received') {
