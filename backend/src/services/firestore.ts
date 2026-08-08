@@ -111,6 +111,15 @@ export async function isSentMessageId(id: string): Promise<boolean> {
   return ids.includes(id);
 }
 
+export async function updateEntrySummary(date: string, summary: string): Promise<void> {
+  const ref = db.collection('entries').doc(date);
+  await ref.update({
+    summary,
+    summaryGeneratedAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
+}
+
 export async function getEntry(date: string): Promise<JournalEntry | null> {
   const snap = await db.collection('entries').doc(date).get();
   return snap.exists ? (snap.data() as JournalEntry) : null;

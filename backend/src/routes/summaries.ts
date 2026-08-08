@@ -4,12 +4,50 @@ import {
   getAllSummaries,
   saveSummary,
   getEntriesInRange,
+  getEntry,
+  updateEntrySummary,
 } from '../services/firestore';
-import { generateSummary } from '../services/groq';
+import { generateSummary, generateDaySummary } from '../services/groq';
 import { AISummary } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
 const router = Router();
+
+// Today's date in the Europe/Berlin timezone (YYYY-MM-DD).
+function berlinToday(): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Berlin',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date());
+}
+
+// Generate + store the daily summary on the entry. Invoked by the Vercel cron
+// each night; also callable manually with ?date=YYYY-MM-DD to (re)generate.
+router.get('/daily', async (req: Request, res: Response) => {
+  const secret = process.env.CRON_SECRET;
+  if (secret && req.headers.authorization !== `Bearer ${secret}`) {
+    res.sendStatus(401);
+    return;
+  }
+
+  const date = (req.query.date as string) || berlinToday();
+  const entry = await getEntry(date);
+  if (!entry) {
+    res.status(404).json({ error: 'No entry for that date' });
+    return;
+  }
+
+  const summary = await generateDaySummary(entry);
+  if (!summary) {
+    res.json({ ok: true, date, summary: null, note: 'No content to summarize' });
+    return;
+  }
+
+  await updateEntrySummary(date, summary);
+  res.json({ ok: true, date, summary });
+});
 
 router.get('/', async (_req: Request, res: Response) => {
   const summaries = await getAllSummaries();

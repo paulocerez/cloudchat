@@ -4,6 +4,8 @@ export interface JournalEntry {
   messages: TextMessage[];
   voiceMemos: VoiceMemo[];
   images: JournalImage[];
+  summary?: string;
+  summaryGeneratedAt?: string;
   createdAt: string;
   updatedAt: string;
 }

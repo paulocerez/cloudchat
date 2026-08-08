@@ -49,6 +49,18 @@ function EntryPage() {
         {formatEntryDate(entry.date)}
       </h1>
       <EntryContent entry={entry} />
+      {entry.summary && <DaySummary summary={entry.summary} />}
+    </div>
+  );
+}
+
+function DaySummary({ summary }: { summary: string }) {
+  return (
+    <div className="mt-8 pt-6 border-t border-gray-100 animate-fade-up">
+      <p className="text-xs font-medium tracking-wide uppercase text-gray-400 mb-2">
+        Daily reflection
+      </p>
+      <p className="text-sm text-gray-600 leading-relaxed">{summary}</p>
     </div>
   );
 }
