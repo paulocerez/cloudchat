@@ -78,22 +78,22 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
         )}
       </div>
 
-      <div className="flex items-center gap-3 shrink-0 text-xs text-gray-400 mt-1">
-        <div className="flex items-center justify-around gap-2 w-36 px-3 py-1.5 rounded-sm bg-gray-50 shadow-sm">
+      <div className="flex items-center gap-3 shrink-0 text-xs mt-1">
+        <div className="flex items-center gap-1.5">
           {messageCount > 0 && (
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-blue-50 text-blue-600 font-medium">
               <MessageCircle size={13} strokeWidth={2.5} />
               {messageCount}
             </span>
           )}
           {memoCount > 0 && (
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-violet-50 text-violet-600 font-medium">
               <Mic size={13} strokeWidth={2.5} />
               {memoCount}
             </span>
           )}
           {imageCount > 0 && (
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-amber-50 text-amber-600 font-medium">
               <ImageIcon size={13} strokeWidth={2.5} />
               {imageCount}
             </span>
