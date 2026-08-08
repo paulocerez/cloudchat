@@ -38,8 +38,15 @@ export async function getOrCreateEntry(date: string): Promise<JournalEntry> {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
-  await ref.set(entry);
-  return entry;
+  // create() fails if the doc already exists, so concurrent webhook
+  // invocations can't overwrite each other's messages with an empty entry.
+  try {
+    await ref.create(entry);
+    return entry;
+  } catch {
+    const existing = await ref.get();
+    return existing.data() as JournalEntry;
+  }
 }
 
 export async function addTextMessage(date: string, msg: TextMessage): Promise<void> {
