@@ -42,36 +42,16 @@ function isImage(a: UnipileAttachment): boolean {
   return a.type === 'img' || a.type === 'image' || (a.mimetype?.startsWith('image/') ?? false);
 }
 
+// Process before responding: on Vercel the function can be frozen once the
+// response is sent, so async Firestore writes after res.send() may never run.
 router.post('/', async (req: Request, res: Response) => {
-  // Acknowledge immediately.
-  res.sendStatus(200);
-
   try {
     const body = req.body as UnipileMessageWebhook;
 
-    console.log('[webhook] content-type:', req.headers['content-type']);
-    console.log('[webhook] raw:', (req as unknown as { rawBody?: string }).rawBody);
-    console.log('[webhook] incoming:', JSON.stringify(req.body));
-
-    if (body?.event !== 'message_received') {
-      console.log('[webhook] skip: event is', body?.event);
-      return;
-    }
-    if (!isSelfChat(body)) {
-      console.log('[webhook] skip: not self-chat', {
-        me: body.account_info?.phone_number,
-        isGroup: body.is_group,
-        attendees: (body.attendees ?? []).map(
-          (a) => a.attendee_specifics?.phone_number ?? a.attendee_public_identifier
-        ),
-      });
-      return;
-    }
+    if (body?.event !== 'message_received') return;
+    if (!isSelfChat(body)) return;
     // Skip our own daily prompt echoed back by Unipile.
-    if (await isSentMessageId(body.message_id)) {
-      console.log('[webhook] skip: sent-id dedupe', body.message_id);
-      return;
-    }
+    if (await isSentMessageId(body.message_id)) return;
 
     const date = new Date().toISOString().split('T')[0];
     const timestamp = body.timestamp ?? new Date().toISOString();
@@ -99,7 +79,9 @@ router.post('/', async (req: Request, res: Response) => {
           timestamp,
         };
         await addVoiceMemo(date, memo);
-        transcribeMedia(date, memo.id, body.message_id, att.id, att.mimetype).catch(console.error);
+        await transcribeMedia(date, memo.id, body.message_id, att.id, att.mimetype).catch(
+          console.error
+        );
       } else if (isImage(att)) {
         const image: JournalImage = {
           id: uuidv4(),
@@ -113,6 +95,8 @@ router.post('/', async (req: Request, res: Response) => {
   } catch (err) {
     console.error('Webhook processing error:', err);
   }
+
+  res.sendStatus(200);
 });
 
 async function transcribeMedia(

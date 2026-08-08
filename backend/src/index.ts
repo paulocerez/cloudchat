@@ -13,14 +13,9 @@ const app = express();
 const PORT = process.env.PORT ?? 3001;
 
 app.use(cors({ origin: process.env.FRONTEND_URL ?? 'http://localhost:5173' }));
-app.use(
-  express.json({
-    type: () => true,
-    verify: (req, _res, buf) => {
-      (req as unknown as { rawBody: string }).rawBody = buf.toString();
-    },
-  })
-);
+// Unipile mislabels webhook POSTs as application/x-www-form-urlencoded while
+// sending JSON, so parse every content-type as JSON.
+app.use(express.json({ type: () => true }));
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
