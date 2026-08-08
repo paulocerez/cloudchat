@@ -57,15 +57,17 @@ export interface UnipileAttachment {
 export interface UnipileAttendee {
   attendee_id: string;
   attendee_name?: string;
-  attendee_provider_id: string;
+  attendee_provider_id: string; // e.g. '258969398427850@lid'
   attendee_profile_url?: string;
+  attendee_public_identifier?: string; // e.g. '4917621446929@s.whatsapp.net'
+  attendee_specifics?: { provider?: string; phone_number?: string; lid?: string };
 }
 
 export interface UnipileMessageWebhook {
   event: string; // 'message_received'
   account_id: string;
   account_type?: string;
-  account_info?: { type?: string; feature?: string; user_id?: string };
+  account_info?: { type?: string; phone_number?: string };
   chat_id: string;
   message_id: string;
   message?: string;
@@ -73,4 +75,6 @@ export interface UnipileMessageWebhook {
   sender?: UnipileAttendee;
   attendees?: UnipileAttendee[];
   attachments?: UnipileAttachment[];
+  is_group?: boolean;
+  is_sender?: boolean;
 }

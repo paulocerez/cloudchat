@@ -17,13 +17,21 @@ const router = Router();
 // Unipile has no verification handshake — respond OK to any GET health check.
 router.get('/', (_req: Request, res: Response) => res.sendStatus(200));
 
-// Only capture messages the user writes to themselves (self-chat journaling).
+function digits(n?: string | null): string {
+  return (n ?? '').replace(/[^0-9]/g, '');
+}
+
+// Only capture messages the user writes to themselves (self-chat journaling):
+// a non-group chat where every attendee is the connected account's own number.
 function isSelfChat(body: UnipileMessageWebhook): boolean {
-  const me = body.account_info?.user_id;
-  const senderId = body.sender?.attendee_provider_id;
-  if (!me || !senderId || senderId !== me) return false;
-  const others = (body.attendees ?? []).filter((a) => a.attendee_provider_id !== me);
-  return others.length === 0;
+  if (body.is_group) return false;
+  const me = digits(body.account_info?.phone_number);
+  if (!me) return false;
+  const attendees = body.attendees ?? [];
+  if (attendees.length === 0) return false;
+  return attendees.every(
+    (a) => digits(a.attendee_specifics?.phone_number ?? a.attendee_public_identifier) === me
+  );
 }
 
 function isAudio(a: UnipileAttachment): boolean {
@@ -51,9 +59,11 @@ router.post('/', async (req: Request, res: Response) => {
     }
     if (!isSelfChat(body)) {
       console.log('[webhook] skip: not self-chat', {
-        me: body.account_info?.user_id,
-        sender: body.sender?.attendee_provider_id,
-        attendees: (body.attendees ?? []).map((a) => a.attendee_provider_id),
+        me: body.account_info?.phone_number,
+        isGroup: body.is_group,
+        attendees: (body.attendees ?? []).map(
+          (a) => a.attendee_specifics?.phone_number ?? a.attendee_public_identifier
+        ),
       });
       return;
     }
