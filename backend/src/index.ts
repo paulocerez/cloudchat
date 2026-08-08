@@ -22,14 +22,17 @@ app.use('/api/entries', entriesRouter);
 app.use('/api/summaries', summariesRouter);
 app.use('/api/config', configRouter);
 
-async function bootstrap() {
-  initFirestore();
-  initGroq();
-  startScheduler();
+initFirestore();
+initGroq();
+startScheduler();
 
+// Local dev only. On Vercel the exported app is invoked as a serverless
+// handler — calling app.listen() there triggers legacy-proxy mode, which
+// consumes the request body before express.json() can parse it.
+if (!process.env.VERCEL) {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
 }
 
-bootstrap().catch(console.error);
+export default app;
