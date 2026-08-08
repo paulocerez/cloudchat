@@ -41,10 +41,25 @@ router.post('/', async (req: Request, res: Response) => {
   try {
     const body = req.body as UnipileMessageWebhook;
 
-    if (body?.event !== 'message_received') return;
-    if (!isSelfChat(body)) return;
+    console.log('[webhook] incoming:', JSON.stringify(req.body));
+
+    if (body?.event !== 'message_received') {
+      console.log('[webhook] skip: event is', body?.event);
+      return;
+    }
+    if (!isSelfChat(body)) {
+      console.log('[webhook] skip: not self-chat', {
+        me: body.account_info?.user_id,
+        sender: body.sender?.attendee_provider_id,
+        attendees: (body.attendees ?? []).map((a) => a.attendee_provider_id),
+      });
+      return;
+    }
     // Skip our own daily prompt echoed back by Unipile.
-    if (await isSentMessageId(body.message_id)) return;
+    if (await isSentMessageId(body.message_id)) {
+      console.log('[webhook] skip: sent-id dedupe', body.message_id);
+      return;
+    }
 
     const date = new Date().toISOString().split('T')[0];
     const timestamp = body.timestamp ?? new Date().toISOString();
