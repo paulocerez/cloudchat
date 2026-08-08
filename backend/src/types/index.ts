@@ -46,12 +46,12 @@ export interface AISummary {
 
 // ── Unipile webhook payload ─────────────────────────────────
 export interface UnipileAttachment {
-  id: string;
-  type: string; // e.g. 'img', 'audio', 'video', 'file'
+  attachment_id: string;
+  attachment_type: string; // e.g. 'img', 'audio', 'video', 'file'
+  attachment_url?: string | null;
+  attachment_size?: number;
   mimetype?: string;
-  url?: string;
   unavailable?: boolean;
-  sticker?: boolean;
 }
 
 export interface UnipileAttendee {

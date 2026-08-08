@@ -35,11 +35,15 @@ function isSelfChat(body: UnipileMessageWebhook): boolean {
 }
 
 function isAudio(a: UnipileAttachment): boolean {
-  return a.type === 'audio' || (a.mimetype?.startsWith('audio/') ?? false);
+  return a.attachment_type === 'audio' || (a.mimetype?.startsWith('audio/') ?? false);
 }
 
 function isImage(a: UnipileAttachment): boolean {
-  return a.type === 'img' || a.type === 'image' || (a.mimetype?.startsWith('image/') ?? false);
+  return (
+    a.attachment_type === 'img' ||
+    a.attachment_type === 'image' ||
+    (a.mimetype?.startsWith('image/') ?? false)
+  );
 }
 
 // Process before responding: on Vercel the function can be frozen once the
@@ -68,10 +72,6 @@ router.post('/', async (req: Request, res: Response) => {
       await addTextMessage(date, textMsg);
     }
 
-    if (body.attachments?.length) {
-      console.log('[webhook] attachments:', JSON.stringify(body.attachments));
-    }
-
     for (const att of body.attachments ?? []) {
       if (att.unavailable) continue;
 
@@ -79,18 +79,22 @@ router.post('/', async (req: Request, res: Response) => {
         const memo: VoiceMemo = {
           id: uuidv4(),
           messageId: body.message_id,
-          mediaId: att.id,
+          mediaId: att.attachment_id,
           timestamp,
         };
         await addVoiceMemo(date, memo);
-        await transcribeMedia(date, memo.id, body.message_id, att.id, att.mimetype).catch(
-          console.error
-        );
+        await transcribeMedia(
+          date,
+          memo.id,
+          body.message_id,
+          att.attachment_id,
+          att.mimetype
+        ).catch(console.error);
       } else if (isImage(att)) {
         const image: JournalImage = {
           id: uuidv4(),
           messageId: body.message_id,
-          mediaId: att.id,
+          mediaId: att.attachment_id,
           timestamp,
         };
         await addImage(date, image);

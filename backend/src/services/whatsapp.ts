@@ -31,14 +31,25 @@ export async function sendTextMessage(to: string, text: string): Promise<string 
   return data?.message_id ?? data?.id;
 }
 
-// Downloads a message attachment (voice memo / image) as raw bytes.
-export async function downloadMedia(messageId: string, attachmentId: string): Promise<Buffer> {
+// Downloads a message attachment (voice memo / image) with its content-type.
+export async function fetchMedia(
+  messageId: string,
+  attachmentId: string
+): Promise<{ buffer: Buffer; contentType: string }> {
   const { dsn, apiKey } = await client();
-  const { data } = await axios.get(
+  const res = await axios.get(
     `${dsn}/api/v1/messages/${messageId}/attachments/${attachmentId}`,
     { headers: { 'X-API-KEY': apiKey }, responseType: 'arraybuffer' }
   );
-  return Buffer.from(data);
+  return {
+    buffer: Buffer.from(res.data),
+    contentType: String(res.headers['content-type'] ?? 'application/octet-stream'),
+  };
+}
+
+export async function downloadMedia(messageId: string, attachmentId: string): Promise<Buffer> {
+  const { buffer } = await fetchMedia(messageId, attachmentId);
+  return buffer;
 }
 
 export const DAILY_PROMPTS = [

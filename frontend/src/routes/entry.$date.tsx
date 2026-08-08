@@ -128,21 +128,17 @@ function VoiceBubble({ memo }: { memo: VoiceMemo }) {
 
 function ImageBubble({ image }: { image: JournalImage }) {
   const time = format(new Date(image.timestamp), 'HH:mm');
+  const src =
+    image.url ??
+    `${import.meta.env.VITE_API_URL ?? ''}/api/media/${image.messageId}/${image.mediaId}`;
   return (
     <div className="flex justify-end animate-slide-right">
       <div className="max-w-xs md:max-w-md rounded-2xl rounded-br-sm bg-gray-50 border border-gray-200 overflow-hidden hover:border-gray-300 transition-all duration-150 hover:shadow-sm">
-        {image.url ? (
-          <img
-            src={image.url}
-            alt={image.caption ?? 'Journal image'}
-            className="w-full transition-transform duration-300 hover:scale-[1.02]"
-          />
-        ) : (
-          <div className="flex items-center gap-2 px-4 py-3">
-            <span className="text-base">📷</span>
-            <span className="text-xs text-gray-400">Image</span>
-          </div>
-        )}
+        <img
+          src={src}
+          alt={image.caption ?? 'Journal image'}
+          className="w-full transition-transform duration-300 hover:scale-[1.02]"
+        />
         <div className="px-4 py-2">
           {image.caption && <p className="text-xs text-gray-600">{image.caption}</p>}
           <p className="text-xs text-gray-400 mt-0.5">{time}</p>
