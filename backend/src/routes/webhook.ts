@@ -9,7 +9,7 @@ import {
   isSentMessageId,
 } from '../services/firestore';
 import { downloadMedia, isDailyPrompt } from '../services/whatsapp';
-import { transcribeAudio } from '../services/groq';
+import { transcribeAudio } from '../services/deepgram';
 import { TextMessage, VoiceMemo, JournalImage, UnipileMessageWebhook, UnipileAttachment } from '../types';
 
 const router = Router();

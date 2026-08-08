@@ -7,17 +7,6 @@ export function initGroq() {
   client = new Groq({ apiKey: process.env.GROQ_API_KEY });
 }
 
-export async function transcribeAudio(audioBuffer: Buffer, mimeType: string): Promise<string> {
-  const ext = mimeType.includes('ogg') ? 'ogg' : mimeType.includes('mp4') ? 'mp4' : 'mp3';
-  const file = new File([audioBuffer], `audio.${ext}`, { type: mimeType });
-
-  const transcription = await client.audio.transcriptions.create({
-    file,
-    model: 'whisper-large-v3',
-  });
-  return transcription.text;
-}
-
 export async function generateSummary(
   entries: JournalEntry[],
   period: 'week' | 'month'
