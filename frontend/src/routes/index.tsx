@@ -66,24 +66,26 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
       </div>
 
       <div className="flex items-center gap-3 shrink-0 text-xs text-gray-400 mt-1">
-        {messageCount > 0 && (
-          <span className="flex items-center gap-1">
-            <MessageCircle size={13} strokeWidth={2.5} />
-            {messageCount}
-          </span>
-        )}
-        {memoCount > 0 && (
-          <span className="flex items-center gap-1">
-            <Mic size={13} strokeWidth={2.5} />
-            {memoCount}
-          </span>
-        )}
-        {imageCount > 0 && (
-          <span className="flex items-center gap-1">
-            <ImageIcon size={13} strokeWidth={2.5} />
-            {imageCount}
-          </span>
-        )}
+        <div className="flex items-center justify-around gap-2 w-24 px-2.5 py-1.5 rounded-sm bg-gray-50 shadow-sm">
+          {messageCount > 0 && (
+            <span className="flex items-center gap-1">
+              <MessageCircle size={13} strokeWidth={2.5} />
+              {messageCount}
+            </span>
+          )}
+          {memoCount > 0 && (
+            <span className="flex items-center gap-1">
+              <Mic size={13} strokeWidth={2.5} />
+              {memoCount}
+            </span>
+          )}
+          {imageCount > 0 && (
+            <span className="flex items-center gap-1">
+              <ImageIcon size={13} strokeWidth={2.5} />
+              {imageCount}
+            </span>
+          )}
+        </div>
         {/* Arrow slides right on hover */}
         <span className="inline-block transition-transform duration-200 group-hover:translate-x-1 text-gray-300 group-hover:text-gray-600">
           →
