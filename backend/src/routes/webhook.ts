@@ -68,6 +68,10 @@ router.post('/', async (req: Request, res: Response) => {
       await addTextMessage(date, textMsg);
     }
 
+    if (body.attachments?.length) {
+      console.log('[webhook] attachments:', JSON.stringify(body.attachments));
+    }
+
     for (const att of body.attachments ?? []) {
       if (att.unavailable) continue;
 
