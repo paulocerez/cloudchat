@@ -114,7 +114,9 @@ function MessageBubble({ msg }: { msg: TextMessage }) {
 
 function VoiceBubble({ memo }: { memo: VoiceMemo }) {
   const time = format(new Date(memo.timestamp), 'HH:mm');
-  const src = `${import.meta.env.VITE_API_URL ?? ''}/api/media/${memo.messageId}/${memo.mediaId}`;
+  const src =
+    memo.audioUrl ??
+    `${import.meta.env.VITE_API_URL ?? ''}/api/media/${memo.messageId}/${memo.mediaId}`;
   return (
     <div className="flex justify-end animate-slide-right">
       <div className="max-w-xs md:max-w-md rounded-2xl rounded-br-sm bg-gray-50 border border-gray-200 px-4 py-3 hover:border-gray-300 transition-colors duration-150">

@@ -1,4 +1,5 @@
 import admin from 'firebase-admin';
+import { v4 as uuidv4 } from 'uuid';
 import { JournalEntry, AISummary, TextMessage, VoiceMemo, JournalImage } from '../types';
 
 let db: admin.firestore.Firestore;
@@ -11,6 +12,8 @@ export function initFirestore() {
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
         privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
       }),
+      storageBucket:
+        process.env.FIREBASE_STORAGE_BUCKET ?? `${process.env.FIREBASE_PROJECT_ID}.appspot.com`,
     });
   }
   db = admin.firestore();
@@ -18,6 +21,25 @@ export function initFirestore() {
 
 export function getDb() {
   return db;
+}
+
+// Uploads bytes to Firebase Storage and returns a stable, tokenized download
+// URL so we keep our own permanent copy instead of relying on Unipile media.
+export async function uploadMedia(
+  path: string,
+  buffer: Buffer,
+  contentType: string
+): Promise<string> {
+  const bucket = admin.storage().bucket();
+  const token = uuidv4();
+  await bucket.file(path).save(buffer, {
+    contentType,
+    resumable: false,
+    metadata: { metadata: { firebaseStorageDownloadTokens: token } },
+  });
+  return `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(
+    path
+  )}?alt=media&token=${token}`;
 }
 
 function todayDate(): string {

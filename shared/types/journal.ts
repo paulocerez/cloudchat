@@ -21,6 +21,7 @@ export interface VoiceMemo {
   id: string;
   messageId: string;
   mediaId: string;
+  audioUrl?: string;
   transcription?: string;
   duration?: number;
   timestamp: string;

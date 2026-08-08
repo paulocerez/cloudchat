@@ -7,8 +7,9 @@ import {
   addImage,
   updateVoiceMemoTranscription,
   isSentMessageId,
+  uploadMedia,
 } from '../services/firestore';
-import { downloadMedia, isDailyPrompt } from '../services/whatsapp';
+import { fetchMedia, isDailyPrompt } from '../services/whatsapp';
 import { transcribeAudio } from '../services/deepgram';
 import { TextMessage, VoiceMemo, JournalImage, UnipileMessageWebhook, UnipileAttachment } from '../types';
 
@@ -76,25 +77,40 @@ router.post('/', async (req: Request, res: Response) => {
       if (att.unavailable) continue;
 
       if (isAudio(att)) {
+        // Download once; reuse the bytes for both storage and transcription.
+        const { buffer, contentType } = await fetchMedia(body.message_id, att.attachment_id);
+        const audioUrl = await uploadMedia(
+          `audio/${date}/${att.attachment_id}.ogg`,
+          buffer,
+          contentType || 'audio/ogg'
+        );
         const memo: VoiceMemo = {
           id: uuidv4(),
           messageId: body.message_id,
           mediaId: att.attachment_id,
+          audioUrl,
           timestamp,
         };
         await addVoiceMemo(date, memo);
-        await transcribeMedia(
-          date,
-          memo.id,
-          body.message_id,
-          att.attachment_id,
-          att.mimetype
-        ).catch(console.error);
+        try {
+          const text = await transcribeAudio(buffer, att.mimetype ?? contentType ?? 'audio/ogg');
+          await updateVoiceMemoTranscription(date, memo.id, text);
+        } catch (err) {
+          console.error('Transcription error:', err);
+        }
       } else if (isImage(att)) {
+        const { buffer, contentType } = await fetchMedia(body.message_id, att.attachment_id);
+        const ext = (contentType?.split('/')[1] ?? 'jpg').split(';')[0];
+        const url = await uploadMedia(
+          `images/${date}/${att.attachment_id}.${ext}`,
+          buffer,
+          contentType || 'image/jpeg'
+        );
         const image: JournalImage = {
           id: uuidv4(),
           messageId: body.message_id,
           mediaId: att.attachment_id,
+          url,
           timestamp,
         };
         await addImage(date, image);
@@ -106,17 +122,5 @@ router.post('/', async (req: Request, res: Response) => {
 
   res.sendStatus(200);
 });
-
-async function transcribeMedia(
-  date: string,
-  memoId: string,
-  messageId: string,
-  attachmentId: string,
-  mimeType?: string
-): Promise<void> {
-  const buffer = await downloadMedia(messageId, attachmentId);
-  const transcription = await transcribeAudio(buffer, mimeType ?? 'audio/ogg');
-  await updateVoiceMemoTranscription(date, memoId, transcription);
-}
 
 export default router;
