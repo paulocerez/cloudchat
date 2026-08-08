@@ -66,7 +66,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
       </div>
 
       <div className="flex items-center gap-3 shrink-0 text-xs text-gray-400 mt-1">
-        <div className="flex items-center justify-around gap-2 w-36 px-4 py-1.5 rounded-sm bg-gray-50 shadow-sm">
+        <div className="flex items-center justify-around gap-2 w-36 px-3 py-1.5 rounded-sm bg-gray-50 shadow-sm">
           {messageCount > 0 && (
             <span className="flex items-center gap-1">
               <MessageCircle size={13} strokeWidth={2.5} />
