@@ -1,6 +1,6 @@
 import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, Mic, Image as ImageIcon } from 'lucide-react';
 import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
 import type { JournalEntry, TextMessage, VoiceMemo } from '@cloudchat/shared';
@@ -66,9 +66,24 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
       </div>
 
       <div className="flex items-center gap-3 shrink-0 text-xs text-gray-400 mt-1">
-        {messageCount > 0 && <span>{messageCount} msg</span>}
-        {memoCount > 0 && <span>{memoCount} memo</span>}
-        {imageCount > 0 && <span>{imageCount} photo</span>}
+        {messageCount > 0 && (
+          <span className="flex items-center gap-1">
+            <MessageCircle size={13} strokeWidth={1.75} />
+            {messageCount}
+          </span>
+        )}
+        {memoCount > 0 && (
+          <span className="flex items-center gap-1">
+            <Mic size={13} strokeWidth={1.75} />
+            {memoCount}
+          </span>
+        )}
+        {imageCount > 0 && (
+          <span className="flex items-center gap-1">
+            <ImageIcon size={13} strokeWidth={1.75} />
+            {imageCount}
+          </span>
+        )}
         {/* Arrow slides right on hover */}
         <span className="inline-block transition-transform duration-200 group-hover:translate-x-1 text-gray-300 group-hover:text-gray-600">
           →
