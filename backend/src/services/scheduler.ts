@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 import { sendTextMessage, getDailyPrompt } from './whatsapp';
-import { getOrCreateEntry, addTextMessage } from './firestore';
+import { getOrCreateEntry, addTextMessage, recordSentMessageId } from './firestore';
 import { getCronSchedule, getUserPhoneNumber } from './config';
 import { TextMessage } from '../types';
 import { v4 as uuidv4 } from 'uuid';
@@ -23,7 +23,8 @@ export async function startScheduler() {
         await getOrCreateEntry(date);
 
         const prompt = getDailyPrompt();
-        await sendTextMessage(userPhone, prompt);
+        const sentId = await sendTextMessage(userPhone, prompt);
+        if (sentId) await recordSentMessageId(sentId);
 
         const systemMsg: TextMessage = {
           id: uuidv4(),

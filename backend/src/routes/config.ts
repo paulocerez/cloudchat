@@ -8,20 +8,18 @@ const router = Router();
 router.get('/', async (_req: Request, res: Response) => {
   const cfg = await getConfig();
   res.json({
-    whatsappToken: cfg.whatsappToken ? '••••••••' : '',
-    whatsappPhoneNumberId: cfg.whatsappPhoneNumberId ?? '',
-    whatsappVerifyToken: cfg.whatsappVerifyToken ? '••••••••' : '',
+    unipileApiKey: cfg.unipileApiKey ? '••••••••' : '',
+    unipileDsn: cfg.unipileDsn ?? '',
+    unipileAccountId: cfg.unipileAccountId ?? '',
     userPhoneNumber: cfg.userPhoneNumber ?? '',
     cronSchedule: cfg.cronSchedule ?? '',
-    timezone: cfg.timezone ?? '',
     // tell the frontend which fields are currently set (via env or Firestore)
     _sources: {
-      whatsappToken: cfg.whatsappToken ? 'db' : process.env.WHATSAPP_TOKEN ? 'env' : 'unset',
-      whatsappPhoneNumberId: cfg.whatsappPhoneNumberId ? 'db' : process.env.WHATSAPP_PHONE_NUMBER_ID ? 'env' : 'unset',
-      whatsappVerifyToken: cfg.whatsappVerifyToken ? 'db' : process.env.WHATSAPP_VERIFY_TOKEN ? 'env' : 'unset',
+      unipileApiKey: cfg.unipileApiKey ? 'db' : process.env.UNIPILE_API_KEY ? 'env' : 'unset',
+      unipileDsn: cfg.unipileDsn ? 'db' : process.env.UNIPILE_DSN ? 'env' : 'unset',
+      unipileAccountId: cfg.unipileAccountId ? 'db' : process.env.UNIPILE_ACCOUNT_ID ? 'env' : 'unset',
       userPhoneNumber: cfg.userPhoneNumber ? 'db' : process.env.USER_PHONE_NUMBER ? 'env' : 'unset',
       cronSchedule: cfg.cronSchedule ? 'db' : process.env.CRON_SCHEDULE ? 'env' : 'unset',
-      timezone: cfg.timezone ? 'db' : process.env.TZ ? 'env' : 'unset',
     },
   });
 });

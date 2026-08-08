@@ -17,6 +17,7 @@ export interface TextMessage {
 
 export interface VoiceMemo {
   id: string;
+  messageId: string;
   mediaId: string;
   transcription?: string;
   duration?: number;
@@ -25,6 +26,7 @@ export interface VoiceMemo {
 
 export interface JournalImage {
   id: string;
+  messageId: string;
   mediaId: string;
   url?: string;
   caption?: string;
@@ -32,12 +34,11 @@ export interface JournalImage {
 }
 
 export interface AppConfig {
-  whatsappToken: string;
-  whatsappPhoneNumberId: string;
-  whatsappVerifyToken: string;
+  unipileApiKey: string;
+  unipileDsn: string;
+  unipileAccountId: string;
   userPhoneNumber: string;
   cronSchedule: string;
-  timezone: string;
   _sources: Record<string, 'db' | 'env' | 'unset'>;
 }
 

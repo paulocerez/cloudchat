@@ -6,68 +6,79 @@ import {
   addVoiceMemo,
   addImage,
   updateVoiceMemoTranscription,
+  isSentMessageId,
 } from '../services/firestore';
-import { downloadMedia } from '../services/whatsapp';
+import { downloadMedia, isDailyPrompt } from '../services/whatsapp';
 import { transcribeAudio } from '../services/groq';
-import { getWhatsappVerifyToken } from '../services/config';
-import { TextMessage, VoiceMemo, JournalImage, WhatsAppMessage } from '../types';
+import { TextMessage, VoiceMemo, JournalImage, UnipileMessageWebhook, UnipileAttachment } from '../types';
 
 const router = Router();
 
-// WhatsApp webhook verification
-router.get('/', async (req: Request, res: Response) => {
-  const mode = req.query['hub.mode'];
-  const token = req.query['hub.verify_token'];
-  const challenge = req.query['hub.challenge'];
-  const verifyToken = await getWhatsappVerifyToken();
+// Unipile has no verification handshake — respond OK to any GET health check.
+router.get('/', (_req: Request, res: Response) => res.sendStatus(200));
 
-  if (mode === 'subscribe' && token === verifyToken) {
-    res.status(200).send(challenge);
-  } else {
-    res.sendStatus(403);
-  }
-});
+// Only capture messages the user writes to themselves (self-chat journaling).
+function isSelfChat(body: UnipileMessageWebhook): boolean {
+  const me = body.account_info?.user_id;
+  const senderId = body.sender?.attendee_provider_id;
+  if (!me || !senderId || senderId !== me) return false;
+  const others = (body.attendees ?? []).filter((a) => a.attendee_provider_id !== me);
+  return others.length === 0;
+}
 
-// Receive WhatsApp messages
+function isAudio(a: UnipileAttachment): boolean {
+  return a.type === 'audio' || (a.mimetype?.startsWith('audio/') ?? false);
+}
+
+function isImage(a: UnipileAttachment): boolean {
+  return a.type === 'img' || a.type === 'image' || (a.mimetype?.startsWith('image/') ?? false);
+}
+
 router.post('/', async (req: Request, res: Response) => {
-  // Respond immediately to acknowledge receipt
+  // Acknowledge immediately.
   res.sendStatus(200);
 
   try {
-    const body = req.body;
-    const entry = body?.entry?.[0];
-    const changes = entry?.changes?.[0];
-    const value = changes?.value;
-    const messages: WhatsAppMessage[] = value?.messages ?? [];
+    const body = req.body as UnipileMessageWebhook;
 
-    for (const msg of messages) {
-      const date = new Date().toISOString().split('T')[0];
-      await getOrCreateEntry(date);
+    if (body?.event !== 'message_received') return;
+    if (!isSelfChat(body)) return;
+    // Skip our own daily prompt echoed back by Unipile.
+    if (await isSentMessageId(body.message_id)) return;
 
-      if (msg.type === 'text' && msg.text) {
-        const textMsg: TextMessage = {
-          id: uuidv4(),
-          content: msg.text.body,
-          timestamp: new Date(parseInt(msg.timestamp) * 1000).toISOString(),
-          fromUser: true,
-        };
-        await addTextMessage(date, textMsg);
-      } else if (msg.type === 'audio' && msg.audio) {
+    const date = new Date().toISOString().split('T')[0];
+    const timestamp = body.timestamp ?? new Date().toISOString();
+    await getOrCreateEntry(date);
+
+    const text = body.message?.trim();
+    if (text && !isDailyPrompt(text)) {
+      const textMsg: TextMessage = {
+        id: uuidv4(),
+        content: text,
+        timestamp,
+        fromUser: true,
+      };
+      await addTextMessage(date, textMsg);
+    }
+
+    for (const att of body.attachments ?? []) {
+      if (att.unavailable) continue;
+
+      if (isAudio(att)) {
         const memo: VoiceMemo = {
           id: uuidv4(),
-          mediaId: msg.audio.id,
-          timestamp: new Date(parseInt(msg.timestamp) * 1000).toISOString(),
+          messageId: body.message_id,
+          mediaId: att.id,
+          timestamp,
         };
         await addVoiceMemo(date, memo);
-
-        // Transcribe asynchronously
-        transcribeMedia(date, memo.id, msg.audio.id, msg.audio.mime_type).catch(console.error);
-      } else if (msg.type === 'image' && msg.image) {
+        transcribeMedia(date, memo.id, body.message_id, att.id, att.mimetype).catch(console.error);
+      } else if (isImage(att)) {
         const image: JournalImage = {
           id: uuidv4(),
-          mediaId: msg.image.id,
-          caption: msg.image.caption,
-          timestamp: new Date(parseInt(msg.timestamp) * 1000).toISOString(),
+          messageId: body.message_id,
+          mediaId: att.id,
+          timestamp,
         };
         await addImage(date, image);
       }
@@ -80,11 +91,12 @@ router.post('/', async (req: Request, res: Response) => {
 async function transcribeMedia(
   date: string,
   memoId: string,
-  mediaId: string,
-  mimeType: string
+  messageId: string,
+  attachmentId: string,
+  mimeType?: string
 ): Promise<void> {
-  const buffer = await downloadMedia(mediaId);
-  const transcription = await transcribeAudio(buffer, mimeType);
+  const buffer = await downloadMedia(messageId, attachmentId);
+  const transcription = await transcribeAudio(buffer, mimeType ?? 'audio/ogg');
   await updateVoiceMemoTranscription(date, memoId, transcription);
 }
 

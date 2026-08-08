@@ -21,22 +21,28 @@ const FIELDS: {
   placeholder: string;
 }[] = [
   {
-    key: 'whatsappToken',
-    label: 'WhatsApp Access Token',
-    hint: 'Permanent token from Meta System User',
+    key: 'unipileApiKey',
+    label: 'Unipile API Key',
+    hint: 'X-API-KEY from your Unipile dashboard',
     sensitive: true,
-    placeholder: 'EAAxxxxxxx…',
+    placeholder: 'xxxxxxxx…',
   },
   {
-    key: 'whatsappPhoneNumberId',
-    label: 'Phone Number ID',
-    hint: 'From WhatsApp → API Setup in Meta developer console',
-    placeholder: '123456789012345',
+    key: 'unipileDsn',
+    label: 'Unipile DSN',
+    hint: 'Your instance base URL, e.g. https://api8.unipile.com:13445',
+    placeholder: 'https://apiXX.unipile.com:XXXXX',
+  },
+  {
+    key: 'unipileAccountId',
+    label: 'Unipile Account ID',
+    hint: 'The id of your connected WhatsApp account',
+    placeholder: 'dfXlh46vQYCsMbVarumWlg',
   },
   {
     key: 'userPhoneNumber',
     label: 'Your WhatsApp Number',
-    hint: 'With country code, no + (e.g. 4917612345678)',
+    hint: 'Your own number, country code, no + (used for the self-chat)',
     placeholder: '4917612345678',
   },
 ];
@@ -75,11 +81,11 @@ export default function SettingsPage() {
   useEffect(() => {
     if (cfg) {
       setForm({
-        whatsappToken: '',
-        whatsappPhoneNumberId: cfg.whatsappPhoneNumberId,
+        unipileApiKey: '',
+        unipileDsn: cfg.unipileDsn,
+        unipileAccountId: cfg.unipileAccountId,
         userPhoneNumber: cfg.userPhoneNumber,
         cronSchedule: cfg.cronSchedule,
-        timezone: cfg.timezone,
       });
     }
   }, [cfg]);

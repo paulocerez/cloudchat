@@ -1,12 +1,11 @@
 import { getDb } from './firestore';
 
 export interface AppConfig {
-  whatsappToken?: string;
-  whatsappPhoneNumberId?: string;
-  whatsappVerifyToken?: string;
+  unipileApiKey?: string;
+  unipileDsn?: string;
+  unipileAccountId?: string;
   userPhoneNumber?: string;
   cronSchedule?: string;
-  timezone?: string;
 }
 
 const DOC = 'config/main';
@@ -39,19 +38,21 @@ export async function updateConfig(patch: Partial<AppConfig>): Promise<AppConfig
 }
 
 // Helpers — each falls back to the env var if Firestore value is absent
-export async function getWhatsappToken(): Promise<string> {
+export async function getUnipileApiKey(): Promise<string> {
   const cfg = await getConfig();
-  return cfg.whatsappToken ?? process.env.WHATSAPP_TOKEN ?? '';
+  return cfg.unipileApiKey ?? process.env.UNIPILE_API_KEY ?? '';
 }
 
-export async function getWhatsappPhoneNumberId(): Promise<string> {
+// Base URL of your Unipile instance, e.g. https://api8.unipile.com:13445 (no trailing slash)
+export async function getUnipileDsn(): Promise<string> {
   const cfg = await getConfig();
-  return cfg.whatsappPhoneNumberId ?? process.env.WHATSAPP_PHONE_NUMBER_ID ?? '';
+  const dsn = cfg.unipileDsn ?? process.env.UNIPILE_DSN ?? '';
+  return dsn.replace(/\/+$/, '');
 }
 
-export async function getWhatsappVerifyToken(): Promise<string> {
+export async function getUnipileAccountId(): Promise<string> {
   const cfg = await getConfig();
-  return cfg.whatsappVerifyToken ?? process.env.WHATSAPP_VERIFY_TOKEN ?? '';
+  return cfg.unipileAccountId ?? process.env.UNIPILE_ACCOUNT_ID ?? '';
 }
 
 export async function getUserPhoneNumber(): Promise<string> {
@@ -62,9 +63,4 @@ export async function getUserPhoneNumber(): Promise<string> {
 export async function getCronSchedule(): Promise<string> {
   const cfg = await getConfig();
   return cfg.cronSchedule ?? process.env.CRON_SCHEDULE ?? '0 20 * * *';
-}
-
-export async function getTimezone(): Promise<string> {
-  const cfg = await getConfig();
-  return cfg.timezone ?? process.env.TZ ?? 'UTC';
 }

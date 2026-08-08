@@ -81,6 +81,29 @@ export async function addImage(date: string, image: JournalImage): Promise<void>
   });
 }
 
+// ── App-sent message dedupe ─────────────────────────────────
+// The daily prompt is sent from the same WhatsApp account the user journals in,
+// so Unipile may echo it back via the webhook. We record ids we send and skip
+// them on the way in to avoid double-logging.
+const RUNTIME_DOC = 'config/runtime';
+const SENT_CAP = 50;
+
+export async function recordSentMessageId(id: string): Promise<void> {
+  if (!id) return;
+  const ref = db.doc(RUNTIME_DOC);
+  const snap = await ref.get();
+  const existing: string[] = (snap.exists && snap.data()?.sentMessageIds) || [];
+  const next = [...existing, id].slice(-SENT_CAP);
+  await ref.set({ sentMessageIds: next }, { merge: true });
+}
+
+export async function isSentMessageId(id: string): Promise<boolean> {
+  if (!id) return false;
+  const snap = await db.doc(RUNTIME_DOC).get();
+  const ids: string[] = (snap.exists && snap.data()?.sentMessageIds) || [];
+  return ids.includes(id);
+}
+
 export async function getEntry(date: string): Promise<JournalEntry | null> {
   const snap = await db.collection('entries').doc(date).get();
   return snap.exists ? (snap.data() as JournalEntry) : null;

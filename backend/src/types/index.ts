@@ -17,6 +17,7 @@ export interface TextMessage {
 
 export interface VoiceMemo {
   id: string;
+  messageId: string;
   mediaId: string;
   transcription?: string;
   duration?: number;
@@ -25,6 +26,7 @@ export interface VoiceMemo {
 
 export interface JournalImage {
   id: string;
+  messageId: string;
   mediaId: string;
   url?: string;
   caption?: string;
@@ -42,12 +44,33 @@ export interface AISummary {
   generatedAt: string;
 }
 
-export interface WhatsAppMessage {
-  from: string;
+// ── Unipile webhook payload ─────────────────────────────────
+export interface UnipileAttachment {
   id: string;
-  timestamp: string;
-  type: 'text' | 'audio' | 'image' | 'document';
-  text?: { body: string };
-  audio?: { id: string; mime_type: string };
-  image?: { id: string; caption?: string; mime_type: string };
+  type: string; // e.g. 'img', 'audio', 'video', 'file'
+  mimetype?: string;
+  url?: string;
+  unavailable?: boolean;
+  sticker?: boolean;
+}
+
+export interface UnipileAttendee {
+  attendee_id: string;
+  attendee_name?: string;
+  attendee_provider_id: string;
+  attendee_profile_url?: string;
+}
+
+export interface UnipileMessageWebhook {
+  event: string; // 'message_received'
+  account_id: string;
+  account_type?: string;
+  account_info?: { type?: string; feature?: string; user_id?: string };
+  chat_id: string;
+  message_id: string;
+  message?: string;
+  timestamp: string; // ISO 8601
+  sender?: UnipileAttendee;
+  attendees?: UnipileAttendee[];
+  attachments?: UnipileAttachment[];
 }
