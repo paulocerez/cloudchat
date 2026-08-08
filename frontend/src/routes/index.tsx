@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { MessageCircle, Mic, Image as ImageIcon } from 'lucide-react';
 import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
-import type { JournalEntry, TextMessage, VoiceMemo } from '@cloudchat/shared';
+import type { JournalEntry, TextMessage, VoiceMemo, JournalImage } from '@cloudchat/shared';
 import { rootRoute } from './__root';
 
 export const indexRoute = createRoute({
@@ -62,6 +62,19 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
           </p>
         ) : (
           <p className="text-gray-400 text-sm italic">No content yet</p>
+        )}
+        {entry.images.length > 0 && (
+          <div className="flex items-center gap-1.5 mt-2">
+            {entry.images.map((img: JournalImage) => (
+              <img
+                key={img.id}
+                src={`${import.meta.env.VITE_API_URL ?? ''}/api/media/${img.messageId}/${img.mediaId}`}
+                alt=""
+                loading="lazy"
+                className="w-10 h-10 rounded-sm object-cover bg-gray-100"
+              />
+            ))}
+          </div>
         )}
       </div>
 
