@@ -68,19 +68,19 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
       <div className="flex items-center gap-3 shrink-0 text-xs text-gray-400 mt-1">
         {messageCount > 0 && (
           <span className="flex items-center gap-1">
-            <MessageCircle size={13} strokeWidth={1.75} />
+            <MessageCircle size={13} strokeWidth={2.5} />
             {messageCount}
           </span>
         )}
         {memoCount > 0 && (
           <span className="flex items-center gap-1">
-            <Mic size={13} strokeWidth={1.75} />
+            <Mic size={13} strokeWidth={2.5} />
             {memoCount}
           </span>
         )}
         {imageCount > 0 && (
           <span className="flex items-center gap-1">
-            <ImageIcon size={13} strokeWidth={1.75} />
+            <ImageIcon size={13} strokeWidth={2.5} />
             {imageCount}
           </span>
         )}
