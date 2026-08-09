@@ -92,15 +92,16 @@ export async function updateVoiceMemoTranscription(
   date: string,
   memoId: string,
   transcription: string
-): Promise<void> {
+): Promise<JournalEntry | null> {
   const ref = db.collection('entries').doc(date);
   const snap = await ref.get();
-  if (!snap.exists) return;
+  if (!snap.exists) return null;
   const entry = snap.data() as JournalEntry;
   const memos = entry.voiceMemos.map((m) =>
     m.id === memoId ? { ...m, transcription } : m
   );
   await ref.update({ voiceMemos: memos, updatedAt: new Date().toISOString() });
+  return (await ref.get()).data() as JournalEntry;
 }
 
 export async function addImage(date: string, image: JournalImage): Promise<void> {

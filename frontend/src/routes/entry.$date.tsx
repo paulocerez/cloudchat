@@ -5,7 +5,7 @@ import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
 import { extractSpotifyLinks, spotifyEmbedUrl, stripSpotifyLinks, type SpotifyLink } from '~/lib/spotify';
 import { staticMapUrl } from '~/lib/mapbox';
-import { MapPin, Star, WandSparkles, List, LayoutGrid, MessageSquare, Image as ImageIcon, Mic, Music } from 'lucide-react';
+import { MapPin, Star, WandSparkles, List, LayoutGrid, MessageSquare, Image as ImageIcon, Mic, Music, Pencil } from 'lucide-react';
 import type { JournalEntry, TextMessage, VoiceMemo, JournalImage } from '@cloudchat/shared';
 import { format } from 'date-fns';
 import { rootRoute } from './__root';
@@ -196,7 +196,7 @@ function EntryContent({ entry }: { entry: JournalEntry }) {
     <div className="space-y-2 stagger">
       {items.map((item) => {
         if (item.kind === 'message') return <MessageBubble key={item.data.id} msg={item.data} />;
-        if (item.kind === 'voice') return <VoiceBubble key={item.data.id} memo={item.data} />;
+        if (item.kind === 'voice') return <VoiceBubble key={item.data.id} memo={item.data} date={entry.date} />;
         if (item.kind === 'image') return <ImageBubble key={item.data.id} image={item.data} />;
       })}
     </div>
@@ -253,7 +253,7 @@ function OrganizedContent({ entry }: { entry: JournalEntry }) {
         <Section icon={Mic} title="Voice memos" count={entry.voiceMemos.length}>
           <div className="space-y-2">
             {entry.voiceMemos.map((memo) => (
-              <VoiceBubble key={memo.id} memo={memo} align="left" />
+              <VoiceBubble key={memo.id} memo={memo} date={entry.date} align="left" />
             ))}
           </div>
         </Section>
@@ -334,11 +334,31 @@ function MessageBubble({ msg }: { msg: TextMessage }) {
   );
 }
 
-function VoiceBubble({ memo, align = 'right' }: { memo: VoiceMemo; align?: 'left' | 'right' }) {
+function VoiceBubble({
+  memo,
+  date,
+  align = 'right',
+}: {
+  memo: VoiceMemo;
+  date: string;
+  align?: 'left' | 'right';
+}) {
   const time = format(new Date(memo.timestamp), 'HH:mm');
   const src =
     memo.audioUrl ??
     `${import.meta.env.VITE_API_URL ?? ''}/api/media/${memo.messageId}/${memo.mediaId}`;
+
+  const qc = useQueryClient();
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(memo.transcription ?? '');
+  const { mutate, isPending } = useMutation({
+    mutationFn: () => api.entries.updateTranscription(date, memo.id, draft.trim()),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['entry', date] });
+      setEditing(false);
+    },
+  });
+
   return (
     <div className={`flex ${align === 'right' ? 'justify-end animate-slide-right' : 'justify-start animate-slide-left'}`}>
       <div className={`max-w-xs md:max-w-md rounded-2xl ${align === 'right' ? 'rounded-br-sm' : 'rounded-bl-sm'} bg-gray-50 border border-gray-200 px-4 py-3 hover:border-gray-300 transition-colors duration-150`}>
@@ -354,10 +374,57 @@ function VoiceBubble({ memo, align = 'right' }: { memo: VoiceMemo; align?: 'left
           <span className="text-xs text-gray-300 ml-auto">{time}</span>
         </div>
         <audio controls preload="none" src={src} className="w-full h-9 mb-2" />
-        {memo.transcription ? (
-          <p className="text-sm text-gray-700 leading-relaxed italic">"{memo.transcription}"</p>
+        {editing ? (
+          <div>
+            <textarea
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              rows={3}
+              autoFocus
+              className="w-full text-sm text-gray-700 rounded-lg border border-gray-300 px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-y"
+            />
+            <div className="flex items-center gap-2 mt-1.5">
+              <button
+                type="button"
+                onClick={() => mutate()}
+                disabled={isPending}
+                className="px-2.5 py-1 rounded-md bg-gray-900 text-white text-xs font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
+              >
+                {isPending ? 'Saving…' : 'Save'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setDraft(memo.transcription ?? '');
+                  setEditing(false);
+                }}
+                className="px-2.5 py-1 rounded-md text-gray-500 text-xs font-medium hover:bg-gray-100 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         ) : (
-          <p className="text-xs text-gray-400 italic">Transcription pending…</p>
+          <div className="group/tx flex items-start gap-1.5">
+            {memo.transcription ? (
+              <p className="text-sm text-gray-700 leading-relaxed italic flex-1">
+                "{memo.transcription}"
+              </p>
+            ) : (
+              <p className="text-xs text-gray-400 italic flex-1">Transcription pending…</p>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setDraft(memo.transcription ?? '');
+                setEditing(true);
+              }}
+              aria-label="Edit transcription"
+              className="shrink-0 p-1 rounded text-gray-300 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+            >
+              <Pencil size={12} strokeWidth={2.5} />
+            </button>
+          </div>
         )}
       </div>
     </div>

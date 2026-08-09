@@ -1,5 +1,11 @@
 import { Router, Request, Response } from 'express';
-import { getAllEntries, getEntry, getEntriesInRange, setEntryHighlight } from '../services/firestore';
+import {
+  getAllEntries,
+  getEntry,
+  getEntriesInRange,
+  setEntryHighlight,
+  updateVoiceMemoTranscription,
+} from '../services/firestore';
 
 const router = Router();
 
@@ -34,6 +40,24 @@ router.put('/:date/highlight', async (req: Request, res: Response) => {
     return;
   }
   const entry = await setEntryHighlight(req.params.date, highlight);
+  res.json(entry);
+});
+
+router.put('/:date/voice/:memoId', async (req: Request, res: Response) => {
+  const { transcription } = req.body;
+  if (typeof transcription !== 'string') {
+    res.status(400).json({ error: 'transcription (string) required' });
+    return;
+  }
+  const entry = await updateVoiceMemoTranscription(
+    req.params.date,
+    req.params.memoId,
+    transcription
+  );
+  if (!entry) {
+    res.status(404).json({ error: 'Entry not found' });
+    return;
+  }
   res.json(entry);
 });
 

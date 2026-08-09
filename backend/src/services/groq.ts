@@ -32,7 +32,7 @@ export async function generateDaySummary(entry: JournalEntry): Promise<DaySummar
       {
         role: 'system',
         content:
-          'You are a personal journaling assistant. Summarize the user\'s journal for a single day. Respond with a JSON object with three keys: "title" — a short headline of 2 to 5 words capturing the essence of the day; "summary" — a single warm, reflective sentence capturing the mood and key events; and "locations" — an array of real-world place names explicitly mentioned (cities, neighborhoods, venues, landmarks, countries), each as a geocodable string like "Berlin" or "Golden Gate Bridge, San Francisco". Use an empty array if no places are mentioned. Write title and summary in the same language the user wrote in. Return only the JSON object, no preamble.',
+          'You are a personal journaling assistant. Summarize the user\'s journal for a single day. Respond with a JSON object with three keys: "title" — a short headline of 2 to 5 words capturing the essence of the day; "summary" — a warm, reflective recap of 2 to 3 sentences that emphasizes the people involved (name them when mentioned), captures who the user was with, where they were, what they did together, and how they felt about it; and "locations" — an array of real-world place names explicitly mentioned (cities, neighborhoods, venues, landmarks, countries), each as a geocodable string like "Berlin" or "Golden Gate Bridge, San Francisco". Use an empty array if no places are mentioned. Write title and summary in the same language the user wrote in. Return only the JSON object, no preamble.',
       },
       {
         role: 'user',

@@ -41,6 +41,8 @@ export const api = {
       get<JournalEntry[]>(`/entries/range?from=${from}&to=${to}`),
     setHighlight: (date: string, highlight: boolean) =>
       put<JournalEntry>(`/entries/${date}/highlight`, { highlight }),
+    updateTranscription: (date: string, memoId: string, transcription: string) =>
+      put<JournalEntry>(`/entries/${date}/voice/${memoId}`, { transcription }),
   },
   config: {
     get: () => get<AppConfig>('/config'),
