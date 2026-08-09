@@ -46,40 +46,52 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
   const hasTranscript = entry.voiceMemos.some((v: VoiceMemo) => v.transcription);
   const spotifyLinks = entry.messages.flatMap((m: TextMessage) => extractSpotifyLinks(m.content));
 
+  const mapUrl =
+    entry.locations && entry.locations.length > 0
+      ? staticMapUrl(entry.locations, 160, 90)
+      : null;
+
   return (
     <div className={entry.highlight ? 'my-2 p-1 rounded-xl ring-2 ring-amber-300 bg-amber-50/40' : undefined}>
     <Link
       to="/entry/$date"
       params={{ date: entry.date }}
-      className={`flex items-start justify-between gap-3 sm:gap-4 py-4 px-3 rounded-lg transition-all duration-200 group cursor-pointer ${
+      className={`flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 py-4 px-3 rounded-lg transition-all duration-200 group cursor-pointer ${
         entry.highlight ? 'hover:bg-amber-100/60' : '-mx-3 hover:bg-gray-50'
       }`}
     >
-      {/* Left accent bar */}
-      <span className="mt-1 w-0.5 h-12 rounded-full bg-gray-200 shrink-0 transition-colors duration-200 group-hover:bg-gray-400" />
-
-      <div className="flex-1 min-w-0">
-        <p className="text-xs text-gray-400 mb-1 font-medium tracking-wide uppercase">
+      {/* Left column: date, summary, songs, images */}
+      <div className="contents sm:flex sm:flex-col sm:flex-1 sm:min-w-0 sm:gap-2">
+        {/* Date */}
+        <p className="order-1 sm:order-none text-xs text-gray-400 font-medium tracking-wide uppercase">
           {formatEntryDate(entry.date)}
         </p>
-        {preview ? (
-          <p className="text-gray-700 text-sm line-clamp-2 leading-relaxed">{preview}</p>
-        ) : hasTranscript ? (
-          <p className="text-gray-500 text-sm italic line-clamp-2 leading-relaxed">
-            {entry.voiceMemos.find((v: VoiceMemo) => v.transcription)?.transcription}
-          </p>
-        ) : spotifyLinks.length === 0 ? (
-          <p className="text-gray-400 text-sm italic">No content yet</p>
-        ) : null}
+
+        {/* Summary */}
+        <div className="order-3 sm:order-none min-w-0">
+          {preview ? (
+            <p className="text-gray-700 text-sm line-clamp-2 leading-relaxed">{preview}</p>
+          ) : hasTranscript ? (
+            <p className="text-gray-500 text-sm italic line-clamp-2 leading-relaxed">
+              {entry.voiceMemos.find((v: VoiceMemo) => v.transcription)?.transcription}
+            </p>
+          ) : spotifyLinks.length === 0 ? (
+            <p className="text-gray-400 text-sm italic">No content yet</p>
+          ) : null}
+        </div>
+
+        {/* Songs */}
         {spotifyLinks.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5 mt-2">
+          <div className="order-4 sm:order-none flex flex-wrap items-center gap-1.5">
             {spotifyLinks.map((link) => (
               <SpotifyChip key={`${link.kind}:${link.id}`} link={link} />
             ))}
           </div>
         )}
+
+        {/* Images */}
         {entry.images.length > 0 && (
-          <div className="flex flex-wrap items-center gap-1.5 mt-2">
+          <div className="order-5 sm:order-none flex flex-wrap items-center gap-1.5">
             {entry.images.map((img: JournalImage) => (
               <img
                 key={img.id}
@@ -93,59 +105,60 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
         )}
       </div>
 
-      <div className="flex flex-col items-end justify-between self-stretch shrink-0 text-xs gap-2">
-        <div className="flex items-center gap-2 sm:gap-3">
-        <div className="flex flex-wrap items-center justify-end gap-1 sm:gap-1.5 max-w-[8.5rem] sm:max-w-none">
-          {messageCount > 0 && (
-            <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-blue-50 text-blue-600 font-medium">
-              <MessageCircle size={13} strokeWidth={2.5} />
-              {messageCount}
-            </span>
-          )}
-          {memoCount > 0 && (
-            <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-violet-50 text-violet-600 font-medium">
-              <Mic size={13} strokeWidth={2.5} />
-              {memoCount}
-            </span>
-          )}
-          {imageCount > 0 && (
-            <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-amber-50 text-amber-600 font-medium">
-              <ImageIcon size={13} strokeWidth={2.5} />
-              {imageCount}
-            </span>
-          )}
-          {spotifyLinks.length > 0 && (
-            <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-green-50 text-green-600 font-medium">
-              <Music size={13} strokeWidth={2.5} />
-              {spotifyLinks.length}
-            </span>
-          )}
-          {entry.locations && entry.locations.length > 0 && (
-            <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-rose-50 text-rose-600 font-medium">
-              <MapPin size={13} strokeWidth={2.5} />
-              {entry.locations.length}
-            </span>
-          )}
+      {/* Right column: stickers, map */}
+      <div className="contents sm:flex sm:flex-col sm:items-end sm:shrink-0 sm:gap-2 text-xs">
+        {/* Stickers / counts */}
+        <div className="order-2 sm:order-none flex items-center gap-2 sm:gap-3">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {messageCount > 0 && (
+              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-blue-50 text-blue-600 font-medium">
+                <MessageCircle size={13} strokeWidth={2.5} />
+                {messageCount}
+              </span>
+            )}
+            {memoCount > 0 && (
+              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-violet-50 text-violet-600 font-medium">
+                <Mic size={13} strokeWidth={2.5} />
+                {memoCount}
+              </span>
+            )}
+            {imageCount > 0 && (
+              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-amber-50 text-amber-600 font-medium">
+                <ImageIcon size={13} strokeWidth={2.5} />
+                {imageCount}
+              </span>
+            )}
+            {spotifyLinks.length > 0 && (
+              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-green-50 text-green-600 font-medium">
+                <Music size={13} strokeWidth={2.5} />
+                {spotifyLinks.length}
+              </span>
+            )}
+            {entry.locations && entry.locations.length > 0 && (
+              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-rose-50 text-rose-600 font-medium">
+                <MapPin size={13} strokeWidth={2.5} />
+                {entry.locations.length}
+              </span>
+            )}
+          </div>
+          {/* Arrow slides right on hover (desktop only) */}
+          <span className="hidden sm:inline-block transition-transform duration-200 group-hover:translate-x-1 text-gray-300 group-hover:text-gray-600">
+            →
+          </span>
         </div>
-        {/* Arrow slides right on hover */}
-        <span className="inline-block transition-transform duration-200 group-hover:translate-x-1 text-gray-300 group-hover:text-gray-600">
-          →
-        </span>
-        </div>
+
+        {/* Map + location */}
         {entry.locations && entry.locations.length > 0 && (
-          <div className="flex flex-col items-end gap-1.5">
-            {(() => {
-              const mapUrl = staticMapUrl(entry.locations!, 160, 90);
-              return mapUrl ? (
-                <img
-                  src={mapUrl}
-                  alt="Map preview"
-                  loading="lazy"
-                  className="w-24 h-14 sm:w-40 sm:h-[90px] object-cover rounded-lg border border-gray-200 bg-gray-100"
-                />
-              ) : null;
-            })()}
-            <span className="flex items-center gap-1 text-rose-500 font-medium text-right max-w-[6rem] sm:max-w-[10rem] truncate">
+          <div className="order-6 sm:order-none flex flex-col items-start sm:items-end gap-1.5">
+            {mapUrl && (
+              <img
+                src={mapUrl}
+                alt="Map preview"
+                loading="lazy"
+                className="w-40 h-[90px] object-cover rounded-lg border border-gray-200 bg-gray-100"
+              />
+            )}
+            <span className="flex items-center gap-1 text-rose-500 font-medium sm:text-right max-w-full sm:max-w-[10rem] truncate">
               <MapPin size={12} strokeWidth={2.5} className="shrink-0" />
               <span className="truncate">
                 {entry.locations.map((l) => l.name).join(', ')}
