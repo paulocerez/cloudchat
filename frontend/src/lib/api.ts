@@ -53,5 +53,6 @@ export const api = {
       get<AISummary>(`/summaries/${period}/${year}/${index}`),
     generate: (period: 'week' | 'month', year: number, index: number) =>
       post<AISummary>('/summaries/generate', { period, year, index }),
+    generateDaily: (date: string) => post<JournalEntry>(`/summaries/daily/${date}`, {}),
   },
 };

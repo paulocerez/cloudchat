@@ -137,7 +137,7 @@ export async function isSentMessageId(id: string): Promise<boolean> {
 export async function updateEntrySummary(
   date: string,
   data: { title: string; summary: string; locations: EntryLocation[] }
-): Promise<void> {
+): Promise<JournalEntry> {
   const ref = db.collection('entries').doc(date);
   await ref.update({
     title: data.title,
@@ -146,6 +146,7 @@ export async function updateEntrySummary(
     summaryGeneratedAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   });
+  return (await ref.get()).data() as JournalEntry;
 }
 
 export async function setEntryHighlight(date: string, highlight: boolean): Promise<JournalEntry> {

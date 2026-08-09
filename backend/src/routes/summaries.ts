@@ -51,6 +51,26 @@ router.get('/daily', async (req: Request, res: Response) => {
   res.json({ ok: true, date, title, summary, locations: geocoded });
 });
 
+// Manual (re)generation triggered from the app UI for a specific date.
+router.post('/daily/:date', async (req: Request, res: Response) => {
+  const { date } = req.params;
+  const entry = await getEntry(date);
+  if (!entry) {
+    res.status(404).json({ error: 'No entry for that date' });
+    return;
+  }
+
+  const { title, summary, locations } = await generateDaySummary(entry);
+  if (!summary && !title) {
+    res.status(422).json({ error: 'No content to summarize' });
+    return;
+  }
+
+  const geocoded = locations.length > 0 ? await geocodePlaces(locations) : [];
+  const updated = await updateEntrySummary(date, { title, summary, locations: geocoded });
+  res.json(updated);
+});
+
 router.get('/', async (_req: Request, res: Response) => {
   const summaries = await getAllSummaries();
   res.json(summaries);

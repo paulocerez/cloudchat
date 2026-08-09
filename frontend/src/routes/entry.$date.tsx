@@ -4,7 +4,7 @@ import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
 import { extractSpotifyLinks, spotifyEmbedUrl, stripSpotifyLinks } from '~/lib/spotify';
 import { staticMapUrl } from '~/lib/mapbox';
-import { MapPin, Star } from 'lucide-react';
+import { MapPin, Star, WandSparkles } from 'lucide-react';
 import type { JournalEntry, TextMessage, VoiceMemo, JournalImage } from '@cloudchat/shared';
 import { format } from 'date-fns';
 import { rootRoute } from './__root';
@@ -55,7 +55,10 @@ function EntryPage() {
       )}
       <div className="flex items-center justify-between gap-3 mb-3">
         <h1 className="text-lg font-semibold text-gray-900">{formatEntryDate(entry.date)}</h1>
-        <HighlightToggle date={entry.date} highlight={Boolean(entry.highlight)} />
+        <div className="flex items-center gap-2">
+          <GenerateSummaryButton date={entry.date} hasSummary={Boolean(entry.summary)} />
+          <HighlightToggle date={entry.date} highlight={Boolean(entry.highlight)} />
+        </div>
       </div>
       {entry.summary && (
         <p className="text-sm text-gray-600 leading-relaxed mb-4">{entry.summary}</p>
@@ -63,6 +66,28 @@ function EntryPage() {
       {entry.locations && entry.locations.length > 0 && <GeoCard locations={entry.locations} />}
       <EntryContent entry={entry} />
     </div>
+  );
+}
+
+function GenerateSummaryButton({ date, hasSummary }: { date: string; hasSummary: boolean }) {
+  const qc = useQueryClient();
+  const { mutate, isPending, isError } = useMutation({
+    mutationFn: () => api.summaries.generateDaily(date),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['entry', date] });
+      qc.invalidateQueries({ queryKey: ['entries'] });
+    },
+  });
+  return (
+    <button
+      type="button"
+      onClick={() => mutate()}
+      disabled={isPending}
+      className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors disabled:opacity-50"
+    >
+      <WandSparkles size={13} strokeWidth={2.5} />
+      {isPending ? 'Generating…' : isError ? 'Retry' : hasSummary ? 'Regenerate' : 'Generate summary'}
+    </button>
   );
 }
 
