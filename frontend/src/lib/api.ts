@@ -39,6 +39,8 @@ export const api = {
     get: (date: string) => get<JournalEntry>(`/entries/${date}`),
     range: (from: string, to: string) =>
       get<JournalEntry[]>(`/entries/range?from=${from}&to=${to}`),
+    setHighlight: (date: string, highlight: boolean) =>
+      put<JournalEntry>(`/entries/${date}/highlight`, { highlight }),
   },
   config: {
     get: () => get<AppConfig>('/config'),

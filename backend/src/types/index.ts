@@ -13,6 +13,7 @@ export interface JournalEntry {
   title?: string; // few-word headline for the day
   summary?: string; // one-sentence reflection
   locations?: EntryLocation[]; // geocoded places mentioned that day
+  highlight?: boolean; // user-marked special day
   summaryGeneratedAt?: string;
   createdAt: string;
   updatedAt: string;

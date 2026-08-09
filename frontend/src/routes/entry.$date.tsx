@@ -1,10 +1,10 @@
 import { createRoute, Link } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
 import { extractSpotifyLinks, spotifyEmbedUrl, stripSpotifyLinks } from '~/lib/spotify';
 import { staticMapUrl } from '~/lib/mapbox';
-import { MapPin } from 'lucide-react';
+import { MapPin, Star } from 'lucide-react';
 import type { JournalEntry, TextMessage, VoiceMemo, JournalImage } from '@cloudchat/shared';
 import { format } from 'date-fns';
 import { rootRoute } from './__root';
@@ -53,15 +53,43 @@ function EntryPage() {
           {entry.title}
         </p>
       )}
-      <h1 className="text-lg font-semibold text-gray-900 mb-3">
-        {formatEntryDate(entry.date)}
-      </h1>
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <h1 className="text-lg font-semibold text-gray-900">{formatEntryDate(entry.date)}</h1>
+        <HighlightToggle date={entry.date} highlight={Boolean(entry.highlight)} />
+      </div>
       {entry.summary && (
         <p className="text-sm text-gray-600 leading-relaxed mb-4">{entry.summary}</p>
       )}
       {entry.locations && entry.locations.length > 0 && <GeoCard locations={entry.locations} />}
       <EntryContent entry={entry} />
     </div>
+  );
+}
+
+function HighlightToggle({ date, highlight }: { date: string; highlight: boolean }) {
+  const qc = useQueryClient();
+  const { mutate, isPending } = useMutation({
+    mutationFn: () => api.entries.setHighlight(date, !highlight),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['entry', date] });
+      qc.invalidateQueries({ queryKey: ['entries'] });
+    },
+  });
+  return (
+    <button
+      type="button"
+      onClick={() => mutate()}
+      disabled={isPending}
+      aria-pressed={highlight}
+      className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-colors disabled:opacity-50 ${
+        highlight
+          ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+      }`}
+    >
+      <Star size={13} strokeWidth={2.5} className={highlight ? 'fill-current' : ''} />
+      {highlight ? 'Highlighted' : 'Highlight'}
+    </button>
   );
 }
 

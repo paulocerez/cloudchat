@@ -1,10 +1,11 @@
 import { Link, useRouter, useRouterState } from '@tanstack/react-router';
-import { LogOut, BookOpen, WandSparkles, Settings } from 'lucide-react';
+import { LogOut, BookOpen, WandSparkles, Settings, CalendarDays } from 'lucide-react';
 import { Logo } from './Logo';
 import { isAuthenticated, logout } from '~/lib/auth';
 
 const TABS = [
   { to: '/',          label: 'Timeline',  Icon: BookOpen  },
+  { to: '/calendar',  label: 'Calendar',  Icon: CalendarDays },
   { to: '/summaries', label: 'Summaries', Icon: WandSparkles },
 ] as const;
 

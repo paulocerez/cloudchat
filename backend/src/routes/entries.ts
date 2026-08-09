@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { getAllEntries, getEntry, getEntriesInRange } from '../services/firestore';
+import { getAllEntries, getEntry, getEntriesInRange, setEntryHighlight } from '../services/firestore';
 
 const router = Router();
 
@@ -24,6 +24,16 @@ router.get('/:date', async (req: Request, res: Response) => {
     res.status(404).json({ error: 'Entry not found' });
     return;
   }
+  res.json(entry);
+});
+
+router.put('/:date/highlight', async (req: Request, res: Response) => {
+  const { highlight } = req.body;
+  if (typeof highlight !== 'boolean') {
+    res.status(400).json({ error: 'highlight (boolean) required' });
+    return;
+  }
+  const entry = await setEntryHighlight(req.params.date, highlight);
   res.json(entry);
 });
 

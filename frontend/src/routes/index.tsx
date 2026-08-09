@@ -49,7 +49,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
   const firstTrack = spotifyLinks.find((l) => l.kind === 'track') ?? spotifyLinks[0];
 
   return (
-    <div>
+    <div className={entry.highlight ? 'my-2 rounded-xl ring-2 ring-amber-300 ring-offset-2 ring-offset-white bg-amber-50/40' : undefined}>
     <Link
       to="/entry/$date"
       params={{ date: entry.date }}

@@ -148,6 +148,13 @@ export async function updateEntrySummary(
   });
 }
 
+export async function setEntryHighlight(date: string, highlight: boolean): Promise<JournalEntry> {
+  await getOrCreateEntry(date);
+  const ref = db.collection('entries').doc(date);
+  await ref.update({ highlight, updatedAt: new Date().toISOString() });
+  return (await ref.get()).data() as JournalEntry;
+}
+
 export async function getEntry(date: string): Promise<JournalEntry | null> {
   const snap = await db.collection('entries').doc(date).get();
   return snap.exists ? (snap.data() as JournalEntry) : null;
