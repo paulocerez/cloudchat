@@ -51,6 +51,7 @@ export interface AppConfig {
   userPhoneNumber: string;
   cronSchedule: string;
   _sources: Record<string, 'db' | 'env' | 'unset'>;
+  _integrations?: Record<string, boolean>;
 }
 
 export interface AISummary {

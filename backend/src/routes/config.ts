@@ -21,6 +21,11 @@ router.get('/', async (_req: Request, res: Response) => {
       userPhoneNumber: cfg.userPhoneNumber ? 'db' : process.env.USER_PHONE_NUMBER ? 'env' : 'unset',
       cronSchedule: cfg.cronSchedule ? 'db' : process.env.CRON_SCHEDULE ? 'env' : 'unset',
     },
+    // read-only presence check for env-only integration tokens
+    _integrations: {
+      groq: Boolean(process.env.GROQ_API_KEY),
+      mapbox: Boolean(process.env.MAPBOX_TOKEN),
+    },
   });
 });
 

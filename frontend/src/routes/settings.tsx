@@ -11,7 +11,7 @@ export const settingsRoute = createRoute({
   component: SettingsPage,
 });
 
-type EditableKey = keyof Omit<AppConfig, '_sources'>;
+type EditableKey = keyof Omit<AppConfig, '_sources' | '_integrations'>;
 
 const FIELDS: {
   key: EditableKey;
@@ -185,6 +185,41 @@ export default function SettingsPage() {
       </form>
 
       <div className="mt-12 pt-6 border-t border-gray-100">
+        <p className="text-sm font-medium text-gray-700 mb-3">Integrations</p>
+        <div className="space-y-2">
+          {[
+            { key: 'groq', label: 'Groq (AI summaries)', envVar: 'GROQ_API_KEY' },
+            { key: 'mapbox', label: 'Mapbox (location maps)', envVar: 'MAPBOX_TOKEN' },
+          ].map(({ key, label, envVar }) => {
+            const present = cfg?._integrations?.[key] ?? false;
+            return (
+              <div key={key} className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-700">{label}</p>
+                  <p className="text-xs text-gray-400">
+                    <code>{envVar}</code>
+                  </p>
+                </div>
+                {present ? (
+                  <span className="text-xs px-1.5 py-0.5 rounded-md bg-green-50 text-green-600 font-medium">
+                    connected
+                  </span>
+                ) : (
+                  <span className="text-xs px-1.5 py-0.5 rounded-md bg-red-50 text-red-400 font-medium">
+                    missing
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        <p className="text-xs text-gray-400 mt-3">
+          These are set via environment variables only. Add the missing token in your backend env to
+          enable the feature.
+        </p>
+      </div>
+
+      <div className="mt-8 pt-6 border-t border-gray-100">
         <p className="text-xs text-gray-400 leading-relaxed">
           <strong className="text-gray-600">How this works:</strong> values saved here are stored in
           Firestore and take precedence over Vercel environment variables at runtime. Leave a field
