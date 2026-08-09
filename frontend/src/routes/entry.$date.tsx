@@ -5,7 +5,7 @@ import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
 import { extractSpotifyLinks, spotifyEmbedUrl, stripSpotifyLinks, type SpotifyLink } from '~/lib/spotify';
 import { staticMapUrl } from '~/lib/mapbox';
-import { MapPin, Star, WandSparkles, List, LayoutGrid, MessageSquare, Image as ImageIcon, Mic, Music, Pencil } from 'lucide-react';
+import { MapPin, Star, WandSparkles, List, LayoutGrid, MessageSquare, Image as ImageIcon, Mic, Music, Pencil, X } from 'lucide-react';
 import type { JournalEntry, TextMessage, VoiceMemo, JournalImage } from '@cloudchat/shared';
 import { format } from 'date-fns';
 import { rootRoute } from './__root';
@@ -374,58 +374,102 @@ function VoiceBubble({
           <span className="text-xs text-gray-300 ml-auto">{time}</span>
         </div>
         <audio controls preload="none" src={src} className="w-full h-9 mb-2" />
-        {editing ? (
-          <div>
-            <textarea
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              rows={3}
-              autoFocus
-              className="w-full text-sm text-gray-700 rounded-lg border border-gray-300 px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-y"
-            />
-            <div className="flex items-center gap-2 mt-1.5">
-              <button
-                type="button"
-                onClick={() => mutate()}
-                disabled={isPending}
-                className="px-2.5 py-1 rounded-md bg-gray-900 text-white text-xs font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
-              >
-                {isPending ? 'Saving…' : 'Save'}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setDraft(memo.transcription ?? '');
-                  setEditing(false);
-                }}
-                className="px-2.5 py-1 rounded-md text-gray-500 text-xs font-medium hover:bg-gray-100 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="group/tx flex items-start gap-1.5">
-            {memo.transcription ? (
-              <p className="text-sm text-gray-700 leading-relaxed italic flex-1">
-                "{memo.transcription}"
-              </p>
-            ) : (
-              <p className="text-xs text-gray-400 italic flex-1">Transcription pending…</p>
-            )}
-            <button
-              type="button"
-              onClick={() => {
-                setDraft(memo.transcription ?? '');
-                setEditing(true);
-              }}
-              aria-label="Edit transcription"
-              className="shrink-0 p-1 rounded text-gray-300 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-            >
-              <Pencil size={12} strokeWidth={2.5} />
-            </button>
-          </div>
-        )}
+        <div className="flex items-start gap-1.5">
+          {memo.transcription ? (
+            <p className="text-sm text-gray-700 leading-relaxed italic flex-1">
+              "{memo.transcription}"
+            </p>
+          ) : (
+            <p className="text-xs text-gray-400 italic flex-1">Transcription pending…</p>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              setDraft(memo.transcription ?? '');
+              setEditing(true);
+            }}
+            aria-label="Edit transcription"
+            className="shrink-0 p-1 rounded text-gray-300 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+          >
+            <Pencil size={12} strokeWidth={2.5} />
+          </button>
+        </div>
+      </div>
+      {editing && (
+        <TranscriptionDialog
+          value={draft}
+          onChange={setDraft}
+          onSave={() => mutate()}
+          onCancel={() => {
+            setDraft(memo.transcription ?? '');
+            setEditing(false);
+          }}
+          isSaving={isPending}
+        />
+      )}
+    </div>
+  );
+}
+
+function TranscriptionDialog({
+  value,
+  onChange,
+  onSave,
+  onCancel,
+  isSaving,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  onSave: () => void;
+  onCancel: () => void;
+  isSaving: boolean;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate-fade-up"
+      onClick={onCancel}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-lg rounded-2xl bg-white shadow-xl p-5"
+      >
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-gray-900">Edit transcription</h2>
+          <button
+            type="button"
+            onClick={onCancel}
+            aria-label="Close"
+            className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+          >
+            <X size={16} strokeWidth={2.5} />
+          </button>
+        </div>
+        <textarea
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          rows={10}
+          autoFocus
+          className="w-full text-sm text-gray-700 leading-relaxed rounded-lg border border-gray-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-y"
+        />
+        <div className="flex items-center justify-end gap-2 mt-4">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-3.5 py-1.5 rounded-lg text-gray-500 text-sm font-medium hover:bg-gray-100 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onSave}
+            disabled={isSaving}
+            className="px-3.5 py-1.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
+          >
+            {isSaving ? 'Saving…' : 'Save'}
+          </button>
+        </div>
       </div>
     </div>
   );
