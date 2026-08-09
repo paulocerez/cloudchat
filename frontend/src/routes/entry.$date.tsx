@@ -1,10 +1,11 @@
+import { useState } from 'react';
 import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
-import { extractSpotifyLinks, spotifyEmbedUrl, stripSpotifyLinks } from '~/lib/spotify';
+import { extractSpotifyLinks, spotifyEmbedUrl, stripSpotifyLinks, type SpotifyLink } from '~/lib/spotify';
 import { staticMapUrl } from '~/lib/mapbox';
-import { MapPin, Star, WandSparkles } from 'lucide-react';
+import { MapPin, Star, WandSparkles, List, LayoutGrid, MessageSquare, Image as ImageIcon, Mic, Music } from 'lucide-react';
 import type { JournalEntry, TextMessage, VoiceMemo, JournalImage } from '@cloudchat/shared';
 import { format } from 'date-fns';
 import { rootRoute } from './__root';
@@ -15,8 +16,17 @@ export const entryDateRoute = createRoute({
   component: EntryPage,
 });
 
+type ViewMode = 'timeline' | 'organized';
+
 function EntryPage() {
   const { date } = entryDateRoute.useParams();
+  const [view, setView] = useState<ViewMode>(
+    () => (localStorage.getItem('entryViewMode') as ViewMode) || 'timeline'
+  );
+  const setViewMode = (v: ViewMode) => {
+    setView(v);
+    localStorage.setItem('entryViewMode', v);
+  };
   const { data: entry, isLoading, isError } = useQuery({
     queryKey: ['entry', date],
     queryFn: () => api.entries.get(date),
@@ -64,7 +74,35 @@ function EntryPage() {
         <p className="text-sm text-gray-600 leading-relaxed mb-4">{entry.summary}</p>
       )}
       {entry.locations && entry.locations.length > 0 && <GeoCard locations={entry.locations} />}
-      <EntryContent entry={entry} />
+      <div className="flex justify-end mb-3">
+        <ViewToggle view={view} onChange={setViewMode} />
+      </div>
+      {view === 'timeline' ? <EntryContent entry={entry} /> : <OrganizedContent entry={entry} />}
+    </div>
+  );
+}
+
+function ViewToggle({ view, onChange }: { view: ViewMode; onChange: (v: ViewMode) => void }) {
+  const opts: { mode: ViewMode; Icon: typeof List; label: string }[] = [
+    { mode: 'timeline', Icon: List, label: 'Timeline view' },
+    { mode: 'organized', Icon: LayoutGrid, label: 'Organized view' },
+  ];
+  return (
+    <div className="inline-flex items-center gap-0.5 p-0.5 rounded-lg bg-gray-100">
+      {opts.map(({ mode, Icon, label }) => (
+        <button
+          key={mode}
+          type="button"
+          onClick={() => onChange(mode)}
+          aria-label={label}
+          aria-pressed={view === mode}
+          className={`p-1.5 rounded-md transition-colors ${
+            view === mode ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400 hover:text-gray-600'
+          }`}
+        >
+          <Icon size={16} strokeWidth={2} />
+        </button>
+      ))}
     </div>
   );
 }
@@ -165,6 +203,105 @@ function EntryContent({ entry }: { entry: JournalEntry }) {
   );
 }
 
+function OrganizedContent({ entry }: { entry: JournalEntry }) {
+  const songs: SpotifyLink[] = entry.messages.flatMap((m) => extractSpotifyLinks(m.content));
+  const textMessages = entry.messages.filter((m) => stripSpotifyLinks(m.content).length > 0);
+
+  const isEmpty =
+    songs.length === 0 &&
+    entry.images.length === 0 &&
+    entry.voiceMemos.length === 0 &&
+    textMessages.length === 0;
+
+  if (isEmpty) return <p className="text-gray-400 text-sm italic">No content for this day.</p>;
+
+  return (
+    <div className="space-y-8 stagger">
+      {textMessages.length > 0 && (
+        <Section icon={MessageSquare} title="Messages" count={textMessages.length}>
+          <div className="space-y-2">
+            {textMessages.map((m) => (
+              <div key={m.id} className="rounded-xl bg-gray-100 text-gray-700 px-4 py-2.5">
+                <p className="text-sm leading-relaxed">{stripSpotifyLinks(m.content)}</p>
+                <p className="text-xs mt-1 text-gray-400">{format(new Date(m.timestamp), 'HH:mm')}</p>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {entry.images.length > 0 && (
+        <Section icon={ImageIcon} title="Images" count={entry.images.length}>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {entry.images.map((img) => (
+              <img
+                key={img.id}
+                src={
+                  img.url ??
+                  `${import.meta.env.VITE_API_URL ?? ''}/api/media/${img.messageId}/${img.mediaId}`
+                }
+                alt={img.caption ?? 'Journal image'}
+                loading="lazy"
+                className="w-full aspect-square object-cover rounded-xl bg-gray-100"
+              />
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {entry.voiceMemos.length > 0 && (
+        <Section icon={Mic} title="Voice memos" count={entry.voiceMemos.length}>
+          <div className="space-y-2">
+            {entry.voiceMemos.map((memo) => (
+              <VoiceBubble key={memo.id} memo={memo} align="left" />
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {songs.length > 0 && (
+        <Section icon={Music} title="Songs" count={songs.length}>
+          <div className="space-y-2">
+            {songs.map((link) => (
+              <iframe
+                key={`${link.kind}:${link.id}`}
+                src={spotifyEmbedUrl(link)}
+                title="Spotify player"
+                loading="lazy"
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                className={`w-full rounded-xl border-0 ${link.kind === 'track' || link.kind === 'episode' ? 'h-[152px]' : 'h-[352px]'}`}
+              />
+            ))}
+          </div>
+        </Section>
+      )}
+    </div>
+  );
+}
+
+function Section({
+  icon: Icon,
+  title,
+  count,
+  children,
+}: {
+  icon: typeof List;
+  title: string;
+  count: number;
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      <div className="flex items-center gap-2 mb-3">
+        <Icon size={15} strokeWidth={2} className="text-gray-400" />
+        <h2 className="text-xs font-medium tracking-wide uppercase text-gray-400">{title}</h2>
+        <span className="text-xs text-gray-300">{count}</span>
+      </div>
+      {children}
+    </section>
+  );
+}
+
 function MessageBubble({ msg }: { msg: TextMessage }) {
   const time = format(new Date(msg.timestamp), 'HH:mm');
   const spotifyLinks = extractSpotifyLinks(msg.content);
@@ -197,14 +334,14 @@ function MessageBubble({ msg }: { msg: TextMessage }) {
   );
 }
 
-function VoiceBubble({ memo }: { memo: VoiceMemo }) {
+function VoiceBubble({ memo, align = 'right' }: { memo: VoiceMemo; align?: 'left' | 'right' }) {
   const time = format(new Date(memo.timestamp), 'HH:mm');
   const src =
     memo.audioUrl ??
     `${import.meta.env.VITE_API_URL ?? ''}/api/media/${memo.messageId}/${memo.mediaId}`;
   return (
-    <div className="flex justify-end animate-slide-right">
-      <div className="max-w-xs md:max-w-md rounded-2xl rounded-br-sm bg-gray-50 border border-gray-200 px-4 py-3 hover:border-gray-300 transition-colors duration-150">
+    <div className={`flex ${align === 'right' ? 'justify-end animate-slide-right' : 'justify-start animate-slide-left'}`}>
+      <div className={`max-w-xs md:max-w-md rounded-2xl ${align === 'right' ? 'rounded-br-sm' : 'rounded-bl-sm'} bg-gray-50 border border-gray-200 px-4 py-3 hover:border-gray-300 transition-colors duration-150`}>
         <div className="flex items-center gap-2 mb-2">
           {/* Animated waveform */}
           <div className="flex items-end gap-0.5 h-4">
