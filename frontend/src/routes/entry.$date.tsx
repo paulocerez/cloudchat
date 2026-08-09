@@ -84,7 +84,7 @@ function HighlightToggle({ date, highlight }: { date: string; highlight: boolean
       className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-colors disabled:opacity-50 ${
         highlight
           ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+          : 'bg-amber-50 text-amber-600 hover:bg-amber-100'
       }`}
     >
       <Star size={13} strokeWidth={2.5} className={highlight ? 'fill-current' : ''} />
