@@ -140,13 +140,44 @@ export async function updateEntrySummary(
   data: { title: string; summary: string; locations: EntryLocation[] }
 ): Promise<JournalEntry> {
   const ref = db.collection('entries').doc(date);
+  const now = new Date().toISOString();
   await ref.update({
     title: data.title,
     summary: data.summary,
     locations: data.locations,
-    summaryGeneratedAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    summaryGeneratedAt: now,
+    locationsScannedAt: now,
+    updatedAt: now,
   });
+  return (await ref.get()).data() as JournalEntry;
+}
+
+// Append a manually-entered location, de-duplicating by name.
+export async function addEntryLocation(
+  date: string,
+  location: EntryLocation
+): Promise<JournalEntry> {
+  await getOrCreateEntry(date);
+  const ref = db.collection('entries').doc(date);
+  const entry = (await ref.get()).data() as JournalEntry;
+  const existing = entry.locations ?? [];
+  const locations = existing.some((l) => l.name === location.name)
+    ? existing
+    : [...existing, location];
+  await ref.update({ locations, updatedAt: new Date().toISOString() });
+  return (await ref.get()).data() as JournalEntry;
+}
+
+export async function removeEntryLocation(
+  date: string,
+  name: string
+): Promise<JournalEntry | null> {
+  const ref = db.collection('entries').doc(date);
+  const snap = await ref.get();
+  if (!snap.exists) return null;
+  const entry = snap.data() as JournalEntry;
+  const locations = (entry.locations ?? []).filter((l) => l.name !== name);
+  await ref.update({ locations, updatedAt: new Date().toISOString() });
   return (await ref.get()).data() as JournalEntry;
 }
 

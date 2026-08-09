@@ -15,6 +15,7 @@ export interface JournalEntry {
   locations?: EntryLocation[]; // geocoded places mentioned that day
   highlight?: boolean; // user-marked special day
   summaryGeneratedAt?: string;
+  locationsScannedAt?: string; // when the automatic location scan last ran
   createdAt: string;
   updatedAt: string;
 }

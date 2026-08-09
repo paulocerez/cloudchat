@@ -5,7 +5,10 @@ import {
   getEntriesInRange,
   setEntryHighlight,
   updateVoiceMemoTranscription,
+  addEntryLocation,
+  removeEntryLocation,
 } from '../services/firestore';
+import { geocodePlaces } from '../services/mapbox';
 
 const router = Router();
 
@@ -54,6 +57,31 @@ router.put('/:date/voice/:memoId', async (req: Request, res: Response) => {
     req.params.memoId,
     transcription
   );
+  if (!entry) {
+    res.status(404).json({ error: 'Entry not found' });
+    return;
+  }
+  res.json(entry);
+});
+
+// Manually add a location by place name; geocoded server-side.
+router.post('/:date/locations', async (req: Request, res: Response) => {
+  const { name } = req.body;
+  if (typeof name !== 'string' || !name.trim()) {
+    res.status(400).json({ error: 'name (string) required' });
+    return;
+  }
+  const [geocoded] = await geocodePlaces([name.trim()]);
+  if (!geocoded) {
+    res.status(422).json({ error: `Could not geocode "${name.trim()}"` });
+    return;
+  }
+  const entry = await addEntryLocation(req.params.date, geocoded);
+  res.json(entry);
+});
+
+router.delete('/:date/locations/:name', async (req: Request, res: Response) => {
+  const entry = await removeEntryLocation(req.params.date, req.params.name);
   if (!entry) {
     res.status(404).json({ error: 'Entry not found' });
     return;

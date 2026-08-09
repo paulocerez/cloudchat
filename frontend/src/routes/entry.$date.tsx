@@ -5,7 +5,7 @@ import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
 import { extractSpotifyLinks, spotifyEmbedUrl, stripSpotifyLinks, type SpotifyLink } from '~/lib/spotify';
 import { staticMapUrl } from '~/lib/mapbox';
-import { MapPin, Star, WandSparkles, List, LayoutGrid, MessageSquare, Image as ImageIcon, Mic, Music, Pencil, X } from 'lucide-react';
+import { MapPin, Star, WandSparkles, List, LayoutGrid, MessageSquare, Image as ImageIcon, Mic, Music, Pencil, X, Plus } from 'lucide-react';
 import type { JournalEntry, TextMessage, VoiceMemo, JournalImage } from '@cloudchat/shared';
 import { format } from 'date-fns';
 import { rootRoute } from './__root';
@@ -73,7 +73,7 @@ function EntryPage() {
       {entry.summary && (
         <p className="text-sm text-gray-600 leading-relaxed mb-4">{entry.summary}</p>
       )}
-      {entry.locations && entry.locations.length > 0 && <GeoCard locations={entry.locations} />}
+      <LocationCard entry={entry} />
       <div className="flex justify-end mb-3">
         <ViewToggle view={view} onChange={setViewMode} />
       </div>
@@ -156,21 +156,106 @@ function HighlightToggle({ date, highlight }: { date: string; highlight: boolean
   );
 }
 
-function GeoCard({ locations }: { locations: NonNullable<JournalEntry['locations']> }) {
+function LocationCard({ entry }: { entry: JournalEntry }) {
+  const qc = useQueryClient();
+  const [name, setName] = useState('');
+  const locations = entry.locations ?? [];
+  const scanned = Boolean(entry.locationsScannedAt);
   const mapUrl = staticMapUrl(locations);
+
+  const invalidate = () => {
+    qc.invalidateQueries({ queryKey: ['entry', entry.date] });
+    qc.invalidateQueries({ queryKey: ['entries'] });
+  };
+
+  const add = useMutation({
+    mutationFn: () => api.entries.addLocation(entry.date, name.trim()),
+    onSuccess: () => {
+      setName('');
+      invalidate();
+    },
+  });
+
+  const remove = useMutation({
+    mutationFn: (locName: string) => api.entries.removeLocation(entry.date, locName),
+    onSuccess: invalidate,
+  });
+
+  const status = scanned
+    ? locations.length > 0
+      ? `Scanned ${format(new Date(entry.locationsScannedAt!), 'MMM d, HH:mm')}`
+      : `Scanned ${format(new Date(entry.locationsScannedAt!), 'MMM d, HH:mm')} · none found`
+    : 'Not scanned yet';
+
   return (
     <div className="mb-6 rounded-2xl border border-gray-200 overflow-hidden animate-fade-up">
       {mapUrl && <img src={mapUrl} alt="Map of places mentioned" className="w-full block" />}
-      <div className="flex flex-wrap gap-1.5 px-3 py-2.5">
-        {locations.map((loc) => (
-          <span
-            key={loc.name}
-            className="flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-medium"
-          >
-            <MapPin size={12} strokeWidth={2.5} />
-            {loc.name}
+      <div className="px-3 py-2.5 space-y-2.5">
+        <div className="flex items-center gap-1.5">
+          <MapPin size={12} strokeWidth={2.5} className="text-gray-400" />
+          <span className="text-xs font-medium tracking-wide uppercase text-gray-400">
+            Locations
           </span>
-        ))}
+          <span
+            className={`ml-auto inline-flex items-center gap-1 text-xs font-medium ${
+              scanned ? 'text-emerald-600' : 'text-gray-400'
+            }`}
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${scanned ? 'bg-emerald-500' : 'bg-gray-300'}`}
+            />
+            {status}
+          </span>
+        </div>
+
+        {locations.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {locations.map((loc) => (
+              <span
+                key={loc.name}
+                className="flex items-center gap-1 pl-2 pr-1 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-medium"
+              >
+                <MapPin size={12} strokeWidth={2.5} />
+                {loc.name}
+                <button
+                  type="button"
+                  onClick={() => remove.mutate(loc.name)}
+                  disabled={remove.isPending}
+                  aria-label={`Remove ${loc.name}`}
+                  className="p-0.5 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-200 transition-colors disabled:opacity-50"
+                >
+                  <X size={11} strokeWidth={2.5} />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (name.trim()) add.mutate();
+          }}
+          className="flex items-center gap-1.5"
+        >
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Add a location…"
+            className="flex-1 text-xs text-gray-700 rounded-lg border border-gray-300 px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+          />
+          <button
+            type="submit"
+            disabled={!name.trim() || add.isPending}
+            className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-gray-900 text-white hover:bg-gray-800 transition-colors disabled:opacity-50"
+          >
+            <Plus size={13} strokeWidth={2.5} />
+            {add.isPending ? 'Adding…' : 'Add'}
+          </button>
+        </form>
+        {add.isError && (
+          <p className="text-xs text-red-500">Couldn't find that place. Try a more specific name.</p>
+        )}
       </div>
     </div>
   );

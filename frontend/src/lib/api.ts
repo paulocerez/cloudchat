@@ -43,6 +43,12 @@ export const api = {
       put<JournalEntry>(`/entries/${date}/highlight`, { highlight }),
     updateTranscription: (date: string, memoId: string, transcription: string) =>
       put<JournalEntry>(`/entries/${date}/voice/${memoId}`, { transcription }),
+    addLocation: (date: string, name: string) =>
+      post<JournalEntry>(`/entries/${date}/locations`, { name }),
+    removeLocation: (date: string, name: string) =>
+      del(`/entries/${date}/locations/${encodeURIComponent(name)}`).then(
+        () => api.entries.get(date)
+      ),
   },
   config: {
     get: () => get<AppConfig>('/config'),
