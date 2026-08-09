@@ -72,6 +72,9 @@ export async function answerQuestion(
   entries: JournalEntry[],
   history: ChatMessage[] = []
 ): Promise<string> {
+  const weekday = (date: string) =>
+    new Date(`${date}T12:00:00`).toLocaleDateString('en-US', { weekday: 'long' });
+
   const context = entries
     .filter((e) => e.summary || e.title)
     .map((e) => {
@@ -79,7 +82,7 @@ export async function answerQuestion(
       const places = e.locations?.length
         ? ` [places: ${e.locations.map((l) => l.name).join(', ')}]`
         : '';
-      return `${e.date}${title}: ${e.summary ?? ''}${places}`.trim();
+      return `${weekday(e.date)} ${e.date}${title}: ${e.summary ?? ''}${places}`.trim();
     })
     .join('\n');
 
@@ -93,7 +96,7 @@ export async function answerQuestion(
       {
         role: 'system',
         content:
-          "You are the user's personal journal assistant. Answer questions about their life strictly using the dated journal summaries provided below. Cite the relevant dates in your answer (e.g. \"on 2026-08-09\"). If the answer isn't in the entries, say you don't have a record of it rather than guessing. Be warm, concise, and specific about people and places. Reply in the same language as the question.\n\nJournal entries:\n" +
+          "You are the user's personal journal assistant. Answer questions about their life strictly using the dated journal summaries provided below. Each entry is prefixed with its weekday and date. Cite the relevant day when answering (e.g. \"on Sunday, 2026-08-09\"). If the answer isn't in the entries, say you don't have a record of it rather than guessing. Be warm, concise, and specific about people and places. Reply in the same language as the question.\n\nJournal entries:\n" +
           context,
       },
       ...history.map((m) => ({ role: m.role, content: m.content })),
