@@ -373,7 +373,7 @@ function EntryContent({ entry }: { entry: JournalEntry }) {
       {items.map((item) => {
         if (item.kind === 'message') return <MessageBubble key={item.data.id} msg={item.data} />;
         if (item.kind === 'voice') return <VoiceBubble key={item.data.id} memo={item.data} date={entry.date} />;
-        if (item.kind === 'image') return <ImageBubble key={item.data.id} image={item.data} />;
+        if (item.kind === 'image') return <ImageBubble key={item.data.id} image={item.data} date={entry.date} />;
       })}
     </div>
   );
@@ -410,15 +410,11 @@ function OrganizedContent({ entry }: { entry: JournalEntry }) {
         <Section icon={ImageIcon} title="Images" count={entry.images.length}>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {entry.images.map((img) => (
-              <img
+              <AnnotatedImage
                 key={img.id}
-                src={
-                  img.url ??
-                  `${import.meta.env.VITE_API_URL ?? ''}/api/media/${img.messageId}/${img.mediaId}`
-                }
-                alt={img.caption ?? 'Journal image'}
-                loading="lazy"
-                className="w-full aspect-square object-cover rounded-xl bg-gray-100"
+                image={img}
+                date={entry.date}
+                className="aspect-square rounded-xl bg-gray-100"
               />
             ))}
           </div>
@@ -651,24 +647,121 @@ function TranscriptionDialog({
   );
 }
 
-function ImageBubble({ image }: { image: JournalImage }) {
+function ImageBubble({ image, date }: { image: JournalImage; date: string }) {
   const time = format(new Date(image.timestamp), 'HH:mm');
-  const src =
-    image.url ??
-    `${import.meta.env.VITE_API_URL ?? ''}/api/media/${image.messageId}/${image.mediaId}`;
   return (
     <div className="flex justify-end animate-slide-right">
       <div className="max-w-xs md:max-w-md rounded-2xl rounded-br-sm bg-gray-50 border border-gray-200 overflow-hidden hover:border-gray-300 transition-all duration-150 hover:shadow-sm">
-        <img
-          src={src}
-          alt={image.caption ?? 'Journal image'}
-          className="w-full transition-transform duration-300 hover:scale-[1.02]"
-        />
+        <AnnotatedImage image={image} date={date} />
         <div className="px-4 py-2">
           {image.caption && <p className="text-xs text-gray-600">{image.caption}</p>}
           <p className="text-xs text-gray-400 mt-0.5">{time}</p>
         </div>
       </div>
+    </div>
+  );
+}
+
+function AnnotatedImage({
+  image,
+  date,
+  className = '',
+}: {
+  image: JournalImage;
+  date: string;
+  className?: string;
+}) {
+  const src =
+    image.url ??
+    `${import.meta.env.VITE_API_URL ?? ''}/api/media/${image.messageId}/${image.mediaId}`;
+  const qc = useQueryClient();
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(image.annotation ?? '');
+  const { mutate, isPending } = useMutation({
+    mutationFn: () => api.entries.updateImageAnnotation(date, image.id, draft.trim()),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['entry', date] });
+      setEditing(false);
+    },
+  });
+
+  return (
+    <div className={`relative group/img overflow-hidden ${className}`}>
+      <img
+        src={src}
+        alt={image.annotation ?? image.caption ?? 'Journal image'}
+        loading="lazy"
+        className="w-full h-full object-cover transition-transform duration-300 group-hover/img:scale-[1.02]"
+      />
+      {image.annotation && (
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-3 pt-6 pb-2.5">
+          <p className="text-white text-xs sm:text-sm font-medium leading-snug drop-shadow">
+            {image.annotation}
+          </p>
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={() => {
+          setDraft(image.annotation ?? '');
+          setEditing(true);
+        }}
+        aria-label="Annotate image"
+        className="absolute top-2 right-2 p-1.5 rounded-full bg-black/45 text-white opacity-0 group-hover/img:opacity-100 hover:bg-black/70 transition-opacity"
+      >
+        <Pencil size={13} strokeWidth={2.5} />
+      </button>
+      {editing && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate-fade-up"
+          onClick={() => setEditing(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md rounded-2xl bg-white shadow-xl p-5"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-gray-900">Annotate image</h2>
+              <button
+                type="button"
+                onClick={() => setEditing(false)}
+                aria-label="Close"
+                className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                <X size={16} strokeWidth={2.5} />
+              </button>
+            </div>
+            <img src={src} alt="" className="w-full max-h-56 object-contain rounded-lg bg-gray-100 mb-3" />
+            <textarea
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              rows={3}
+              autoFocus
+              placeholder="Add a note for this photo…"
+              className="w-full text-sm text-gray-700 leading-relaxed rounded-lg border border-gray-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-y"
+            />
+            <div className="flex items-center justify-end gap-2 mt-4">
+              <button
+                type="button"
+                onClick={() => setEditing(false)}
+                className="px-3.5 py-1.5 rounded-lg text-gray-500 text-sm font-medium hover:bg-gray-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => mutate()}
+                disabled={isPending}
+                className="px-3.5 py-1.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
+              >
+                {isPending ? 'Saving…' : 'Save'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

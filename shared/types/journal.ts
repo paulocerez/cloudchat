@@ -43,6 +43,7 @@ export interface JournalImage {
   mediaId: string;
   url?: string;
   caption?: string;
+  annotation?: string; // user-added note shown over the image
   timestamp: string;
 }
 

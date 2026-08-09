@@ -104,6 +104,22 @@ export async function updateVoiceMemoTranscription(
   return (await ref.get()).data() as JournalEntry;
 }
 
+export async function updateImageAnnotation(
+  date: string,
+  imageId: string,
+  annotation: string
+): Promise<JournalEntry | null> {
+  const ref = db.collection('entries').doc(date);
+  const snap = await ref.get();
+  if (!snap.exists) return null;
+  const entry = snap.data() as JournalEntry;
+  const images = entry.images.map((img) =>
+    img.id === imageId ? { ...img, annotation } : img
+  );
+  await ref.update({ images, updatedAt: new Date().toISOString() });
+  return (await ref.get()).data() as JournalEntry;
+}
+
 export async function addImage(date: string, image: JournalImage): Promise<void> {
   const ref = db.collection('entries').doc(date);
   await ref.update({

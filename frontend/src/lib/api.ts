@@ -45,6 +45,8 @@ export const api = {
       put<JournalEntry>(`/entries/${date}/voice/${memoId}`, { transcription }),
     updateSummary: (date: string, body: { title?: string; summary?: string }) =>
       put<JournalEntry>(`/entries/${date}/summary`, body),
+    updateImageAnnotation: (date: string, imageId: string, annotation: string) =>
+      put<JournalEntry>(`/entries/${date}/image/${imageId}`, { annotation }),
     addLocation: (date: string, name: string) =>
       post<JournalEntry>(`/entries/${date}/locations`, { name }),
     removeLocation: (date: string, name: string) =>

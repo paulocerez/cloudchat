@@ -5,6 +5,7 @@ import {
   getEntriesInRange,
   setEntryHighlight,
   updateVoiceMemoTranscription,
+  updateImageAnnotation,
   updateEntryText,
   addEntryLocation,
   removeEntryLocation,
@@ -57,6 +58,24 @@ router.put('/:date/voice/:memoId', async (req: Request, res: Response) => {
     req.params.date,
     req.params.memoId,
     transcription
+  );
+  if (!entry) {
+    res.status(404).json({ error: 'Entry not found' });
+    return;
+  }
+  res.json(entry);
+});
+
+router.put('/:date/image/:imageId', async (req: Request, res: Response) => {
+  const { annotation } = req.body;
+  if (typeof annotation !== 'string') {
+    res.status(400).json({ error: 'annotation (string) required' });
+    return;
+  }
+  const entry = await updateImageAnnotation(
+    req.params.date,
+    req.params.imageId,
+    annotation
   );
   if (!entry) {
     res.status(404).json({ error: 'Entry not found' });
