@@ -1,10 +1,9 @@
-import { useState } from 'react';
 import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { MessageCircle, Mic, Image as ImageIcon, Music, Play, X, MapPin } from 'lucide-react';
+import { MessageCircle, Mic, Image as ImageIcon, Music, MapPin } from 'lucide-react';
 import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
-import { extractSpotifyLinks, spotifyEmbedUrl, stripSpotifyLinks, type SpotifyLink } from '~/lib/spotify';
+import { extractSpotifyLinks, stripSpotifyLinks } from '~/lib/spotify';
 import { SpotifyChip } from '~/components/SpotifyChip';
 import type { JournalEntry, TextMessage, VoiceMemo, JournalImage } from '@cloudchat/shared';
 import { rootRoute } from './__root';
@@ -38,7 +37,6 @@ function Timeline() {
 }
 
 function EntryCard({ entry }: { entry: JournalEntry }) {
-  const [expandedTrack, setPreview] = useState<SpotifyLink | null>(null);
   const messageCount = entry.messages.filter((m: TextMessage) => m.fromUser).length;
   const memoCount = entry.voiceMemos.length;
   const imageCount = entry.images.length;
@@ -46,7 +44,6 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
   const preview = entry.title || (firstMessage ? stripSpotifyLinks(firstMessage) : undefined);
   const hasTranscript = entry.voiceMemos.some((v: VoiceMemo) => v.transcription);
   const spotifyLinks = entry.messages.flatMap((m: TextMessage) => extractSpotifyLinks(m.content));
-  const firstTrack = spotifyLinks.find((l) => l.kind === 'track') ?? spotifyLinks[0];
 
   return (
     <div className={entry.highlight ? 'my-2 rounded-xl ring-2 ring-amber-300 ring-offset-2 ring-offset-white bg-amber-50/40' : undefined}>
@@ -132,38 +129,6 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
         </span>
       </div>
     </Link>
-      {firstTrack && (
-        <div className="pb-3 -mt-1">
-          {expandedTrack ? (
-            <div className="relative">
-              <iframe
-                src={spotifyEmbedUrl(expandedTrack)}
-                title="Spotify preview"
-                loading="lazy"
-                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                className="w-full h-20 rounded-xl border-0"
-              />
-              <button
-                type="button"
-                onClick={() => setPreview(null)}
-                aria-label="Close preview"
-                className="absolute -top-2 -right-2 w-6 h-6 flex items-center justify-center rounded-full bg-white border border-gray-200 text-gray-500 shadow-sm hover:text-gray-900 hover:border-gray-300 transition-colors"
-              >
-                <X size={13} strokeWidth={2.5} />
-              </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setPreview(firstTrack)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-green-50 text-green-700 text-xs font-medium hover:bg-green-100 transition-colors"
-            >
-              <Play size={12} strokeWidth={2.5} className="fill-current" />
-              Play preview
-            </button>
-          )}
-        </div>
-      )}
     </div>
   );
 }

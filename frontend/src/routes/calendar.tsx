@@ -86,7 +86,7 @@ function CalendarPage() {
           const highlighted = Boolean(entry?.highlight);
 
           const base =
-            'relative aspect-square rounded-lg flex flex-col items-center justify-center text-sm transition-all duration-150';
+            'relative h-10 rounded-lg flex items-center justify-center text-sm transition-all duration-150';
           const tone = !inMonth
             ? 'text-gray-300'
             : highlighted
