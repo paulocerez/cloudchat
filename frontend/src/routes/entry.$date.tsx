@@ -2,6 +2,7 @@ import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
+import { extractSpotifyLinks, spotifyEmbedUrl, stripSpotifyLinks } from '~/lib/spotify';
 import type { JournalEntry, TextMessage, VoiceMemo, JournalImage } from '@cloudchat/shared';
 import { format } from 'date-fns';
 import { rootRoute } from './__root';
@@ -94,6 +95,8 @@ function EntryContent({ entry }: { entry: JournalEntry }) {
 
 function MessageBubble({ msg }: { msg: TextMessage }) {
   const time = format(new Date(msg.timestamp), 'HH:mm');
+  const spotifyLinks = extractSpotifyLinks(msg.content);
+  const text = spotifyLinks.length > 0 ? stripSpotifyLinks(msg.content) : msg.content;
   return (
     <div
       className={`flex ${msg.fromUser ? 'justify-end animate-slide-right' : 'justify-start animate-slide-left'}`}
@@ -105,7 +108,17 @@ function MessageBubble({ msg }: { msg: TextMessage }) {
             : 'bg-gray-100 text-gray-700 rounded-bl-sm'
         }`}
       >
-        <p className="text-sm leading-relaxed">{msg.content}</p>
+        {text && <p className="text-sm leading-relaxed">{text}</p>}
+        {spotifyLinks.map((link) => (
+          <iframe
+            key={`${link.kind}:${link.id}`}
+            src={spotifyEmbedUrl(link)}
+            title="Spotify player"
+            loading="lazy"
+            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+            className={`w-full rounded-xl border-0 ${text ? 'mt-2' : ''} ${link.kind === 'track' || link.kind === 'episode' ? 'h-[152px]' : 'h-[352px]'}`}
+          />
+        ))}
         <p className="text-xs mt-1 text-gray-400">{time}</p>
       </div>
     </div>
