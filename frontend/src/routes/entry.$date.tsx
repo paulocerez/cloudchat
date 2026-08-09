@@ -63,9 +63,9 @@ function EntryPage() {
           {entry.title}
         </p>
       )}
-      <div className="flex items-center justify-between gap-3 mb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 mb-3">
         <h1 className="text-lg font-semibold text-gray-900">{formatEntryDate(entry.date)}</h1>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <EditSummaryButton entry={entry} />
           <GenerateSummaryButton date={entry.date} hasSummary={Boolean(entry.summary)} />
           <HighlightToggle date={entry.date} highlight={Boolean(entry.highlight)} />

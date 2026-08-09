@@ -94,8 +94,8 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
       </div>
 
       <div className="flex flex-col items-end justify-between self-stretch shrink-0 text-xs gap-2">
-        <div className="flex items-center gap-3">
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex flex-wrap items-center justify-end gap-1 sm:gap-1.5 max-w-[8.5rem] sm:max-w-none">
           {messageCount > 0 && (
             <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-blue-50 text-blue-600 font-medium">
               <MessageCircle size={13} strokeWidth={2.5} />
@@ -141,11 +141,11 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
                   src={mapUrl}
                   alt="Map preview"
                   loading="lazy"
-                  className="w-40 h-[90px] object-cover rounded-lg border border-gray-200 bg-gray-100"
+                  className="w-24 h-14 sm:w-40 sm:h-[90px] object-cover rounded-lg border border-gray-200 bg-gray-100"
                 />
               ) : null;
             })()}
-            <span className="flex items-center gap-1 text-rose-500 font-medium text-right max-w-[10rem] truncate">
+            <span className="flex items-center gap-1 text-rose-500 font-medium text-right max-w-[6rem] sm:max-w-[10rem] truncate">
               <MapPin size={12} strokeWidth={2.5} className="shrink-0" />
               <span className="truncate">
                 {entry.locations.map((l) => l.name).join(', ')}
