@@ -5,6 +5,7 @@ import {
   getEntriesInRange,
   setEntryHighlight,
   updateVoiceMemoTranscription,
+  updateEntryText,
   addEntryLocation,
   removeEntryLocation,
 } from '../services/firestore';
@@ -61,6 +62,21 @@ router.put('/:date/voice/:memoId', async (req: Request, res: Response) => {
     res.status(404).json({ error: 'Entry not found' });
     return;
   }
+  res.json(entry);
+});
+
+// Manually edit the day's title and/or summary.
+router.put('/:date/summary', async (req: Request, res: Response) => {
+  const { title, summary } = req.body;
+  if (title !== undefined && typeof title !== 'string') {
+    res.status(400).json({ error: 'title must be a string' });
+    return;
+  }
+  if (summary !== undefined && typeof summary !== 'string') {
+    res.status(400).json({ error: 'summary must be a string' });
+    return;
+  }
+  const entry = await updateEntryText(req.params.date, { title, summary });
   res.json(entry);
 });
 

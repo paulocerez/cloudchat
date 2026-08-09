@@ -43,6 +43,8 @@ export const api = {
       put<JournalEntry>(`/entries/${date}/highlight`, { highlight }),
     updateTranscription: (date: string, memoId: string, transcription: string) =>
       put<JournalEntry>(`/entries/${date}/voice/${memoId}`, { transcription }),
+    updateSummary: (date: string, body: { title?: string; summary?: string }) =>
+      put<JournalEntry>(`/entries/${date}/summary`, body),
     addLocation: (date: string, name: string) =>
       post<JournalEntry>(`/entries/${date}/locations`, { name }),
     removeLocation: (date: string, name: string) =>

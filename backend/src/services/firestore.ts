@@ -152,6 +152,20 @@ export async function updateEntrySummary(
   return (await ref.get()).data() as JournalEntry;
 }
 
+// Manually edit the day's title and/or summary text.
+export async function updateEntryText(
+  date: string,
+  data: { title?: string; summary?: string }
+): Promise<JournalEntry> {
+  await getOrCreateEntry(date);
+  const ref = db.collection('entries').doc(date);
+  const patch: Record<string, unknown> = { updatedAt: new Date().toISOString() };
+  if (data.title !== undefined) patch.title = data.title;
+  if (data.summary !== undefined) patch.summary = data.summary;
+  await ref.update(patch);
+  return (await ref.get()).data() as JournalEntry;
+}
+
 // Append a manually-entered location, de-duplicating by name.
 export async function addEntryLocation(
   date: string,

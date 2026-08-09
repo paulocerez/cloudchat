@@ -66,6 +66,7 @@ function EntryPage() {
       <div className="flex items-center justify-between gap-3 mb-3">
         <h1 className="text-lg font-semibold text-gray-900">{formatEntryDate(entry.date)}</h1>
         <div className="flex items-center gap-2">
+          <EditSummaryButton entry={entry} />
           <GenerateSummaryButton date={entry.date} hasSummary={Boolean(entry.summary)} />
           <HighlightToggle date={entry.date} highlight={Boolean(entry.highlight)} />
         </div>
@@ -104,6 +105,96 @@ function ViewToggle({ view, onChange }: { view: ViewMode; onChange: (v: ViewMode
         </button>
       ))}
     </div>
+  );
+}
+
+function EditSummaryButton({ entry }: { entry: JournalEntry }) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState(entry.title ?? '');
+  const [summary, setSummary] = useState(entry.summary ?? '');
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: () =>
+      api.entries.updateSummary(entry.date, { title: title.trim(), summary: summary.trim() }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['entry', entry.date] });
+      qc.invalidateQueries({ queryKey: ['entries'] });
+      setOpen(false);
+    },
+  });
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => {
+          setTitle(entry.title ?? '');
+          setSummary(entry.summary ?? '');
+          setOpen(true);
+        }}
+        className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+      >
+        <Pencil size={13} strokeWidth={2.5} />
+        Edit
+      </button>
+      {open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate-fade-up"
+          onClick={() => setOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-lg rounded-2xl bg-white shadow-xl p-5"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-gray-900">Edit day summary</h2>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label="Close"
+                className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                <X size={16} strokeWidth={2.5} />
+              </button>
+            </div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Title</label>
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Short headline"
+              className="w-full text-sm text-gray-700 rounded-lg border border-gray-300 px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+            />
+            <label className="block text-xs font-medium text-gray-500 mb-1">Summary</label>
+            <textarea
+              value={summary}
+              onChange={(e) => setSummary(e.target.value)}
+              rows={8}
+              className="w-full text-sm text-gray-700 leading-relaxed rounded-lg border border-gray-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-y"
+            />
+            <div className="flex items-center justify-end gap-2 mt-4">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="px-3.5 py-1.5 rounded-lg text-gray-500 text-sm font-medium hover:bg-gray-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => mutate()}
+                disabled={isPending}
+                className="px-3.5 py-1.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
+              >
+                {isPending ? 'Saving…' : 'Save'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
