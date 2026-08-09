@@ -31,3 +31,15 @@ export function spotifyEmbedUrl(link: SpotifyLink): string {
 export function stripSpotifyLinks(content: string): string {
   return content.replace(SPOTIFY_RE, '').replace(/\s{2,}/g, ' ').trim();
 }
+
+/** Fetch a human-readable title via Spotify's public oEmbed endpoint. */
+export async function fetchSpotifyTitle(link: SpotifyLink): Promise<string | null> {
+  try {
+    const res = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(link.url)}`);
+    if (!res.ok) return null;
+    const data = (await res.json()) as { title?: string };
+    return data.title?.trim() || null;
+  } catch {
+    return null;
+  }
+}

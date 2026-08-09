@@ -4,7 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { MessageCircle, Mic, Image as ImageIcon, Music, Play, X, MapPin } from 'lucide-react';
 import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
-import { extractSpotifyLinks, spotifyEmbedUrl, type SpotifyLink } from '~/lib/spotify';
+import { extractSpotifyLinks, spotifyEmbedUrl, stripSpotifyLinks, type SpotifyLink } from '~/lib/spotify';
+import { SpotifyChip } from '~/components/SpotifyChip';
 import type { JournalEntry, TextMessage, VoiceMemo, JournalImage } from '@cloudchat/shared';
 import { rootRoute } from './__root';
 
@@ -41,8 +42,8 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
   const messageCount = entry.messages.filter((m: TextMessage) => m.fromUser).length;
   const memoCount = entry.voiceMemos.length;
   const imageCount = entry.images.length;
-  const preview =
-    entry.title || entry.messages.find((m: TextMessage) => m.fromUser)?.content;
+  const firstMessage = entry.messages.find((m: TextMessage) => m.fromUser)?.content;
+  const preview = entry.title || (firstMessage ? stripSpotifyLinks(firstMessage) : undefined);
   const hasTranscript = entry.voiceMemos.some((v: VoiceMemo) => v.transcription);
   const spotifyLinks = entry.messages.flatMap((m: TextMessage) => extractSpotifyLinks(m.content));
   const firstTrack = spotifyLinks.find((l) => l.kind === 'track') ?? spotifyLinks[0];
@@ -67,8 +68,15 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
           <p className="text-gray-500 text-sm italic line-clamp-2 leading-relaxed">
             {entry.voiceMemos.find((v: VoiceMemo) => v.transcription)?.transcription}
           </p>
-        ) : (
+        ) : spotifyLinks.length === 0 ? (
           <p className="text-gray-400 text-sm italic">No content yet</p>
+        ) : null}
+        {spotifyLinks.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 mt-2">
+            {spotifyLinks.map((link) => (
+              <SpotifyChip key={`${link.kind}:${link.id}`} link={link} />
+            ))}
+          </div>
         )}
         {entry.images.length > 0 && (
           <div className="flex flex-wrap items-center gap-1.5 mt-2">
