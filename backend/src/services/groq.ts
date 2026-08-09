@@ -60,6 +60,52 @@ export async function generateDaySummary(entry: JournalEntry): Promise<DaySummar
   }
 }
 
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+// Answer a natural-language question grounded in the user's past journal.
+// Entries are compacted to date + title + summary so a long history still fits.
+export async function answerQuestion(
+  question: string,
+  entries: JournalEntry[],
+  history: ChatMessage[] = []
+): Promise<string> {
+  const context = entries
+    .filter((e) => e.summary || e.title)
+    .map((e) => {
+      const title = e.title ? ` — ${e.title}` : '';
+      const places = e.locations?.length
+        ? ` [places: ${e.locations.map((l) => l.name).join(', ')}]`
+        : '';
+      return `${e.date}${title}: ${e.summary ?? ''}${places}`.trim();
+    })
+    .join('\n');
+
+  if (!context) {
+    return "There aren't any journal entries with summaries yet, so I don't have anything to look back on.";
+  }
+
+  const completion = await client.chat.completions.create({
+    model: 'llama-3.3-70b-versatile',
+    messages: [
+      {
+        role: 'system',
+        content:
+          "You are the user's personal journal assistant. Answer questions about their life strictly using the dated journal summaries provided below. Cite the relevant dates in your answer (e.g. \"on 2026-08-09\"). If the answer isn't in the entries, say you don't have a record of it rather than guessing. Be warm, concise, and specific about people and places. Reply in the same language as the question.\n\nJournal entries:\n" +
+          context,
+      },
+      ...history.map((m) => ({ role: m.role, content: m.content })),
+      { role: 'user', content: question },
+    ],
+    temperature: 0.4,
+    max_tokens: 600,
+  });
+
+  return completion.choices[0]?.message?.content?.trim() ?? 'Sorry, I could not come up with an answer.';
+}
+
 export async function generateSummary(
   entries: JournalEntry[],
   period: 'week' | 'month'

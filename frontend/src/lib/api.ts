@@ -52,6 +52,10 @@ export const api = {
         () => api.entries.get(date)
       ),
   },
+  chat: {
+    ask: (question: string, history: { role: 'user' | 'assistant'; content: string }[]) =>
+      post<{ answer: string }>('/chat', { question, history }),
+  },
   config: {
     get: () => get<AppConfig>('/config'),
     update: (body: Partial<Omit<AppConfig, '_sources'>>) => put<{ ok: boolean }>('/config', body),
