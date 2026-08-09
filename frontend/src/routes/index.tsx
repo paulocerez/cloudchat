@@ -92,7 +92,8 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
         )}
       </div>
 
-      <div className="flex items-center gap-3 shrink-0 text-xs mt-1">
+      <div className="flex flex-col items-end justify-between self-stretch shrink-0 text-xs gap-2">
+        <div className="flex items-center gap-3">
         <div className="flex items-center gap-1.5">
           {messageCount > 0 && (
             <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-blue-50 text-blue-600 font-medium">
@@ -129,6 +130,15 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
         <span className="inline-block transition-transform duration-200 group-hover:translate-x-1 text-gray-300 group-hover:text-gray-600">
           →
         </span>
+        </div>
+        {entry.locations && entry.locations.length > 0 && (
+          <span className="flex items-center gap-1 text-rose-500 font-medium text-right max-w-[10rem] truncate">
+            <MapPin size={12} strokeWidth={2.5} className="shrink-0" />
+            <span className="truncate">
+              {entry.locations.map((l) => l.name).join(', ')}
+            </span>
+          </span>
+        )}
       </div>
     </Link>
     </div>
