@@ -4,6 +4,7 @@ import { MessageCircle, Mic, Image as ImageIcon, Music, MapPin } from 'lucide-re
 import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
 import { extractSpotifyLinks, stripSpotifyLinks } from '~/lib/spotify';
+import { staticMapUrl } from '~/lib/mapbox';
 import { SpotifyChip } from '~/components/SpotifyChip';
 import type { JournalEntry, TextMessage, VoiceMemo, JournalImage } from '@cloudchat/shared';
 import { rootRoute } from './__root';
@@ -132,12 +133,25 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
         </span>
         </div>
         {entry.locations && entry.locations.length > 0 && (
-          <span className="flex items-center gap-1 text-rose-500 font-medium text-right max-w-[10rem] truncate">
-            <MapPin size={12} strokeWidth={2.5} className="shrink-0" />
-            <span className="truncate">
-              {entry.locations.map((l) => l.name).join(', ')}
+          <div className="flex flex-col items-end gap-1.5">
+            {(() => {
+              const mapUrl = staticMapUrl(entry.locations!, 160, 90);
+              return mapUrl ? (
+                <img
+                  src={mapUrl}
+                  alt="Map preview"
+                  loading="lazy"
+                  className="w-40 h-[90px] object-cover rounded-lg border border-gray-200 bg-gray-100"
+                />
+              ) : null;
+            })()}
+            <span className="flex items-center gap-1 text-rose-500 font-medium text-right max-w-[10rem] truncate">
+              <MapPin size={12} strokeWidth={2.5} className="shrink-0" />
+              <span className="truncate">
+                {entry.locations.map((l) => l.name).join(', ')}
+              </span>
             </span>
-          </span>
+          </div>
         )}
       </div>
     </Link>
