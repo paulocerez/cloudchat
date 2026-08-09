@@ -1,18 +1,25 @@
-const SESSION_KEY = 'journal_authed';
+const SESSION_KEY = 'journal_authed_until';
 const MASTER_PASSWORD = import.meta.env.VITE_MASTER_PASSWORD ?? 'journal';
+const SESSION_TTL_MS = 60 * 24 * 60 * 60 * 1000; // 60 days
 
 export function isAuthenticated(): boolean {
-  return sessionStorage.getItem(SESSION_KEY) === 'true';
+  const until = Number(localStorage.getItem(SESSION_KEY));
+  if (!until || Number.isNaN(until)) return false;
+  if (Date.now() > until) {
+    localStorage.removeItem(SESSION_KEY);
+    return false;
+  }
+  return true;
 }
 
 export function login(password: string): boolean {
   if (password === MASTER_PASSWORD) {
-    sessionStorage.setItem(SESSION_KEY, 'true');
+    localStorage.setItem(SESSION_KEY, String(Date.now() + SESSION_TTL_MS));
     return true;
   }
   return false;
 }
 
 export function logout(): void {
-  sessionStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem(SESSION_KEY);
 }
