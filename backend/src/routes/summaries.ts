@@ -8,6 +8,7 @@ import {
   updateEntrySummary,
 } from '../services/firestore';
 import { generateSummary, generateDaySummary } from '../services/groq';
+import { geocodePlaces } from '../services/mapbox';
 import { AISummary } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -39,14 +40,15 @@ router.get('/daily', async (req: Request, res: Response) => {
     return;
   }
 
-  const summary = await generateDaySummary(entry);
-  if (!summary) {
+  const { title, summary, locations } = await generateDaySummary(entry);
+  if (!summary && !title) {
     res.json({ ok: true, date, summary: null, note: 'No content to summarize' });
     return;
   }
 
-  await updateEntrySummary(date, summary);
-  res.json({ ok: true, date, summary });
+  const geocoded = locations.length > 0 ? await geocodePlaces(locations) : [];
+  await updateEntrySummary(date, { title, summary, locations: geocoded });
+  res.json({ ok: true, date, title, summary, locations: geocoded });
 });
 
 router.get('/', async (_req: Request, res: Response) => {

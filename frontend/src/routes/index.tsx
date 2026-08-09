@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { MessageCircle, Mic, Image as ImageIcon, Music, Play, X } from 'lucide-react';
+import { MessageCircle, Mic, Image as ImageIcon, Music, Play, X, MapPin } from 'lucide-react';
 import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
 import { extractSpotifyLinks, spotifyEmbedUrl, type SpotifyLink } from '~/lib/spotify';
@@ -41,7 +41,8 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
   const messageCount = entry.messages.filter((m: TextMessage) => m.fromUser).length;
   const memoCount = entry.voiceMemos.length;
   const imageCount = entry.images.length;
-  const preview = entry.messages.find((m: TextMessage) => m.fromUser)?.content;
+  const preview =
+    entry.title || entry.messages.find((m: TextMessage) => m.fromUser)?.content;
   const hasTranscript = entry.voiceMemos.some((v: VoiceMemo) => v.transcription);
   const spotifyLinks = entry.messages.flatMap((m: TextMessage) => extractSpotifyLinks(m.content));
   const firstTrack = spotifyLinks.find((l) => l.kind === 'track') ?? spotifyLinks[0];
@@ -108,6 +109,12 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
             <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-green-50 text-green-600 font-medium">
               <Music size={13} strokeWidth={2.5} />
               {spotifyLinks.length}
+            </span>
+          )}
+          {entry.locations && entry.locations.length > 0 && (
+            <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-rose-50 text-rose-600 font-medium">
+              <MapPin size={13} strokeWidth={2.5} />
+              {entry.locations.length}
             </span>
           )}
         </div>

@@ -1,6 +1,6 @@
 import admin from 'firebase-admin';
 import { v4 as uuidv4 } from 'uuid';
-import { JournalEntry, AISummary, TextMessage, VoiceMemo, JournalImage } from '../types';
+import { JournalEntry, AISummary, TextMessage, VoiceMemo, JournalImage, EntryLocation } from '../types';
 
 let db: admin.firestore.Firestore;
 
@@ -134,10 +134,15 @@ export async function isSentMessageId(id: string): Promise<boolean> {
   return ids.includes(id);
 }
 
-export async function updateEntrySummary(date: string, summary: string): Promise<void> {
+export async function updateEntrySummary(
+  date: string,
+  data: { title: string; summary: string; locations: EntryLocation[] }
+): Promise<void> {
   const ref = db.collection('entries').doc(date);
   await ref.update({
-    summary,
+    title: data.title,
+    summary: data.summary,
+    locations: data.locations,
     summaryGeneratedAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   });

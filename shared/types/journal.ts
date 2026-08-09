@@ -1,10 +1,18 @@
+export interface EntryLocation {
+  name: string;
+  longitude: number;
+  latitude: number;
+}
+
 export interface JournalEntry {
   id: string;
   date: string; // YYYY-MM-DD
   messages: TextMessage[];
   voiceMemos: VoiceMemo[];
   images: JournalImage[];
-  summary?: string;
+  title?: string; // few-word headline for the day
+  summary?: string; // one-sentence reflection
+  locations?: EntryLocation[]; // geocoded places mentioned that day
   summaryGeneratedAt?: string;
   createdAt: string;
   updatedAt: string;

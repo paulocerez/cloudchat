@@ -7,7 +7,13 @@ export function initGroq() {
   client = new Groq({ apiKey: process.env.GROQ_API_KEY });
 }
 
-export async function generateDaySummary(entry: JournalEntry): Promise<string> {
+export interface DaySummary {
+  title: string; // a few words
+  summary: string; // one sentence
+  locations: string[]; // place names mentioned (cities, venues, countries)
+}
+
+export async function generateDaySummary(entry: JournalEntry): Promise<DaySummary> {
   const texts = entry.messages
     .filter((m) => m.fromUser)
     .map((m) => m.content)
@@ -18,7 +24,7 @@ export async function generateDaySummary(entry: JournalEntry): Promise<string> {
     .join('\n');
   const content = `${texts}\n${transcripts}`.trim();
 
-  if (!content) return '';
+  if (!content) return { title: '', summary: '', locations: [] };
 
   const completion = await client.chat.completions.create({
     model: 'llama-3.3-70b-versatile',
@@ -26,7 +32,7 @@ export async function generateDaySummary(entry: JournalEntry): Promise<string> {
       {
         role: 'system',
         content:
-          "You are a personal journaling assistant. Summarize the user's journal for a single day in 2-3 warm, reflective sentences. Capture the mood, key events, and any notable feelings. Write in the same language the user wrote in. Do not add a title or preamble — just the reflection.",
+          'You are a personal journaling assistant. Summarize the user\'s journal for a single day. Respond with a JSON object with three keys: "title" — a short headline of 2 to 5 words capturing the essence of the day; "summary" — a single warm, reflective sentence capturing the mood and key events; and "locations" — an array of real-world place names explicitly mentioned (cities, neighborhoods, venues, landmarks, countries), each as a geocodable string like "Berlin" or "Golden Gate Bridge, San Francisco". Use an empty array if no places are mentioned. Write title and summary in the same language the user wrote in. Return only the JSON object, no preamble.',
       },
       {
         role: 'user',
@@ -35,9 +41,23 @@ export async function generateDaySummary(entry: JournalEntry): Promise<string> {
     ],
     temperature: 0.7,
     max_tokens: 300,
+    response_format: { type: 'json_object' },
   });
 
-  return completion.choices[0]?.message?.content?.trim() ?? '';
+  const raw = completion.choices[0]?.message?.content?.trim() ?? '{}';
+  try {
+    const parsed = JSON.parse(raw) as Partial<DaySummary>;
+    const locations = Array.isArray(parsed.locations)
+      ? parsed.locations.map((l) => String(l).trim()).filter(Boolean)
+      : [];
+    return {
+      title: (parsed.title ?? '').trim(),
+      summary: (parsed.summary ?? '').trim(),
+      locations,
+    };
+  } catch {
+    return { title: '', summary: raw, locations: [] };
+  }
 }
 
 export async function generateSummary(

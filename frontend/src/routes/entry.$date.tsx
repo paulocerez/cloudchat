@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
 import { extractSpotifyLinks, spotifyEmbedUrl, stripSpotifyLinks } from '~/lib/spotify';
+import { staticMapUrl } from '~/lib/mapbox';
+import { MapPin } from 'lucide-react';
 import type { JournalEntry, TextMessage, VoiceMemo, JournalImage } from '@cloudchat/shared';
 import { format } from 'date-fns';
 import { rootRoute } from './__root';
@@ -46,22 +48,39 @@ function EntryPage() {
       >
         ← Timeline
       </Link>
-      <h1 className="text-lg font-semibold text-gray-900 mb-6">
+      {entry.title && (
+        <p className="text-xs font-medium tracking-wide uppercase text-gray-400 mb-1">
+          {entry.title}
+        </p>
+      )}
+      <h1 className="text-lg font-semibold text-gray-900 mb-3">
         {formatEntryDate(entry.date)}
       </h1>
+      {entry.summary && (
+        <p className="text-sm text-gray-600 leading-relaxed mb-4">{entry.summary}</p>
+      )}
+      {entry.locations && entry.locations.length > 0 && <GeoCard locations={entry.locations} />}
       <EntryContent entry={entry} />
-      {entry.summary && <DaySummary summary={entry.summary} />}
     </div>
   );
 }
 
-function DaySummary({ summary }: { summary: string }) {
+function GeoCard({ locations }: { locations: NonNullable<JournalEntry['locations']> }) {
+  const mapUrl = staticMapUrl(locations);
   return (
-    <div className="mt-8 pt-6 border-t border-gray-100 animate-fade-up">
-      <p className="text-xs font-medium tracking-wide uppercase text-gray-400 mb-2">
-        Daily reflection
-      </p>
-      <p className="text-sm text-gray-600 leading-relaxed">{summary}</p>
+    <div className="mb-6 rounded-2xl border border-gray-200 overflow-hidden animate-fade-up">
+      {mapUrl && <img src={mapUrl} alt="Map of places mentioned" className="w-full block" />}
+      <div className="flex flex-wrap gap-1.5 px-3 py-2.5">
+        {locations.map((loc) => (
+          <span
+            key={loc.name}
+            className="flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-medium"
+          >
+            <MapPin size={12} strokeWidth={2.5} />
+            {loc.name}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
