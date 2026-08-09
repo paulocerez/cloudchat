@@ -46,11 +46,13 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
   const spotifyLinks = entry.messages.flatMap((m: TextMessage) => extractSpotifyLinks(m.content));
 
   return (
-    <div className={entry.highlight ? 'my-2 rounded-xl ring-2 ring-amber-300 ring-offset-2 ring-offset-white bg-amber-50/40' : undefined}>
+    <div className={entry.highlight ? 'my-2 p-1 rounded-xl ring-2 ring-amber-300 bg-amber-50/40' : undefined}>
     <Link
       to="/entry/$date"
       params={{ date: entry.date }}
-      className="flex items-start justify-between gap-3 sm:gap-4 py-4 -mx-3 px-3 rounded-lg transition-all duration-200 hover:bg-gray-50 group cursor-pointer"
+      className={`flex items-start justify-between gap-3 sm:gap-4 py-4 px-3 rounded-lg transition-all duration-200 group cursor-pointer ${
+        entry.highlight ? 'hover:bg-amber-100/60' : '-mx-3 hover:bg-gray-50'
+      }`}
     >
       {/* Left accent bar */}
       <span className="mt-1 w-0.5 h-12 rounded-full bg-gray-200 shrink-0 transition-colors duration-200 group-hover:bg-gray-400" />
