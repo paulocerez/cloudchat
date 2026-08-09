@@ -7,7 +7,7 @@ export interface SpotifyLink {
 }
 
 const SPOTIFY_RE =
-  /https?:\/\/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?(track|album|playlist|episode|show|artist)\/([a-zA-Z0-9]+)/gi;
+  /https?:\/\/open\.spotify\.com\/(?:intl-[a-z]{2}\/)?(track|album|playlist|episode|show|artist)\/([a-zA-Z0-9]+)(?:\?\S*)?/gi;
 
 export function extractSpotifyLinks(content: string): SpotifyLink[] {
   const links: SpotifyLink[] = [];
