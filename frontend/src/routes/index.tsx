@@ -1,6 +1,7 @@
 import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { MessageCircle, Mic, Image as ImageIcon, Music, MapPin } from 'lucide-react';
+import { MessageCircle, Mic, Image as ImageIcon, Music, MapPin, Flame } from 'lucide-react';
+import { subDays, format as formatDate } from 'date-fns';
 import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
 import { extractSpotifyLinks, stripSpotifyLinks } from '~/lib/spotify';
@@ -27,13 +28,40 @@ function Timeline() {
 
   return (
     <div className="animate-fade-up">
-      <h1 className="text-lg font-semibold text-gray-900 mb-6">Timeline</h1>
+      <div className="flex items-center justify-between gap-3 mb-6">
+        <h1 className="text-lg font-semibold text-gray-900">Timeline</h1>
+        <StreakBadge entries={entries} />
+      </div>
       <div className="divide-y divide-gray-100 stagger">
         {entries.map((entry) => (
           <EntryCard key={entry.id} entry={entry} />
         ))}
       </div>
     </div>
+  );
+}
+
+function StreakBadge({ entries }: { entries: JournalEntry[] }) {
+  const hasContent = (e: JournalEntry) =>
+    e.messages.length > 0 || e.voiceMemos.length > 0 || e.images.length > 0;
+  const days = new Set(entries.filter(hasContent).map((e) => e.date));
+
+  let streak = 0;
+  let cursor = new Date();
+  // If today has no entry yet, don't break the streak — start counting from yesterday.
+  if (!days.has(formatDate(cursor, 'yyyy-MM-dd'))) cursor = subDays(cursor, 1);
+  while (days.has(formatDate(cursor, 'yyyy-MM-dd'))) {
+    streak += 1;
+    cursor = subDays(cursor, 1);
+  }
+
+  if (streak === 0) return null;
+
+  return (
+    <span className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-orange-50 text-orange-600 text-sm font-semibold">
+      <Flame size={15} strokeWidth={2.5} className="fill-orange-400 text-orange-500" />
+      {streak} day{streak === 1 ? '' : 's'}
+    </span>
   );
 }
 
