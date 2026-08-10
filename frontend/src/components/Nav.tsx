@@ -22,14 +22,14 @@ export default function Nav() {
 
   return (
     <header className="sticky top-0 z-10">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 md:px-8 flex items-center justify-between h-14">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 md:px-8 grid grid-cols-3 items-center h-14">
         {/* Logo */}
-        <Link to="/" className="transition-opacity hover:opacity-70 shrink-0">
+        <Link to="/" className="justify-self-start transition-opacity hover:opacity-70 shrink-0">
           <Logo size="md" />
         </Link>
 
         {/* Tab nav */}
-        <nav className="flex items-center gap-1">
+        <nav className="justify-self-center flex items-center gap-1">
           {TABS.map(({ to, label, Icon }) => {
             const active = to === '/' ? pathname === '/' : pathname.startsWith(to);
             return (
@@ -50,7 +50,7 @@ export default function Nav() {
         </nav>
 
         {/* Actions */}
-        <div className="flex items-center gap-2.5">
+        <div className="justify-self-end flex items-center gap-2.5">
           <Link
             to="/settings"
             title="Settings"

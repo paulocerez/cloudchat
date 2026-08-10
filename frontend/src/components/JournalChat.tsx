@@ -35,7 +35,7 @@ export default function JournalChat() {
   };
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center pointer-events-none">
+    <div className="fixed bottom-10 sm:bottom-12 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center pointer-events-none">
       {open && (
         <div className="pointer-events-auto mb-3 w-[calc(100vw-2rem)] max-w-2xl rounded-xl bg-white shadow-2xl border border-gray-200 flex flex-col overflow-hidden animate-fade-up">
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
