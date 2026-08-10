@@ -58,7 +58,7 @@ function StreakBadge({ entries }: { entries: JournalEntry[] }) {
   if (streak === 0) return null;
 
   return (
-    <span className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-orange-50 text-orange-600 text-sm font-semibold">
+    <span className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm bg-orange-50 text-orange-600 text-sm font-semibold">
       <Flame size={15} strokeWidth={2.5} className="fill-orange-400 text-orange-500" />
       {streak} day{streak === 1 ? '' : 's'}
     </span>
