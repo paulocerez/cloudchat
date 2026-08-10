@@ -81,7 +81,14 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
       : null;
 
   return (
-    <div className={entry.highlight ? 'my-2 p-1 rounded-xl ring-2 ring-amber-300 bg-amber-50/40' : undefined}>
+    <div className={`relative ${entry.highlight ? 'my-2 p-1 rounded-xl ring-2 ring-amber-300 bg-amber-50/40' : ''}`}>
+    {spotifyLinks.length > 0 && (
+      <div className="pointer-events-none absolute -top-1 right-8 flex items-end gap-1">
+        <Music className="music-note" size={11} strokeWidth={2.5} />
+        <Music className="music-note" size={13} strokeWidth={2.5} />
+        <Music className="music-note" size={10} strokeWidth={2.5} />
+      </div>
+    )}
     <Link
       to="/entry/$date"
       params={{ date: entry.date }}
