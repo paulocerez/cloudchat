@@ -33,7 +33,7 @@ function Timeline() {
         <StreakBadge entries={entries} />
       </div>
       <p className="text-sm text-gray-400 mb-6">Hey Paulo, what's on your mind? Here's your timeline</p>
-      <div className="divide-y divide-gray-100 stagger">
+      <div className="stagger">
         {entries.map((entry) => (
           <EntryCard key={entry.id} entry={entry} />
         ))}
