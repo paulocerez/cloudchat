@@ -81,14 +81,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
       : null;
 
   return (
-    <div className={`relative ${entry.highlight ? 'my-2 p-1 rounded-xl ring-2 ring-amber-300 bg-amber-50/40' : ''}`}>
-    {spotifyLinks.length > 0 && (
-      <div className="pointer-events-none absolute -top-1 right-8 flex items-end gap-1">
-        <Music className="music-note" size={11} strokeWidth={2.5} />
-        <Music className="music-note" size={13} strokeWidth={2.5} />
-        <Music className="music-note" size={10} strokeWidth={2.5} />
-      </div>
-    )}
+    <div className={entry.highlight ? 'my-2 p-1 rounded-xl ring-2 ring-amber-300 bg-amber-50/40' : undefined}>
     <Link
       to="/entry/$date"
       params={{ date: entry.date }}
@@ -118,7 +111,12 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
 
         {/* Songs */}
         {spotifyLinks.length > 0 && (
-          <div className="order-4 sm:order-none flex flex-wrap items-center gap-1.5">
+          <div className="order-4 sm:order-none relative flex flex-wrap items-center gap-1.5">
+            <div className="pointer-events-none absolute -top-3 left-3 z-10 flex items-end gap-1">
+              <Music className="music-note" size={11} strokeWidth={2.5} />
+              <Music className="music-note" size={13} strokeWidth={2.5} />
+              <Music className="music-note" size={10} strokeWidth={2.5} />
+            </div>
             {spotifyLinks.map((link) => (
               <SpotifyChip key={`${link.kind}:${link.id}`} link={link} />
             ))}
