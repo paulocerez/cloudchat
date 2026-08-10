@@ -79,7 +79,44 @@ function EntryPage() {
         <ViewToggle view={view} onChange={setViewMode} />
       </div>
       {view === 'timeline' ? <EntryContent entry={entry} /> : <OrganizedContent entry={entry} />}
+      <MessageComposer date={entry.date} />
     </div>
+  );
+}
+
+function MessageComposer({ date }: { date: string }) {
+  const qc = useQueryClient();
+  const [content, setContent] = useState('');
+  const { mutate, isPending } = useMutation({
+    mutationFn: () => api.entries.addMessage(date, content.trim()),
+    onSuccess: () => {
+      setContent('');
+      qc.invalidateQueries({ queryKey: ['entry', date] });
+      qc.invalidateQueries({ queryKey: ['entries'] });
+    },
+  });
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (content.trim()) mutate();
+      }}
+      className="mt-6 flex items-center gap-2"
+    >
+      <input
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        placeholder="Add something you forgot…"
+        className="flex-1 text-sm text-gray-700 rounded-lg border border-gray-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+      />
+      <button
+        type="submit"
+        disabled={!content.trim() || isPending}
+        className="shrink-0 inline-flex items-center gap-1 px-3.5 py-2.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
+      >
+        {isPending ? 'Adding…' : 'Add'}
+      </button>
+    </form>
   );
 }
 

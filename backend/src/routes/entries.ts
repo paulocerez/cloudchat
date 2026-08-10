@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import { v4 as uuidv4 } from 'uuid';
 import {
   getAllEntries,
   getEntry,
@@ -9,8 +10,11 @@ import {
   updateEntryText,
   addEntryLocation,
   removeEntryLocation,
+  getOrCreateEntry,
+  addTextMessage,
 } from '../services/firestore';
 import { geocodePlaces } from '../services/mapbox';
+import { TextMessage } from '../types';
 
 const router = Router();
 
@@ -81,6 +85,27 @@ router.put('/:date/image/:imageId', async (req: Request, res: Response) => {
     res.status(404).json({ error: 'Entry not found' });
     return;
   }
+  res.json(entry);
+});
+
+// Manually add a text message to backfill something forgotten that day.
+router.post('/:date/messages', async (req: Request, res: Response) => {
+  const { content } = req.body;
+  if (typeof content !== 'string' || !content.trim()) {
+    res.status(400).json({ error: 'content (string) required' });
+    return;
+  }
+  const { date } = req.params;
+  const time = new Date().toTimeString().slice(0, 8); // HH:MM:SS
+  const msg: TextMessage = {
+    id: uuidv4(),
+    content: content.trim(),
+    timestamp: `${date}T${time}`,
+    fromUser: true,
+  };
+  await getOrCreateEntry(date);
+  await addTextMessage(date, msg);
+  const entry = await getEntry(date);
   res.json(entry);
 });
 
