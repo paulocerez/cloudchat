@@ -28,10 +28,11 @@ function Timeline() {
 
   return (
     <div className="animate-fade-up">
-      <div className="flex items-center justify-between gap-3 mb-6">
+      <div className="flex items-center justify-between gap-3 mb-1">
         <h1 className="text-lg font-semibold text-gray-900">Timeline</h1>
         <StreakBadge entries={entries} />
       </div>
+      <p className="text-sm text-gray-400 mb-6">Hey Paulo, what's on your mind? Here's your timeline</p>
       <div className="divide-y divide-gray-100 stagger">
         {entries.map((entry) => (
           <EntryCard key={entry.id} entry={entry} />
