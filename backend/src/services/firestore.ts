@@ -1,6 +1,6 @@
 import admin from 'firebase-admin';
 import { v4 as uuidv4 } from 'uuid';
-import { JournalEntry, AISummary, TextMessage, VoiceMemo, JournalImage, EntryLocation } from '../types';
+import { JournalEntry, AISummary, TextMessage, VoiceMemo, JournalImage, EntryLocation, TimePeriod } from '../types';
 
 let db: admin.firestore.Firestore;
 
@@ -256,4 +256,53 @@ export async function getSummary(
 export async function getAllSummaries(): Promise<AISummary[]> {
   const snap = await db.collection('summaries').orderBy('year', 'desc').get();
   return snap.docs.map((d) => d.data() as AISummary);
+}
+
+// ── Time periods (vacations, trips…) ────────────────────────
+export async function getAllPeriods(): Promise<TimePeriod[]> {
+  const snap = await db.collection('periods').orderBy('startDate', 'desc').get();
+  return snap.docs.map((d) => d.data() as TimePeriod);
+}
+
+export async function createPeriod(
+  data: Pick<TimePeriod, 'name' | 'startDate' | 'endDate' | 'color' | 'emoji'>
+): Promise<TimePeriod> {
+  const now = new Date().toISOString();
+  const period: TimePeriod = {
+    id: uuidv4(),
+    name: data.name,
+    startDate: data.startDate,
+    endDate: data.endDate,
+    color: data.color,
+    ...(data.emoji ? { emoji: data.emoji } : {}),
+    createdAt: now,
+    updatedAt: now,
+  };
+  await db.collection('periods').doc(period.id).set(period);
+  return period;
+}
+
+export async function updatePeriod(
+  id: string,
+  data: Partial<Pick<TimePeriod, 'name' | 'startDate' | 'endDate' | 'color' | 'emoji'>>
+): Promise<TimePeriod | null> {
+  const ref = db.collection('periods').doc(id);
+  const snap = await ref.get();
+  if (!snap.exists) return null;
+  const patch: Record<string, unknown> = { updatedAt: new Date().toISOString() };
+  if (data.name !== undefined) patch.name = data.name;
+  if (data.startDate !== undefined) patch.startDate = data.startDate;
+  if (data.endDate !== undefined) patch.endDate = data.endDate;
+  if (data.color !== undefined) patch.color = data.color;
+  if (data.emoji !== undefined) patch.emoji = data.emoji;
+  await ref.update(patch);
+  return (await ref.get()).data() as TimePeriod;
+}
+
+export async function deletePeriod(id: string): Promise<boolean> {
+  const ref = db.collection('periods').doc(id);
+  const snap = await ref.get();
+  if (!snap.exists) return false;
+  await ref.delete();
+  return true;
 }

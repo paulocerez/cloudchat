@@ -58,6 +58,20 @@ export interface AISummary {
   generatedAt: string;
 }
 
+export type PeriodColor = 'amber' | 'blue' | 'violet' | 'green' | 'rose';
+
+// A named span of days (vacation, a trip…) bracketing entries on the timeline.
+export interface TimePeriod {
+  id: string;
+  name: string;
+  startDate: string; // YYYY-MM-DD, inclusive
+  endDate: string; // YYYY-MM-DD, inclusive
+  color: PeriodColor;
+  emoji?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ── Unipile webhook payload ─────────────────────────────────
 export interface UnipileAttachment {
   attachment_id: string;

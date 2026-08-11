@@ -1,4 +1,12 @@
-import type { JournalEntry, AISummary, AppConfig } from '@cloudchat/shared';
+import type { JournalEntry, AISummary, AppConfig, TimePeriod, PeriodColor } from '@cloudchat/shared';
+
+type PeriodInput = {
+  name: string;
+  startDate: string;
+  endDate: string;
+  color: PeriodColor;
+  emoji?: string;
+};
 
 const BASE = `${import.meta.env.VITE_API_URL ?? ''}/api`;
 
@@ -64,6 +72,13 @@ export const api = {
     get: () => get<AppConfig>('/config'),
     update: (body: Partial<Omit<AppConfig, '_sources'>>) => put<{ ok: boolean }>('/config', body),
     clearKey: (key: string) => del(`/config/${key}`),
+  },
+  periods: {
+    list: () => get<TimePeriod[]>('/periods'),
+    create: (body: PeriodInput) => post<TimePeriod>('/periods', body),
+    update: (id: string, body: Partial<PeriodInput>) =>
+      put<TimePeriod>(`/periods/${id}`, body),
+    remove: (id: string) => del(`/periods/${id}`),
   },
   summaries: {
     list: () => get<AISummary[]>('/summaries'),

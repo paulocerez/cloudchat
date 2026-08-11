@@ -1,13 +1,16 @@
+import { useLayoutEffect, useRef, useState } from 'react';
 import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { MessageCircle, Mic, Image as ImageIcon, Music, MapPin, Flame } from 'lucide-react';
+import { MessageCircle, Mic, Image as ImageIcon, Music, MapPin, Flame, CalendarRange, Plus } from 'lucide-react';
 import { subDays, format as formatDate } from 'date-fns';
 import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
 import { extractSpotifyLinks, stripSpotifyLinks } from '~/lib/spotify';
 import { staticMapUrl } from '~/lib/mapbox';
+import { tone, coversDate } from '~/lib/periods';
 import { SpotifyChip } from '~/components/SpotifyChip';
-import type { JournalEntry, TextMessage, VoiceMemo, JournalImage } from '@cloudchat/shared';
+import { PeriodDialog } from '~/components/PeriodDialog';
+import type { JournalEntry, TextMessage, VoiceMemo, JournalImage, TimePeriod } from '@cloudchat/shared';
 import { rootRoute } from './__root';
 
 export const indexRoute = createRoute({
@@ -21,19 +24,179 @@ function Timeline() {
     queryKey: ['entries'],
     queryFn: api.entries.list,
   });
+  const { data: periods } = useQuery({
+    queryKey: ['periods'],
+    queryFn: api.periods.list,
+  });
+
+  const [addOpen, setAddOpen] = useState(false);
+  const [editing, setEditing] = useState<TimePeriod | null>(null);
 
   if (isLoading) return <LoadingState />;
   if (isError) return <ErrorState />;
   if (!entries || entries.length === 0) return <EmptyState />;
 
+  const activePeriods = periods ?? [];
+
   return (
     <div className="animate-fade-up">
       <div className="flex items-center justify-between gap-3 mb-1">
         <h1 className="text-lg font-semibold text-gray-900">Timeline</h1>
-        <StreakBadge entries={entries} />
+        <div className="flex items-center gap-2">
+          <StreakBadge entries={entries} />
+          <button
+            type="button"
+            onClick={() => setAddOpen(true)}
+            title="Mark a period"
+            className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm bg-gray-100 text-gray-600 text-xs font-medium hover:bg-gray-200 transition-colors"
+          >
+            <CalendarRange size={15} strokeWidth={2.5} />
+            <span className="hidden sm:inline">Period</span>
+          </button>
+        </div>
       </div>
       <p className="text-sm text-gray-400 mb-6">Hey Paulo, what's on your mind? Here's your timeline</p>
-      <div className="stagger">
+
+      <PeriodTimeline entries={entries} periods={activePeriods} onEditPeriod={setEditing} />
+
+      {addOpen && <PeriodDialog open onClose={() => setAddOpen(false)} />}
+      {editing && (
+        <PeriodDialog open period={editing} onClose={() => setEditing(null)} />
+      )}
+    </div>
+  );
+}
+
+interface Band {
+  period: TimePeriod;
+  top: number;
+  height: number;
+  lane: number;
+}
+
+const LANE_WIDTH = 22; // horizontal spacing between overlapping period lines
+
+// Renders the entry list with a measured left gutter of vertical period lines.
+// Each line brackets the rows its date range covers.
+function PeriodTimeline({
+  entries,
+  periods,
+  onEditPeriod,
+}: {
+  entries: JournalEntry[];
+  periods: TimePeriod[];
+  onEditPeriod: (p: TimePeriod) => void;
+}) {
+  const listRef = useRef<HTMLDivElement>(null);
+  const [bands, setBands] = useState<Band[]>([]);
+
+  useLayoutEffect(() => {
+    const el = listRef.current;
+    if (!el || periods.length === 0) {
+      setBands([]);
+      return;
+    }
+
+    const measure = () => {
+      const contTop = el.getBoundingClientRect().top;
+      const rects = new Map<string, { top: number; bottom: number }>();
+      el.querySelectorAll<HTMLElement>('[data-entry-date]').forEach((row) => {
+        const r = row.getBoundingClientRect();
+        rects.set(row.dataset.entryDate!, { top: r.top - contTop, bottom: r.bottom - contTop });
+      });
+
+      // entries are rendered newest-first (desc by date)
+      const raw = periods
+        .map((period) => {
+          const covered = entries
+            .filter((e) => coversDate(period, e.date))
+            .map((e) => rects.get(e.date))
+            .filter((r): r is { top: number; bottom: number } => Boolean(r));
+
+          let top: number;
+          let bottom: number;
+          if (covered.length > 0) {
+            top = Math.min(...covered.map((c) => c.top));
+            bottom = Math.max(...covered.map((c) => c.bottom));
+          } else {
+            // No entries in range — anchor the line at the gap between the
+            // nearest older and newer neighbours so it still reads as a marker.
+            const olderTop = entries
+              .filter((e) => e.date < period.startDate)
+              .map((e) => rects.get(e.date)?.top)
+              .find((v): v is number => v !== undefined);
+            const newerBottom = [...entries]
+              .filter((e) => e.date > period.endDate)
+              .reverse()
+              .map((e) => rects.get(e.date)?.bottom)
+              .find((v): v is number => v !== undefined);
+            const anchor = newerBottom ?? olderTop ?? 0;
+            top = anchor;
+            bottom = anchor + 28;
+          }
+          return { period, top, height: Math.max(bottom - top, 20) };
+        })
+        .sort((a, b) => a.top - b.top);
+
+      // Greedy lane assignment so overlapping lines sit side by side.
+      const laneEnds: number[] = [];
+      const placed: Band[] = raw.map((b) => {
+        let lane = laneEnds.findIndex((end) => b.top >= end - 1);
+        if (lane === -1) {
+          lane = laneEnds.length;
+          laneEnds.push(0);
+        }
+        laneEnds[lane] = b.top + b.height;
+        return { ...b, lane };
+      });
+      setBands(placed);
+    };
+
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    window.addEventListener('resize', measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, [entries, periods]);
+
+  const laneCount = bands.reduce((max, b) => Math.max(max, b.lane + 1), 0);
+  const gutter = laneCount > 0 ? 20 + laneCount * LANE_WIDTH : 0;
+
+  return (
+    <div className="relative" style={{ paddingLeft: gutter }}>
+      {/* Period lines live in the left gutter, absolutely positioned. */}
+      <div className="pointer-events-none absolute inset-0">
+        {bands.map((b) => {
+          const t = tone(b.period.color);
+          const left = 8 + b.lane * LANE_WIDTH;
+          return (
+            <button
+              key={b.period.id}
+              type="button"
+              onClick={() => onEditPeriod(b.period)}
+              title={`${b.period.name} · ${b.period.startDate} → ${b.period.endDate}`}
+              className="pointer-events-auto absolute flex flex-col items-center group/period focus:outline-none"
+              style={{ top: b.top, height: b.height, left }}
+            >
+              <span className="text-sm leading-none mb-1 transition-transform group-hover/period:scale-125">
+                {b.period.emoji ?? '📌'}
+              </span>
+              <span className={`w-1.5 flex-1 rounded-full ${t.line} transition-all group-hover/period:w-2`} />
+              <span
+                className={`absolute top-7 left-2.5 [writing-mode:vertical-rl] text-[10px] font-semibold uppercase tracking-wide ${t.text} whitespace-nowrap overflow-hidden`}
+                style={{ maxHeight: Math.max(b.height - 32, 0) }}
+              >
+                {b.period.name}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="stagger" ref={listRef}>
         {entries.map((entry) => (
           <EntryCard key={entry.id} entry={entry} />
         ))}
@@ -81,7 +244,10 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
       : null;
 
   return (
-    <div className={entry.highlight ? 'my-2 p-1 rounded-xl ring-2 ring-amber-300 bg-amber-50/40' : undefined}>
+    <div
+      data-entry-date={entry.date}
+      className={entry.highlight ? 'my-2 p-1 rounded-xl ring-2 ring-amber-300 bg-amber-50/40' : undefined}
+    >
     <Link
       to="/entry/$date"
       params={{ date: entry.date }}
