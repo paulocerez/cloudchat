@@ -5,9 +5,11 @@ import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
 import { extractSpotifyLinks, spotifyEmbedUrl, stripSpotifyLinks, type SpotifyLink } from '~/lib/spotify';
 import { staticMapUrl } from '~/lib/mapbox';
-import { MapPin, Star, WandSparkles, List, LayoutGrid, MessageSquare, Image as ImageIcon, Mic, Music, Pencil, X, Plus } from 'lucide-react';
-import type { JournalEntry, TextMessage, VoiceMemo, JournalImage } from '@cloudchat/shared';
-import { format } from 'date-fns';
+import { MapPin, Star, WandSparkles, List, LayoutGrid, MessageSquare, Image as ImageIcon, Mic, Music, Pencil, X, Plus, Check, SlidersHorizontal } from 'lucide-react';
+import type { JournalEntry, TextMessage, VoiceMemo, JournalImage, Habit } from '@cloudchat/shared';
+import { format, startOfWeek, endOfWeek } from 'date-fns';
+import { tone } from '~/lib/periods';
+import { HabitManager } from '~/components/HabitManager';
 import { rootRoute } from './__root';
 
 export const entryDateRoute = createRoute({
@@ -75,6 +77,7 @@ function EntryPage() {
         <p className="text-sm text-gray-600 leading-relaxed mb-4">{entry.summary}</p>
       )}
       <LocationCard entry={entry} />
+      <HabitTracker date={entry.date} habitsDone={entry.habitsDone ?? []} />
       <div className="flex justify-end mb-3">
         <ViewToggle view={view} onChange={setViewMode} />
       </div>
@@ -117,6 +120,105 @@ function MessageComposer({ date }: { date: string }) {
         {isPending ? 'Adding…' : 'Add'}
       </button>
     </form>
+  );
+}
+
+function HabitTracker({ date, habitsDone }: { date: string; habitsDone: string[] }) {
+  const qc = useQueryClient();
+  const [managerOpen, setManagerOpen] = useState(false);
+
+  const { data: habits } = useQuery({ queryKey: ['habits'], queryFn: api.habits.list });
+
+  // The Mon–Sun week containing this day, used to count against weekly targets.
+  const weekStart = format(startOfWeek(new Date(date), { weekStartsOn: 1 }), 'yyyy-MM-dd');
+  const weekEnd = format(endOfWeek(new Date(date), { weekStartsOn: 1 }), 'yyyy-MM-dd');
+  const { data: weekEntries } = useQuery({
+    queryKey: ['entries', 'week', weekStart],
+    queryFn: () => api.entries.range(weekStart, weekEnd),
+  });
+
+  const toggle = useMutation({
+    mutationFn: ({ habitId, done }: { habitId: string; done: boolean }) =>
+      api.entries.toggleHabit(date, habitId, done),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['entry', date] });
+      qc.invalidateQueries({ queryKey: ['entries'] });
+    },
+  });
+
+  const list = habits ?? [];
+  if (list.length === 0) {
+    return (
+      <>
+        <button
+          type="button"
+          onClick={() => setManagerOpen(true)}
+          className="mb-4 flex items-center gap-1.5 text-xs font-medium text-gray-400 hover:text-gray-700 transition-colors"
+        >
+          <Plus size={14} strokeWidth={2.5} /> Track a habit
+        </button>
+        <HabitManager open={managerOpen} onClose={() => setManagerOpen(false)} />
+      </>
+    );
+  }
+
+  const weeklyCount = (habitId: string) =>
+    (weekEntries ?? []).filter((e) => (e.habitsDone ?? []).includes(habitId)).length;
+
+  return (
+    <div className="mb-4 rounded-xl border border-gray-100 bg-gray-50/50 p-3">
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Habits</h2>
+        <button
+          type="button"
+          onClick={() => setManagerOpen(true)}
+          title="Manage habits"
+          className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-200/60 transition-colors"
+        >
+          <SlidersHorizontal size={14} strokeWidth={2} />
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        {list.map((h) => {
+          const done = habitsDone.includes(h.id);
+          const count = weeklyCount(h.id);
+          const met = count >= h.weeklyTarget;
+          const t = tone(h.color);
+          return (
+            <button
+              key={h.id}
+              type="button"
+              disabled={toggle.isPending}
+              onClick={() => toggle.mutate({ habitId: h.id, done: !done })}
+              className="flex items-center gap-2.5 px-2 py-1.5 -mx-2 rounded-lg text-left hover:bg-white transition-colors disabled:opacity-60"
+            >
+              <span
+                className={`w-5 h-5 shrink-0 rounded-md flex items-center justify-center transition-colors ${
+                  done ? `${t.line} text-white` : 'bg-white border border-gray-300'
+                }`}
+              >
+                {done && <Check size={13} strokeWidth={3} />}
+              </span>
+              <span className="text-base leading-none">{h.emoji ?? '✅'}</span>
+              <span className={`text-sm font-medium ${done ? 'text-gray-900' : 'text-gray-600'}`}>
+                {h.name}
+              </span>
+              <span
+                className={`ml-auto shrink-0 inline-flex items-center gap-1 text-xs font-medium ${
+                  met ? t.text : 'text-gray-400'
+                }`}
+              >
+                {met && <Check size={12} strokeWidth={3} />}
+                {count}/{h.weeklyTarget} this week
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <HabitManager open={managerOpen} onClose={() => setManagerOpen(false)} />
+    </div>
   );
 }
 

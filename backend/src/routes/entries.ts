@@ -12,6 +12,7 @@ import {
   removeEntryLocation,
   getOrCreateEntry,
   addTextMessage,
+  setEntryHabit,
 } from '../services/firestore';
 import { geocodePlaces } from '../services/mapbox';
 import { TextMessage } from '../types';
@@ -106,6 +107,21 @@ router.post('/:date/messages', async (req: Request, res: Response) => {
   await getOrCreateEntry(date);
   await addTextMessage(date, msg);
   const entry = await getEntry(date);
+  res.json(entry);
+});
+
+// Check or uncheck a habit for this day.
+router.put('/:date/habits', async (req: Request, res: Response) => {
+  const { habitId, done } = req.body;
+  if (typeof habitId !== 'string' || !habitId) {
+    res.status(400).json({ error: 'habitId (string) required' });
+    return;
+  }
+  if (typeof done !== 'boolean') {
+    res.status(400).json({ error: 'done (boolean) required' });
+    return;
+  }
+  const entry = await setEntryHabit(req.params.date, habitId, done);
   res.json(entry);
 });
 

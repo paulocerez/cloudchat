@@ -14,6 +14,7 @@ export interface JournalEntry {
   summary?: string; // one-sentence reflection
   locations?: EntryLocation[]; // geocoded places mentioned that day
   highlight?: boolean; // user-marked special day
+  habitsDone?: string[]; // ids of habits checked off this day
   summaryGeneratedAt?: string;
   locationsScannedAt?: string; // when the automatic location scan last ran
   createdAt: string;

@@ -14,6 +14,7 @@ export interface JournalEntry {
   summary?: string; // one-sentence reflection
   locations?: EntryLocation[]; // geocoded places mentioned that day
   highlight?: boolean; // user-marked special day
+  habitsDone?: string[]; // ids of habits checked off this day
   summaryGeneratedAt?: string;
   locationsScannedAt?: string; // when the automatic location scan last ran
   createdAt: string;
@@ -68,6 +69,17 @@ export interface TimePeriod {
   endDate: string; // YYYY-MM-DD, inclusive
   color: PeriodColor;
   emoji?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// A recurring habit checked off per day, with a weekly target.
+export interface Habit {
+  id: string;
+  name: string;
+  emoji?: string;
+  color: PeriodColor;
+  weeklyTarget: number; // 1–7 days per week
   createdAt: string;
   updatedAt: string;
 }

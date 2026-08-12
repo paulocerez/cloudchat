@@ -1,6 +1,6 @@
 import admin from 'firebase-admin';
 import { v4 as uuidv4 } from 'uuid';
-import { JournalEntry, AISummary, TextMessage, VoiceMemo, JournalImage, EntryLocation, TimePeriod } from '../types';
+import { JournalEntry, AISummary, TextMessage, VoiceMemo, JournalImage, EntryLocation, TimePeriod, Habit } from '../types';
 
 let db: admin.firestore.Firestore;
 
@@ -305,4 +305,68 @@ export async function deletePeriod(id: string): Promise<boolean> {
   if (!snap.exists) return false;
   await ref.delete();
   return true;
+}
+
+// ── Habits ──────────────────────────────────────────────────
+export async function getAllHabits(): Promise<Habit[]> {
+  const snap = await db.collection('habits').orderBy('createdAt', 'asc').get();
+  return snap.docs.map((d) => d.data() as Habit);
+}
+
+export async function createHabit(
+  data: Pick<Habit, 'name' | 'color' | 'weeklyTarget' | 'emoji'>
+): Promise<Habit> {
+  const now = new Date().toISOString();
+  const habit: Habit = {
+    id: uuidv4(),
+    name: data.name,
+    color: data.color,
+    weeklyTarget: data.weeklyTarget,
+    ...(data.emoji ? { emoji: data.emoji } : {}),
+    createdAt: now,
+    updatedAt: now,
+  };
+  await db.collection('habits').doc(habit.id).set(habit);
+  return habit;
+}
+
+export async function updateHabit(
+  id: string,
+  data: Partial<Pick<Habit, 'name' | 'color' | 'weeklyTarget' | 'emoji'>>
+): Promise<Habit | null> {
+  const ref = db.collection('habits').doc(id);
+  const snap = await ref.get();
+  if (!snap.exists) return null;
+  const patch: Record<string, unknown> = { updatedAt: new Date().toISOString() };
+  if (data.name !== undefined) patch.name = data.name;
+  if (data.color !== undefined) patch.color = data.color;
+  if (data.weeklyTarget !== undefined) patch.weeklyTarget = data.weeklyTarget;
+  if (data.emoji !== undefined) patch.emoji = data.emoji;
+  await ref.update(patch);
+  return (await ref.get()).data() as Habit;
+}
+
+export async function deleteHabit(id: string): Promise<boolean> {
+  const ref = db.collection('habits').doc(id);
+  const snap = await ref.get();
+  if (!snap.exists) return false;
+  await ref.delete();
+  return true;
+}
+
+// Check or uncheck a habit for a given day, stored on the day's entry.
+export async function setEntryHabit(
+  date: string,
+  habitId: string,
+  done: boolean
+): Promise<JournalEntry> {
+  await getOrCreateEntry(date);
+  const ref = db.collection('entries').doc(date);
+  await ref.update({
+    habitsDone: done
+      ? admin.firestore.FieldValue.arrayUnion(habitId)
+      : admin.firestore.FieldValue.arrayRemove(habitId),
+    updatedAt: new Date().toISOString(),
+  });
+  return (await ref.get()).data() as JournalEntry;
 }

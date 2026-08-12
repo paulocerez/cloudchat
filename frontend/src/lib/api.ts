@@ -1,10 +1,17 @@
-import type { JournalEntry, AISummary, AppConfig, TimePeriod, PeriodColor } from '@cloudchat/shared';
+import type { JournalEntry, AISummary, AppConfig, TimePeriod, PeriodColor, Habit } from '@cloudchat/shared';
 
 type PeriodInput = {
   name: string;
   startDate: string;
   endDate: string;
   color: PeriodColor;
+  emoji?: string;
+};
+
+type HabitInput = {
+  name: string;
+  color: PeriodColor;
+  weeklyTarget: number;
   emoji?: string;
 };
 
@@ -59,6 +66,8 @@ export const api = {
       post<JournalEntry>(`/entries/${date}/messages`, { content }),
     addLocation: (date: string, name: string) =>
       post<JournalEntry>(`/entries/${date}/locations`, { name }),
+    toggleHabit: (date: string, habitId: string, done: boolean) =>
+      put<JournalEntry>(`/entries/${date}/habits`, { habitId, done }),
     removeLocation: (date: string, name: string) =>
       del(`/entries/${date}/locations/${encodeURIComponent(name)}`).then(
         () => api.entries.get(date)
@@ -79,6 +88,12 @@ export const api = {
     update: (id: string, body: Partial<PeriodInput>) =>
       put<TimePeriod>(`/periods/${id}`, body),
     remove: (id: string) => del(`/periods/${id}`),
+  },
+  habits: {
+    list: () => get<Habit[]>('/habits'),
+    create: (body: HabitInput) => post<Habit>('/habits', body),
+    update: (id: string, body: Partial<HabitInput>) => put<Habit>(`/habits/${id}`, body),
+    remove: (id: string) => del(`/habits/${id}`),
   },
   summaries: {
     list: () => get<AISummary[]>('/summaries'),

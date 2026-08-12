@@ -57,6 +57,8 @@ export const PERIOD_COLORS: PeriodColor[] = ['amber', 'blue', 'violet', 'green',
 
 export const PERIOD_EMOJIS = ['🌴', '✈️', '🏖️', '🎄', '💼', '🏠', '❤️', '🎉', '🎓', '🤒'];
 
+export const HABIT_EMOJIS = ['🏃', '💧', '📚', '🧘', '🏋️', '🥗', '😴', '✍️', '🎸', '🧹', '💊', '🚭'];
+
 export function tone(color: PeriodColor): PeriodTone {
   return PERIOD_TONES[color] ?? PERIOD_TONES.amber;
 }
