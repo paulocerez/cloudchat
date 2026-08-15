@@ -59,7 +59,19 @@ export interface AISummary {
   generatedAt: string;
 }
 
-export type PeriodColor = 'amber' | 'blue' | 'violet' | 'green' | 'rose';
+export type PeriodColor =
+  | 'amber'
+  | 'orange'
+  | 'rose'
+  | 'pink'
+  | 'violet'
+  | 'indigo'
+  | 'blue'
+  | 'sky'
+  | 'cyan'
+  | 'teal'
+  | 'green'
+  | 'lime';
 
 // A named span of days (vacation, a trip…) bracketing entries on the timeline.
 export interface TimePeriod {

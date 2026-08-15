@@ -9,7 +9,10 @@ import { PeriodColor } from '../types';
 
 const router = Router();
 
-const COLORS: PeriodColor[] = ['amber', 'blue', 'violet', 'green', 'rose'];
+const COLORS: PeriodColor[] = [
+  'amber', 'orange', 'rose', 'pink', 'violet', 'indigo',
+  'blue', 'sky', 'cyan', 'teal', 'green', 'lime',
+];
 
 function validate(body: Record<string, unknown>, partial: boolean) {
   const { name, color, weeklyTarget, emoji } = body;

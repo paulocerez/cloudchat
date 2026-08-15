@@ -121,7 +121,7 @@ export function PeriodDialog({ open, onClose, period, defaultRange }: PeriodDial
           {/* Color */}
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1.5">Color</label>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {PERIOD_COLORS.map((c) => (
                 <button
                   key={c}

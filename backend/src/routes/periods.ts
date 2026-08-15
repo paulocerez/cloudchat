@@ -9,7 +9,10 @@ import { PeriodColor } from '../types';
 
 const router = Router();
 
-const COLORS: PeriodColor[] = ['amber', 'blue', 'violet', 'green', 'rose'];
+const COLORS: PeriodColor[] = [
+  'amber', 'orange', 'rose', 'pink', 'violet', 'indigo',
+  'blue', 'sky', 'cyan', 'teal', 'green', 'lime',
+];
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 function validate(body: Record<string, unknown>, partial: boolean) {
