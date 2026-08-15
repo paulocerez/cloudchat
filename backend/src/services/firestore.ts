@@ -157,10 +157,22 @@ export async function updateEntrySummary(
 ): Promise<JournalEntry> {
   const ref = db.collection('entries').doc(date);
   const now = new Date().toISOString();
+  // Preserve manually-added locations: append only newly-detected places,
+  // de-duplicating by name (case-insensitive) so a re-run never wipes them.
+  const existing = ((await ref.get()).data() as JournalEntry | undefined)?.locations ?? [];
+  const seen = new Set(existing.map((l) => l.name.trim().toLowerCase()));
+  const locations = [...existing];
+  for (const loc of data.locations) {
+    const key = loc.name.trim().toLowerCase();
+    if (!seen.has(key)) {
+      seen.add(key);
+      locations.push(loc);
+    }
+  }
   await ref.update({
     title: data.title,
     summary: data.summary,
-    locations: data.locations,
+    locations,
     summaryGeneratedAt: now,
     locationsScannedAt: now,
     updatedAt: now,
