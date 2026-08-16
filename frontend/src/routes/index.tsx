@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { MessageCircle, Mic, Image as ImageIcon, Music, MapPin, Flame, CalendarRange, Plus } from 'lucide-react';
+import { MessageCircle, Mic, Image as ImageIcon, Music, MapPin, Flame, CalendarRange, Plus, Film, Play } from 'lucide-react';
 import { subDays, format as formatDate } from 'date-fns';
 import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
@@ -10,7 +10,7 @@ import { staticMapUrl } from '~/lib/mapbox';
 import { tone, coversDate } from '~/lib/periods';
 import { SpotifyChip } from '~/components/SpotifyChip';
 import { PeriodDialog } from '~/components/PeriodDialog';
-import type { JournalEntry, TextMessage, VoiceMemo, JournalImage, TimePeriod } from '@cloudchat/shared';
+import type { JournalEntry, TextMessage, VoiceMemo, JournalImage, JournalVideo, TimePeriod } from '@cloudchat/shared';
 import { rootRoute } from './__root';
 
 export const indexRoute = createRoute({
@@ -235,6 +235,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
   const messageCount = entry.messages.filter((m: TextMessage) => m.fromUser).length;
   const memoCount = entry.voiceMemos.length;
   const imageCount = entry.images.length;
+  const videos = entry.videos ?? [];
   const firstMessage = entry.messages.find((m: TextMessage) => m.fromUser)?.content;
   const preview = entry.title || (firstMessage ? stripSpotifyLinks(firstMessage) : undefined);
   const hasTranscript = entry.voiceMemos.some((v: VoiceMemo) => v.transcription);
@@ -291,8 +292,8 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
           </div>
         )}
 
-        {/* Images */}
-        {entry.images.length > 0 && (
+        {/* Images & videos */}
+        {(entry.images.length > 0 || videos.length > 0) && (
           <div className="order-5 sm:order-none flex flex-wrap items-center gap-1.5">
             {entry.images.map((img: JournalImage) => (
               <img
@@ -303,6 +304,25 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
                 className="w-10 h-10 rounded-md object-cover bg-gray-100"
               />
             ))}
+            {videos.map((vid: JournalVideo) =>
+              vid.url ? (
+                <div
+                  key={vid.id}
+                  className="relative w-10 h-10 rounded-md overflow-hidden bg-gray-900"
+                >
+                  <video
+                    src={`${vid.url}#t=0.1`}
+                    muted
+                    playsInline
+                    preload="metadata"
+                    className="w-full h-full object-cover"
+                  />
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <Play size={12} strokeWidth={2} className="text-white/90 fill-white/90 drop-shadow" />
+                  </span>
+                </div>
+              ) : null
+            )}
           </div>
         )}
       </div>
@@ -328,6 +348,12 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
               <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-amber-50 text-amber-600 font-medium">
                 <ImageIcon size={13} strokeWidth={2.5} />
                 {imageCount}
+              </span>
+            )}
+            {videos.length > 0 && (
+              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-slate-100 text-slate-600 font-medium">
+                <Film size={13} strokeWidth={2.5} />
+                {videos.length}
               </span>
             )}
             {spotifyLinks.length > 0 && (
