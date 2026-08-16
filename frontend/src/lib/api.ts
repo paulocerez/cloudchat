@@ -70,6 +70,8 @@ export const api = {
       put<JournalEntry>(`/entries/${date}/habits`, { habitId, done }),
     move: (date: string, toDate: string) =>
       put<JournalEntry>(`/entries/${date}/move`, { toDate }),
+    moveVoiceMemo: (date: string, memoId: string, toDate: string) =>
+      put<JournalEntry>(`/entries/${date}/voice/${memoId}/move`, { toDate }),
     removeLocation: (date: string, name: string) =>
       del(`/entries/${date}/locations/${encodeURIComponent(name)}`).then(
         () => api.entries.get(date)

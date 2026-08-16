@@ -14,6 +14,7 @@ import {
   addTextMessage,
   setEntryHabit,
   moveEntry,
+  moveVoiceMemo,
 } from '../services/firestore';
 import { geocodePlaces } from '../services/mapbox';
 import { TextMessage } from '../types';
@@ -125,6 +126,25 @@ router.put('/:date/move', async (req: Request, res: Response) => {
   const entry = await moveEntry(req.params.date, toDate);
   if (!entry) {
     res.status(404).json({ error: 'Entry not found' });
+    return;
+  }
+  res.json(entry);
+});
+
+// Move a single voice memo to a different day (e.g. one recorded on the wrong date).
+router.put('/:date/voice/:memoId/move', async (req: Request, res: Response) => {
+  const { toDate } = req.body;
+  if (typeof toDate !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(toDate)) {
+    res.status(400).json({ error: 'toDate (YYYY-MM-DD) required' });
+    return;
+  }
+  if (toDate === req.params.date) {
+    res.status(400).json({ error: 'toDate must differ from the current date' });
+    return;
+  }
+  const entry = await moveVoiceMemo(req.params.date, req.params.memoId, toDate);
+  if (!entry) {
+    res.status(404).json({ error: 'Entry or voice memo not found' });
     return;
   }
   res.json(entry);

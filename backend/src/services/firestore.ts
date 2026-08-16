@@ -317,6 +317,58 @@ export async function moveEntry(
   });
 }
 
+// Move a single voice memo to another day (e.g. one recorded late and logged
+// on the wrong date). The memo's timestamp is re-dated (time-of-day kept), it's
+// removed from the source entry and appended to the target (created if needed).
+// Returns the updated source entry. Runs in a transaction.
+export async function moveVoiceMemo(
+  fromDate: string,
+  memoId: string,
+  toDate: string
+): Promise<JournalEntry | null> {
+  const fromRef = db.collection('entries').doc(fromDate);
+  const toRef = db.collection('entries').doc(toDate);
+
+  return db.runTransaction(async (tx) => {
+    const fromSnap = await tx.get(fromRef);
+    if (!fromSnap.exists) return null;
+    const source = fromSnap.data() as JournalEntry;
+    const memo = source.voiceMemos.find((m) => m.id === memoId);
+    if (!memo) return null;
+
+    const toSnap = await tx.get(toRef);
+    const now = new Date().toISOString();
+    const shifted: VoiceMemo = {
+      ...memo,
+      timestamp: shiftTimestampDate(memo.timestamp, toDate),
+    };
+    const remaining = source.voiceMemos.filter((m) => m.id !== memoId);
+
+    tx.update(fromRef, { voiceMemos: remaining, updatedAt: now });
+
+    if (toSnap.exists) {
+      const target = toSnap.data() as JournalEntry;
+      tx.update(toRef, {
+        voiceMemos: [...target.voiceMemos, shifted],
+        updatedAt: now,
+      });
+    } else {
+      const created: JournalEntry = {
+        id: toDate,
+        date: toDate,
+        messages: [],
+        voiceMemos: [shifted],
+        images: [],
+        createdAt: now,
+        updatedAt: now,
+      };
+      tx.set(toRef, created);
+    }
+
+    return { ...source, voiceMemos: remaining, updatedAt: now };
+  });
+}
+
 export async function setEntryHighlight(date: string, highlight: boolean): Promise<JournalEntry> {
   await getOrCreateEntry(date);
   const ref = db.collection('entries').doc(date);

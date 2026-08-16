@@ -761,6 +761,18 @@ function VoiceBubble({
     },
   });
 
+  const [moving, setMoving] = useState(false);
+  const [moveTo, setMoveTo] = useState(date);
+  const move = useMutation({
+    mutationFn: () => api.entries.moveVoiceMemo(date, memo.id, moveTo),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['entry', date] });
+      qc.invalidateQueries({ queryKey: ['entry', moveTo] });
+      qc.invalidateQueries({ queryKey: ['entries'] });
+      setMoving(false);
+    },
+  });
+
   return (
     <div className={`flex ${align === 'right' ? 'justify-end animate-slide-right' : 'justify-start animate-slide-left'}`}>
       <div className={`max-w-xs md:max-w-md rounded-2xl ${align === 'right' ? 'rounded-br-sm' : 'rounded-bl-sm'} bg-gray-50 border border-gray-200 px-4 py-3 hover:border-gray-300 transition-colors duration-150`}>
@@ -795,6 +807,17 @@ function VoiceBubble({
           >
             <Pencil size={12} strokeWidth={2.5} />
           </button>
+          <button
+            type="button"
+            onClick={() => {
+              setMoveTo(date);
+              setMoving(true);
+            }}
+            aria-label="Move voice memo to another day"
+            className="shrink-0 p-1 rounded text-gray-300 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+          >
+            <CalendarClock size={12} strokeWidth={2.5} />
+          </button>
         </div>
       </div>
       {editing && (
@@ -808,6 +831,61 @@ function VoiceBubble({
           }}
           isSaving={isPending}
         />
+      )}
+      {moving && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate-fade-up"
+          onClick={() => setMoving(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm rounded-2xl bg-white shadow-xl p-5"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-gray-900">Move voice memo</h2>
+              <button
+                type="button"
+                onClick={() => setMoving(false)}
+                aria-label="Close"
+                className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                <X size={16} strokeWidth={2.5} />
+              </button>
+            </div>
+            <label className="block text-xs font-medium text-gray-500 mb-1.5">Move this voice memo to</label>
+            <input
+              type="date"
+              value={moveTo}
+              onChange={(e) => setMoveTo(e.target.value)}
+              className="w-full text-sm text-gray-700 rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+            />
+            <p className="text-xs text-gray-400 mt-2 leading-relaxed">
+              The memo keeps its time of day. If that day has no entry yet, one will be created.
+            </p>
+            {move.isError && (
+              <p className="text-xs text-rose-500 mt-2">Couldn't move the memo. Try again.</p>
+            )}
+            <div className="flex items-center justify-end gap-2 mt-4">
+              <button
+                type="button"
+                onClick={() => setMoving(false)}
+                className="px-3.5 py-1.5 rounded-lg text-gray-500 text-sm font-medium hover:bg-gray-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => move.mutate()}
+                disabled={move.isPending || !moveTo || moveTo === date}
+                className="px-3.5 py-1.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-40"
+              >
+                {move.isPending ? 'Moving…' : 'Move memo'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
