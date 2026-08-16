@@ -55,22 +55,23 @@ function EntryPage() {
     );
 
   return (
-    <div className="animate-fade-up">
-      <Link
-        to="/"
-        className="inline-flex items-center gap-1 text-gray-400 hover:text-gray-900 text-sm mb-6 transition-all duration-150 hover:-translate-x-0.5"
-      >
-        ← Timeline
-      </Link>
-      {entry.title && (
-        <p className="text-xs font-medium tracking-wide uppercase text-gray-400 mb-1">
-          {entry.title}
-        </p>
-      )}
-      <div className="mb-3">
-        <h1
-          className="text-2xl font-bold text-gray-900 tracking-[-0.02em] leading-[1.1] [font-optical-sizing:auto]"
+    <>
+      {/* Sticky translucent header — pins below the nav, with a scroll-edge
+          fade so content dissolves under the glass. Lives outside the
+          transformed wrapper so position: sticky resolves against the viewport. */}
+      <div className="sticky top-14 z-20 -mx-4 sm:-mx-6 md:-mx-8 -mt-8 px-4 sm:px-6 md:px-8 pt-8 pb-3 bg-white/70 backdrop-blur-xl backdrop-saturate-150 glass-surface [mask-image:linear-gradient(to_bottom,black_calc(100%-14px),transparent)]">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1 text-gray-400 hover:text-gray-900 text-sm mb-4 transition-all duration-150 hover:-translate-x-0.5"
         >
+          ← Timeline
+        </Link>
+        {entry.title && (
+          <p className="text-xs font-medium tracking-wide uppercase text-gray-400 mb-1">
+            {entry.title}
+          </p>
+        )}
+        <h1 className="text-2xl font-bold text-gray-900 tracking-[-0.02em] leading-[1.1] [font-optical-sizing:auto]">
           {formatEntryDate(entry.date)}
         </h1>
         <div className="flex flex-wrap items-center gap-2 mt-3.5">
@@ -80,17 +81,19 @@ function EntryPage() {
           <HighlightToggle date={entry.date} highlight={Boolean(entry.highlight)} />
         </div>
       </div>
-      {entry.summary && (
-        <p className="text-sm text-gray-600 leading-relaxed mb-4">{entry.summary}</p>
-      )}
-      <LocationCard entry={entry} />
-      <HabitTracker date={entry.date} habitsDone={entry.habitsDone ?? []} />
-      <div className="flex justify-end mb-3">
-        <ViewToggle view={view} onChange={setViewMode} />
+      <div className="animate-fade-up pt-4">
+        {entry.summary && (
+          <p className="text-sm text-gray-600 leading-relaxed mb-4">{entry.summary}</p>
+        )}
+        <LocationCard entry={entry} />
+        <HabitTracker date={entry.date} habitsDone={entry.habitsDone ?? []} />
+        <div className="flex justify-end mb-3">
+          <ViewToggle view={view} onChange={setViewMode} />
+        </div>
+        {view === 'timeline' ? <EntryContent entry={entry} /> : <OrganizedContent entry={entry} />}
+        <MessageComposer date={entry.date} />
       </div>
-      {view === 'timeline' ? <EntryContent entry={entry} /> : <OrganizedContent entry={entry} />}
-      <MessageComposer date={entry.date} />
-    </div>
+    </>
   );
 }
 
@@ -173,7 +176,7 @@ function HabitTracker({ date, habitsDone }: { date: string; habitsDone: string[]
     (weekEntries ?? []).filter((e) => (e.habitsDone ?? []).includes(habitId)).length;
 
   return (
-    <div className="mb-4 rounded-xl border border-gray-100 bg-gray-50/50 p-3">
+    <div className="mb-4 rounded-2xl bg-white ring-1 ring-gray-900/[0.06] shadow-sm p-3.5">
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-xs font-medium text-gray-400 uppercase tracking-wide">Habits</h2>
         <button
@@ -403,7 +406,7 @@ function LocationCard({ entry }: { entry: JournalEntry }) {
     : 'Not scanned yet';
 
   return (
-    <div className="mb-6 rounded-2xl border border-gray-200 overflow-hidden animate-fade-up">
+    <div className="mb-6 rounded-2xl bg-white ring-1 ring-gray-900/[0.06] shadow-sm overflow-hidden animate-fade-up">
       {mapUrl && <img src={mapUrl} alt="Map of places mentioned" className="w-full block" />}
       <div className="px-3 py-2.5 space-y-2.5">
         <div className="flex items-center gap-1.5">

@@ -21,7 +21,7 @@ export default function Nav() {
   }
 
   return (
-    <header className="sticky top-0 z-10">
+    <header className="sticky top-0 z-30 bg-white/70 backdrop-blur-xl backdrop-saturate-150 border-b border-gray-900/[0.06] glass-surface">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 md:px-8 grid grid-cols-3 items-center h-14">
         {/* Logo */}
         <Link to="/" className="justify-self-start transition-opacity hover:opacity-70 shrink-0">
