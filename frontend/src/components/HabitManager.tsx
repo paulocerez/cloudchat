@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { X, Trash2, Plus, ChevronLeft } from 'lucide-react';
+import { Trash2, Plus, ChevronLeft } from 'lucide-react';
 import type { Habit, PeriodColor } from '@cloudchat/shared';
 import { api } from '~/lib/api';
 import { PERIOD_COLORS, HABIT_EMOJIS, tone } from '~/lib/periods';
+import { Modal, ModalHeader } from '~/components/Modal';
 
 // Create / edit / delete a single habit.
 function HabitForm({
@@ -138,7 +139,7 @@ function HabitForm({
             type="button"
             onClick={() => remove.mutate()}
             disabled={remove.isPending}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-rose-600 hover:bg-rose-50 active:scale-[0.97] transition-all disabled:opacity-50"
           >
             <Trash2 size={15} strokeWidth={2} /> Delete
           </button>
@@ -149,7 +150,7 @@ function HabitForm({
           type="button"
           onClick={() => save.mutate()}
           disabled={!name.trim() || save.isPending}
-          className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-900 text-white hover:bg-gray-800 transition-colors disabled:opacity-40"
+          className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-900 text-white hover:bg-gray-800 active:scale-[0.97] transition-all disabled:opacity-40"
         >
           {save.isPending ? 'Saving…' : editing ? 'Save' : 'Add habit'}
         </button>
@@ -163,42 +164,21 @@ export function HabitManager({ open, onClose }: { open: boolean; onClose: () => 
   const { data: habits } = useQuery({ queryKey: ['habits'], queryFn: api.habits.list });
   const [mode, setMode] = useState<{ view: 'list' } | { view: 'form'; habit?: Habit }>({ view: 'list' });
 
-  if (!open) return null;
-
   const list = habits ?? [];
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate-fade-up"
-      onClick={onClose}
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-lg rounded-2xl bg-white shadow-xl p-5"
-      >
-        {mode.view === 'form' ? (
-          <HabitForm
-            habit={mode.habit}
-            onDone={() => setMode({ view: 'list' })}
-            onBack={() => setMode({ view: 'list' })}
-          />
-        ) : (
-          <>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-semibold text-gray-900">Habits</h2>
-              <button
-                type="button"
-                onClick={onClose}
-                aria-label="Close"
-                className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-              >
-                <X size={16} strokeWidth={2.5} />
-              </button>
-            </div>
+    <Modal open={open} onClose={onClose}>
+      {mode.view === 'form' ? (
+        <HabitForm
+          habit={mode.habit}
+          onDone={() => setMode({ view: 'list' })}
+          onBack={() => setMode({ view: 'list' })}
+        />
+      ) : (
+        <>
+          <ModalHeader title="Habits" onClose={onClose} />
 
-            <div className="flex flex-col gap-1 mb-3">
+          <div className="flex flex-col gap-1 mb-3">
               {list.length === 0 && (
                 <p className="text-sm text-gray-400 py-6 text-center">
                   No habits yet. Add one to start tracking.
@@ -221,16 +201,15 @@ export function HabitManager({ open, onClose }: { open: boolean; onClose: () => 
               ))}
             </div>
 
-            <button
-              type="button"
-              onClick={() => setMode({ view: 'form' })}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-gray-900 text-white hover:bg-gray-800 transition-colors"
-            >
-              <Plus size={15} strokeWidth={2.5} /> New habit
-            </button>
-          </>
-        )}
-      </div>
-    </div>
+          <button
+            type="button"
+            onClick={() => setMode({ view: 'form' })}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-gray-900 text-white hover:bg-gray-800 active:scale-[0.97] transition-all"
+          >
+            <Plus size={15} strokeWidth={2.5} /> New habit
+          </button>
+        </>
+      )}
+    </Modal>
   );
 }

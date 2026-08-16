@@ -11,6 +11,7 @@ import type { JournalEntry, TextMessage, VoiceMemo, JournalImage, JournalVideo, 
 import { format, startOfWeek, endOfWeek } from 'date-fns';
 import { tone } from '~/lib/periods';
 import { HabitManager } from '~/components/HabitManager';
+import { Modal, ModalHeader } from '~/components/Modal';
 import { rootRoute } from './__root';
 
 export const entryDateRoute = createRoute({
@@ -67,8 +68,12 @@ function EntryPage() {
         </p>
       )}
       <div className="mb-3">
-        <h1 className="text-lg font-semibold text-gray-900">{formatEntryDate(entry.date)}</h1>
-        <div className="flex flex-wrap items-center gap-2 mt-3">
+        <h1
+          className="text-2xl font-bold text-gray-900 tracking-[-0.02em] leading-[1.1] [font-optical-sizing:auto]"
+        >
+          {formatEntryDate(entry.date)}
+        </h1>
+        <div className="flex flex-wrap items-center gap-2 mt-3.5">
           <EditSummaryButton entry={entry} />
           <VideoUploader date={entry.date} />
           <GenerateSummaryButton date={entry.date} hasSummary={Boolean(entry.summary)} />
@@ -117,7 +122,7 @@ function MessageComposer({ date }: { date: string }) {
       <button
         type="submit"
         disabled={!content.trim() || isPending}
-        className="shrink-0 inline-flex items-center gap-1 px-3.5 py-2.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
+        className="shrink-0 inline-flex items-center gap-1 px-3.5 py-2.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 active:scale-[0.97] transition-all disabled:opacity-50"
       >
         {isPending ? 'Adding…' : 'Add'}
       </button>
@@ -274,67 +279,45 @@ function EditSummaryButton({ entry }: { entry: JournalEntry }) {
           setSummary(entry.summary ?? '');
           setOpen(true);
         }}
-        className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+        className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 active:scale-[0.97] transition-all"
       >
         <Pencil size={13} strokeWidth={2.5} />
         Edit
       </button>
-      {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate-fade-up"
-          onClick={() => setOpen(false)}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg rounded-2xl bg-white shadow-xl p-5"
+      <Modal open={open} onClose={() => setOpen(false)}>
+        <ModalHeader title="Edit day summary" onClose={() => setOpen(false)} />
+        <label className="block text-xs font-medium text-gray-500 mb-1">Title</label>
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Short headline"
+          className="w-full text-sm text-gray-700 rounded-lg border border-gray-300 bg-white/70 px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+        />
+        <label className="block text-xs font-medium text-gray-500 mb-1">Summary</label>
+        <textarea
+          value={summary}
+          onChange={(e) => setSummary(e.target.value)}
+          rows={8}
+          className="w-full text-sm text-gray-700 leading-relaxed rounded-lg border border-gray-300 bg-white/70 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-y"
+        />
+        <div className="flex items-center justify-end gap-2 mt-4">
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="px-3.5 py-1.5 rounded-lg text-gray-500 text-sm font-medium hover:bg-gray-500/10 active:scale-[0.97] transition-all"
           >
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-gray-900">Edit day summary</h2>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                aria-label="Close"
-                className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-              >
-                <X size={16} strokeWidth={2.5} />
-              </button>
-            </div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Title</label>
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Short headline"
-              className="w-full text-sm text-gray-700 rounded-lg border border-gray-300 px-3 py-2 mb-3 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-            />
-            <label className="block text-xs font-medium text-gray-500 mb-1">Summary</label>
-            <textarea
-              value={summary}
-              onChange={(e) => setSummary(e.target.value)}
-              rows={8}
-              className="w-full text-sm text-gray-700 leading-relaxed rounded-lg border border-gray-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-y"
-            />
-            <div className="flex items-center justify-end gap-2 mt-4">
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="px-3.5 py-1.5 rounded-lg text-gray-500 text-sm font-medium hover:bg-gray-100 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => mutate()}
-                disabled={isPending}
-                className="px-3.5 py-1.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
-              >
-                {isPending ? 'Saving…' : 'Save'}
-              </button>
-            </div>
-          </div>
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={() => mutate()}
+            disabled={isPending}
+            className="px-3.5 py-1.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 active:scale-[0.97] transition-all disabled:opacity-50"
+          >
+            {isPending ? 'Saving…' : 'Save'}
+          </button>
         </div>
-      )}
+      </Modal>
     </>
   );
 }
@@ -353,7 +336,7 @@ function GenerateSummaryButton({ date, hasSummary }: { date: string; hasSummary:
       type="button"
       onClick={() => mutate()}
       disabled={isPending}
-      className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors disabled:opacity-50"
+      className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 active:scale-[0.97] transition-all disabled:opacity-50"
     >
       <WandSparkles size={13} strokeWidth={2.5} />
       {isPending ? 'Generating…' : isError ? 'Retry' : hasSummary ? 'Regenerate' : 'Generate summary'}
@@ -376,7 +359,7 @@ function HighlightToggle({ date, highlight }: { date: string; highlight: boolean
       onClick={() => mutate()}
       disabled={isPending}
       aria-pressed={highlight}
-      className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 ${
+      className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium active:scale-[0.97] transition-all disabled:opacity-50 ${
         highlight
           ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
           : 'bg-amber-50 text-amber-600 hover:bg-amber-100'
@@ -479,7 +462,7 @@ function LocationCard({ entry }: { entry: JournalEntry }) {
           <button
             type="submit"
             disabled={!name.trim() || add.isPending}
-            className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-gray-900 text-white hover:bg-gray-800 transition-colors disabled:opacity-50"
+            className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-gray-900 text-white hover:bg-gray-800 active:scale-[0.97] transition-all disabled:opacity-50"
           >
             <Plus size={13} strokeWidth={2.5} />
             {add.isPending ? 'Adding…' : 'Add'}
@@ -815,61 +798,37 @@ function MoveToDayButton({
       >
         <CalendarClock size={variant === 'overlay' ? 13 : 12} strokeWidth={2.5} />
       </button>
-      {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate-fade-up"
-          onClick={() => setOpen(false)}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm rounded-2xl bg-white shadow-xl p-5"
+      <Modal open={open} onClose={() => setOpen(false)} className="max-w-sm">
+        <ModalHeader title={title} onClose={() => setOpen(false)} />
+        <label className="block text-xs font-medium text-gray-500 mb-1.5">{label}</label>
+        <input
+          type="date"
+          value={moveTo}
+          onChange={(e) => setMoveTo(e.target.value)}
+          className="w-full text-sm text-gray-700 rounded-lg border border-gray-300 bg-white/70 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+        />
+        <p className="text-xs text-gray-400 mt-2 leading-relaxed">
+          It keeps its time of day. If that day has no entry yet, one will be created.
+        </p>
+        {m.isError && <p className="text-xs text-rose-500 mt-2">Couldn't move it. Try again.</p>}
+        <div className="flex items-center justify-end gap-2 mt-4">
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="px-3.5 py-1.5 rounded-lg text-gray-500 text-sm font-medium hover:bg-gray-500/10 active:scale-[0.97] transition-all"
           >
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-gray-900">{title}</h2>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                aria-label="Close"
-                className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-              >
-                <X size={16} strokeWidth={2.5} />
-              </button>
-            </div>
-            <label className="block text-xs font-medium text-gray-500 mb-1.5">{label}</label>
-            <input
-              type="date"
-              value={moveTo}
-              onChange={(e) => setMoveTo(e.target.value)}
-              className="w-full text-sm text-gray-700 rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-            />
-            <p className="text-xs text-gray-400 mt-2 leading-relaxed">
-              It keeps its time of day. If that day has no entry yet, one will be created.
-            </p>
-            {m.isError && (
-              <p className="text-xs text-rose-500 mt-2">Couldn't move it. Try again.</p>
-            )}
-            <div className="flex items-center justify-end gap-2 mt-4">
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="px-3.5 py-1.5 rounded-lg text-gray-500 text-sm font-medium hover:bg-gray-100 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => m.mutate()}
-                disabled={m.isPending || !moveTo || moveTo === date}
-                className="px-3.5 py-1.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-40"
-              >
-                {m.isPending ? 'Moving…' : 'Move'}
-              </button>
-            </div>
-          </div>
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={() => m.mutate()}
+            disabled={m.isPending || !moveTo || moveTo === date}
+            className="px-3.5 py-1.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 active:scale-[0.97] transition-all disabled:opacity-40"
+          >
+            {m.isPending ? 'Moving…' : 'Move'}
+          </button>
         </div>
-      )}
+      </Modal>
     </>
   );
 }
@@ -888,53 +847,33 @@ function TranscriptionDialog({
   isSaving: boolean;
 }) {
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate-fade-up"
-      onClick={onCancel}
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-lg rounded-2xl bg-white shadow-xl p-5"
-      >
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-gray-900">Edit transcription</h2>
-          <button
-            type="button"
-            onClick={onCancel}
-            aria-label="Close"
-            className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-          >
-            <X size={16} strokeWidth={2.5} />
-          </button>
-        </div>
-        <textarea
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          rows={10}
-          autoFocus
-          className="w-full text-sm text-gray-700 leading-relaxed rounded-lg border border-gray-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-y"
-        />
-        <div className="flex items-center justify-end gap-2 mt-4">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-3.5 py-1.5 rounded-lg text-gray-500 text-sm font-medium hover:bg-gray-100 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={onSave}
-            disabled={isSaving}
-            className="px-3.5 py-1.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
-          >
-            {isSaving ? 'Saving…' : 'Save'}
-          </button>
-        </div>
+    <Modal open onClose={onCancel}>
+      <ModalHeader title="Edit transcription" onClose={onCancel} />
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        rows={10}
+        autoFocus
+        className="w-full text-sm text-gray-700 leading-relaxed rounded-lg border border-gray-300 bg-white/70 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-y"
+      />
+      <div className="flex items-center justify-end gap-2 mt-4">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-3.5 py-1.5 rounded-lg text-gray-500 text-sm font-medium hover:bg-gray-500/10 active:scale-[0.97] transition-all"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          onClick={onSave}
+          disabled={isSaving}
+          className="px-3.5 py-1.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 active:scale-[0.97] transition-all disabled:opacity-50"
+        >
+          {isSaving ? 'Saving…' : 'Save'}
+        </button>
       </div>
-    </div>
+    </Modal>
   );
 }
 
@@ -1033,7 +972,7 @@ function VideoUploader({ date }: { date: string }) {
   return (
     <>
       <label
-        className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer ${
+        className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 active:scale-[0.97] transition-all cursor-pointer ${
           busy ? 'opacity-60 pointer-events-none' : ''
         }`}
       >
@@ -1110,19 +1049,19 @@ function AnnotatedImage({
       {zoomed &&
         createPortal(
           <div
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 animate-fade-up cursor-zoom-out"
+            className="glass-scrim fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-scrim cursor-zoom-out"
             onClick={() => setZoomed(false)}
           >
             <button
               type="button"
               onClick={() => setZoomed(false)}
               aria-label="Close"
-              className="absolute top-4 right-4 p-1.5 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+              className="absolute top-4 right-4 p-1.5 rounded-full bg-white/10 text-white hover:bg-white/20 active:scale-90 transition-all"
             >
               <X size={20} strokeWidth={2.5} />
             </button>
             <figure
-              className="max-w-full max-h-full flex flex-col items-center"
+              className="max-w-full max-h-full flex flex-col items-center animate-materialize"
               onClick={(e) => e.stopPropagation()}
             >
               <img
@@ -1139,57 +1078,35 @@ function AnnotatedImage({
           </div>,
           document.body
         )}
-      {editing && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate-fade-up"
-          onClick={() => setEditing(false)}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md rounded-2xl bg-white shadow-xl p-5"
+      <Modal open={editing} onClose={() => setEditing(false)} className="max-w-md">
+        <ModalHeader title="Annotate image" onClose={() => setEditing(false)} />
+        <img src={src} alt="" className="w-full max-h-56 object-contain rounded-lg bg-gray-100 mb-3" />
+        <textarea
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          rows={3}
+          autoFocus
+          placeholder="Add a note for this photo…"
+          className="w-full text-sm text-gray-700 leading-relaxed rounded-lg border border-gray-300 bg-white/70 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-y"
+        />
+        <div className="flex items-center justify-end gap-2 mt-4">
+          <button
+            type="button"
+            onClick={() => setEditing(false)}
+            className="px-3.5 py-1.5 rounded-lg text-gray-500 text-sm font-medium hover:bg-gray-500/10 active:scale-[0.97] transition-all"
           >
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-gray-900">Annotate image</h2>
-              <button
-                type="button"
-                onClick={() => setEditing(false)}
-                aria-label="Close"
-                className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-              >
-                <X size={16} strokeWidth={2.5} />
-              </button>
-            </div>
-            <img src={src} alt="" className="w-full max-h-56 object-contain rounded-lg bg-gray-100 mb-3" />
-            <textarea
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              rows={3}
-              autoFocus
-              placeholder="Add a note for this photo…"
-              className="w-full text-sm text-gray-700 leading-relaxed rounded-lg border border-gray-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-y"
-            />
-            <div className="flex items-center justify-end gap-2 mt-4">
-              <button
-                type="button"
-                onClick={() => setEditing(false)}
-                className="px-3.5 py-1.5 rounded-lg text-gray-500 text-sm font-medium hover:bg-gray-100 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => mutate()}
-                disabled={isPending}
-                className="px-3.5 py-1.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
-              >
-                {isPending ? 'Saving…' : 'Save'}
-              </button>
-            </div>
-          </div>
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={() => mutate()}
+            disabled={isPending}
+            className="px-3.5 py-1.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 active:scale-[0.97] transition-all disabled:opacity-50"
+          >
+            {isPending ? 'Saving…' : 'Save'}
+          </button>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

@@ -142,3 +142,60 @@ body {
 .animate-spin-slow {
   animation: spin 1s linear infinite;
 }
+
+/* ── Glass modal: scrim fades, surface materializes ─────────── */
+@keyframes scrim-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-scrim {
+  animation: scrim-in 0.25s ease-out both;
+}
+
+@keyframes materialize {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+}
+.animate-materialize {
+  animation: materialize 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: center;
+}
+
+/* ── Accessibility: gentle, non-vestibular fallbacks ────────── */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-slide-right,
+  .animate-slide-left,
+  .animate-materialize,
+  .animate-pop,
+  .animate-logo,
+  .stagger > * {
+    animation: scrim-in 0.2s ease-out both;
+    transform: none !important;
+    filter: none !important;
+  }
+  .music-note,
+  .wave-bar,
+  .btn-shimmer:hover {
+    animation: none !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass-surface {
+    background: #fff !important;
+    backdrop-filter: none !important;
+  }
+  .glass-scrim {
+    background: rgba(0, 0, 0, 0.6) !important;
+    backdrop-filter: none !important;
+  }
+}
