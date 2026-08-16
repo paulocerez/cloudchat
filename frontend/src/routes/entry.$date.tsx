@@ -5,8 +5,8 @@ import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
 import { extractSpotifyLinks, spotifyEmbedUrl, stripSpotifyLinks, type SpotifyLink } from '~/lib/spotify';
 import { staticMapUrl } from '~/lib/mapbox';
-import { MapPin, Star, WandSparkles, List, LayoutGrid, MessageSquare, Image as ImageIcon, Mic, Music, Pencil, X, Plus, Check, SlidersHorizontal, CalendarClock } from 'lucide-react';
-import type { JournalEntry, TextMessage, VoiceMemo, JournalImage, Habit } from '@cloudchat/shared';
+import { MapPin, Star, WandSparkles, List, LayoutGrid, MessageSquare, Image as ImageIcon, Mic, Music, Film, Upload, Pencil, X, Plus, Check, SlidersHorizontal, CalendarClock } from 'lucide-react';
+import type { JournalEntry, TextMessage, VoiceMemo, JournalImage, JournalVideo, Habit } from '@cloudchat/shared';
 import { format, startOfWeek, endOfWeek } from 'date-fns';
 import { tone } from '~/lib/periods';
 import { HabitManager } from '~/components/HabitManager';
@@ -69,6 +69,7 @@ function EntryPage() {
         <h1 className="text-lg font-semibold text-gray-900">{formatEntryDate(entry.date)}</h1>
         <div className="flex flex-wrap items-center gap-2">
           <EditSummaryButton entry={entry} />
+          <VideoUploader date={entry.date} />
           <MoveDateButton date={entry.date} />
           <GenerateSummaryButton date={entry.date} hasSummary={Boolean(entry.summary)} />
           <HighlightToggle date={entry.date} highlight={Boolean(entry.highlight)} />
@@ -586,12 +587,14 @@ function EntryContent({ entry }: { entry: JournalEntry }) {
   type Item =
     | { kind: 'message'; data: TextMessage }
     | { kind: 'voice'; data: VoiceMemo }
-    | { kind: 'image'; data: JournalImage };
+    | { kind: 'image'; data: JournalImage }
+    | { kind: 'video'; data: JournalVideo };
 
   const items: Item[] = [
     ...entry.messages.map((m: TextMessage): Item => ({ kind: 'message', data: m })),
     ...entry.voiceMemos.map((v: VoiceMemo): Item => ({ kind: 'voice', data: v })),
     ...entry.images.map((img: JournalImage): Item => ({ kind: 'image', data: img })),
+    ...(entry.videos ?? []).map((v: JournalVideo): Item => ({ kind: 'video', data: v })),
   ].sort((a, b) => a.data.timestamp.localeCompare(b.data.timestamp));
 
   if (items.length === 0) {
@@ -604,6 +607,7 @@ function EntryContent({ entry }: { entry: JournalEntry }) {
         if (item.kind === 'message') return <MessageBubble key={item.data.id} msg={item.data} date={entry.date} />;
         if (item.kind === 'voice') return <VoiceBubble key={item.data.id} memo={item.data} date={entry.date} />;
         if (item.kind === 'image') return <ImageBubble key={item.data.id} image={item.data} date={entry.date} />;
+        if (item.kind === 'video') return <VideoBubble key={item.data.id} video={item.data} />;
       })}
     </div>
   );
@@ -613,10 +617,12 @@ function OrganizedContent({ entry }: { entry: JournalEntry }) {
   const songs: SpotifyLink[] = entry.messages.flatMap((m) => extractSpotifyLinks(m.content));
   const textMessages = entry.messages.filter((m) => stripSpotifyLinks(m.content).length > 0);
 
+  const videos = entry.videos ?? [];
   const isEmpty =
     songs.length === 0 &&
     entry.images.length === 0 &&
     entry.voiceMemos.length === 0 &&
+    videos.length === 0 &&
     textMessages.length === 0;
 
   if (isEmpty) return <p className="text-gray-400 text-sm italic">No content for this day.</p>;
@@ -645,6 +651,22 @@ function OrganizedContent({ entry }: { entry: JournalEntry }) {
                 image={img}
                 date={entry.date}
                 className="aspect-square rounded-xl bg-gray-100"
+              />
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {videos.length > 0 && (
+        <Section icon={Film} title="Videos" count={videos.length}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {videos.map((video) => (
+              <video
+                key={video.id}
+                controls
+                preload="metadata"
+                src={video.url}
+                className="w-full rounded-xl bg-black"
               />
             ))}
           </div>
@@ -1026,6 +1048,101 @@ function ImageBubble({ image, date }: { image: JournalImage; date: string }) {
         </div>
       </div>
     </div>
+  );
+}
+
+function VideoBubble({ video }: { video: JournalVideo }) {
+  const time = format(new Date(video.timestamp), 'HH:mm');
+  return (
+    <div className="flex justify-end animate-slide-right">
+      <div className="max-w-xs md:max-w-md rounded-2xl rounded-br-sm bg-gray-50 border border-gray-200 overflow-hidden hover:border-gray-300 transition-all duration-150 hover:shadow-sm">
+        <video
+          controls
+          preload="metadata"
+          src={video.url}
+          className="w-full bg-black max-h-96"
+        />
+        <div className="px-4 py-2">
+          {video.caption && <p className="text-xs text-gray-600">{video.caption}</p>}
+          <p className="text-xs text-gray-400 mt-0.5">{time}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const MAX_VIDEO_BYTES = 500 * 1024 * 1024;
+
+function VideoUploader({ date }: { date: string }) {
+  const qc = useQueryClient();
+  const [progress, setProgress] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const upload = async (file: File) => {
+    setError(null);
+    if (!file.type.startsWith('video/')) {
+      setError('Please choose a video file.');
+      return;
+    }
+    if (file.size > MAX_VIDEO_BYTES) {
+      setError('That video is larger than 500MB.');
+      return;
+    }
+    const ext = file.name.split('.').pop() || 'mp4';
+    try {
+      setProgress(0);
+      const { uploadUrl, path } = await api.entries.videoUploadUrl(date, file.type, ext);
+
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', uploadUrl);
+        xhr.setRequestHeader('Content-Type', file.type);
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100));
+        };
+        xhr.onload = () =>
+          xhr.status >= 200 && xhr.status < 300
+            ? resolve()
+            : reject(new Error(`Upload failed (${xhr.status})`));
+        xhr.onerror = () => reject(new Error('Upload failed'));
+        xhr.send(file);
+      });
+
+      await api.entries.addVideo(date, { path, contentType: file.type, size: file.size });
+      qc.invalidateQueries({ queryKey: ['entry', date] });
+      qc.invalidateQueries({ queryKey: ['entries'] });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setProgress(null);
+    }
+  };
+
+  const busy = progress !== null;
+
+  return (
+    <>
+      <label
+        className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer ${
+          busy ? 'opacity-60 pointer-events-none' : ''
+        }`}
+      >
+        <Upload size={13} strokeWidth={2.5} />
+        {busy ? `Uploading ${progress}%` : 'Add video'}
+        <input
+          type="file"
+          accept="video/*"
+          className="hidden"
+          disabled={busy}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            e.target.value = '';
+            if (file) upload(file);
+          }}
+        />
+      </label>
+      {error && <span className="text-xs text-rose-500">{error}</span>}
+    </>
   );
 }
 

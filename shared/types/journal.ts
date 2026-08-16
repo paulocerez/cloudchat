@@ -10,6 +10,7 @@ export interface JournalEntry {
   messages: TextMessage[];
   voiceMemos: VoiceMemo[];
   images: JournalImage[];
+  videos?: JournalVideo[]; // manually uploaded video clips
   title?: string; // few-word headline for the day
   summary?: string; // one-sentence reflection
   locations?: EntryLocation[]; // geocoded places mentioned that day
@@ -45,6 +46,18 @@ export interface JournalImage {
   url?: string;
   caption?: string;
   annotation?: string; // user-added note shown over the image
+  timestamp: string;
+}
+
+export interface JournalVideo {
+  id: string;
+  path: string; // object path within the Storage bucket
+  url?: string; // permanent tokened download URL
+  caption?: string;
+  annotation?: string; // user-added note
+  duration?: number;
+  size?: number; // bytes
+  contentType: string;
   timestamp: string;
 }
 

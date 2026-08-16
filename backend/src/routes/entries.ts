@@ -17,6 +17,8 @@ import {
   moveVoiceMemo,
   moveImage,
   moveTextMessage,
+  createVideoUploadUrl,
+  registerVideo,
 } from '../services/firestore';
 import { geocodePlaces } from '../services/mapbox';
 import { TextMessage } from '../types';
@@ -185,6 +187,49 @@ router.put('/:date/messages/:messageId/move', async (req: Request, res: Response
   const entry = await moveTextMessage(req.params.date, req.params.messageId, toDate);
   if (!entry) {
     res.status(404).json({ error: 'Entry or message not found' });
+    return;
+  }
+  res.json(entry);
+});
+
+// Issue a short-lived signed URL so the browser can upload a video straight to
+// Storage (too large to stream through the serverless backend).
+router.post('/:date/videos/upload-url', async (req: Request, res: Response) => {
+  const { contentType, ext } = req.body;
+  if (typeof contentType !== 'string' || !contentType.startsWith('video/')) {
+    res.status(400).json({ error: 'contentType (video/*) required' });
+    return;
+  }
+  if (typeof ext !== 'string' || !ext) {
+    res.status(400).json({ error: 'ext (string) required' });
+    return;
+  }
+  const result = await createVideoUploadUrl(req.params.date, contentType, ext);
+  res.json(result);
+});
+
+// Register a video already uploaded to Storage, attaching it to the entry.
+router.post('/:date/videos', async (req: Request, res: Response) => {
+  const { path, contentType, size, caption } = req.body;
+  if (typeof path !== 'string' || !path) {
+    res.status(400).json({ error: 'path (string) required' });
+    return;
+  }
+  if (typeof contentType !== 'string' || !contentType.startsWith('video/')) {
+    res.status(400).json({ error: 'contentType (video/*) required' });
+    return;
+  }
+  if (size !== undefined && typeof size !== 'number') {
+    res.status(400).json({ error: 'size must be a number' });
+    return;
+  }
+  if (caption !== undefined && typeof caption !== 'string') {
+    res.status(400).json({ error: 'caption must be a string' });
+    return;
+  }
+  const entry = await registerVideo(req.params.date, { path, contentType, size, caption });
+  if (!entry) {
+    res.status(422).json({ error: 'Uploaded video not found in storage' });
     return;
   }
   res.json(entry);

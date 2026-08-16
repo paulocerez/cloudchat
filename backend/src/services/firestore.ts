@@ -1,6 +1,6 @@
 import admin from 'firebase-admin';
 import { v4 as uuidv4 } from 'uuid';
-import { JournalEntry, AISummary, TextMessage, VoiceMemo, JournalImage, EntryLocation, TimePeriod, Habit } from '../types';
+import { JournalEntry, AISummary, TextMessage, VoiceMemo, JournalImage, JournalVideo, EntryLocation, TimePeriod, Habit } from '../types';
 
 let db: admin.firestore.Firestore;
 
@@ -43,6 +43,62 @@ export async function uploadMedia(
   )}?alt=media&token=${token}`;
 }
 
+// Large videos can't stream through the (serverless) backend, so the browser
+// uploads straight to Storage via a short-lived signed URL. We only hand out
+// the target path + upload URL here; the object is registered once uploaded.
+export async function createVideoUploadUrl(
+  date: string,
+  contentType: string,
+  ext: string
+): Promise<{ uploadUrl: string; path: string }> {
+  const bucket = admin.storage().bucket();
+  const safeExt = ext.replace(/[^a-z0-9]/gi, '').toLowerCase() || 'mp4';
+  const path = `videos/${date}/${uuidv4()}.${safeExt}`;
+  const [uploadUrl] = await bucket.file(path).getSignedUrl({
+    version: 'v4',
+    action: 'write',
+    expires: Date.now() + 15 * 60 * 1000,
+    contentType,
+  });
+  return { uploadUrl, path };
+}
+
+// After the browser finishes uploading, give the object a permanent download
+// token (matching how images/audio are served) and attach it to the entry.
+export async function registerVideo(
+  date: string,
+  input: { path: string; contentType: string; size?: number; caption?: string; timestamp?: string }
+): Promise<JournalEntry | null> {
+  const bucket = admin.storage().bucket();
+  const file = bucket.file(input.path);
+  const [exists] = await file.exists();
+  if (!exists) return null;
+
+  const token = uuidv4();
+  await file.setMetadata({ metadata: { firebaseStorageDownloadTokens: token } });
+  const url = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(
+    input.path
+  )}?alt=media&token=${token}`;
+
+  await getOrCreateEntry(date);
+  const video: JournalVideo = {
+    id: uuidv4(),
+    path: input.path,
+    url,
+    contentType: input.contentType,
+    timestamp: input.timestamp ?? `${date}T${new Date().toTimeString().slice(0, 8)}`,
+  };
+  if (input.size !== undefined) video.size = input.size;
+  if (input.caption) video.caption = input.caption;
+
+  const ref = db.collection('entries').doc(date);
+  await ref.update({
+    videos: admin.firestore.FieldValue.arrayUnion(video),
+    updatedAt: new Date().toISOString(),
+  });
+  return (await ref.get()).data() as JournalEntry;
+}
+
 function todayDate(): string {
   return new Date().toISOString().split('T')[0];
 }
@@ -58,6 +114,7 @@ export async function getOrCreateEntry(date: string): Promise<JournalEntry> {
     messages: [],
     voiceMemos: [],
     images: [],
+    videos: [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -259,6 +316,10 @@ export async function moveEntry(
       ...i,
       timestamp: shiftTimestampDate(i.timestamp, toDate),
     }));
+    const videos = (source.videos ?? []).map((v) => ({
+      ...v,
+      timestamp: shiftTimestampDate(v.timestamp, toDate),
+    }));
 
     if (!toSnap.exists) {
       const moved: JournalEntry = {
@@ -268,6 +329,7 @@ export async function moveEntry(
         messages,
         voiceMemos,
         images,
+        videos,
         updatedAt: now,
       };
       tx.set(toRef, moved);
@@ -299,6 +361,8 @@ export async function moveEntry(
       createdAt: target.createdAt,
       updatedAt: now,
     };
+    const mergedVideos = [...(target.videos ?? []), ...videos];
+    if (mergedVideos.length) merged.videos = mergedVideos;
     const title = target.title ?? source.title;
     if (title !== undefined) merged.title = title;
     const summary = target.summary ?? source.summary;
@@ -359,6 +423,7 @@ export async function moveVoiceMemo(
         messages: [],
         voiceMemos: [shifted],
         images: [],
+        videos: [],
         createdAt: now,
         updatedAt: now,
       };
@@ -407,6 +472,7 @@ export async function moveImage(
         messages: [],
         voiceMemos: [],
         images: [shifted],
+        videos: [],
         createdAt: now,
         updatedAt: now,
       };
@@ -455,6 +521,7 @@ export async function moveTextMessage(
         messages: [shifted],
         voiceMemos: [],
         images: [],
+        videos: [],
         createdAt: now,
         updatedAt: now,
       };

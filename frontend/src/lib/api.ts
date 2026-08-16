@@ -64,6 +64,15 @@ export const api = {
       put<JournalEntry>(`/entries/${date}/image/${imageId}`, { annotation }),
     addMessage: (date: string, content: string) =>
       post<JournalEntry>(`/entries/${date}/messages`, { content }),
+    videoUploadUrl: (date: string, contentType: string, ext: string) =>
+      post<{ uploadUrl: string; path: string }>(`/entries/${date}/videos/upload-url`, {
+        contentType,
+        ext,
+      }),
+    addVideo: (
+      date: string,
+      body: { path: string; contentType: string; size?: number; caption?: string }
+    ) => post<JournalEntry>(`/entries/${date}/videos`, body),
     addLocation: (date: string, name: string) =>
       post<JournalEntry>(`/entries/${date}/locations`, { name }),
     toggleHabit: (date: string, habitId: string, done: boolean) =>
