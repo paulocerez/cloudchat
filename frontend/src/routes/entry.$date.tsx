@@ -601,7 +601,7 @@ function EntryContent({ entry }: { entry: JournalEntry }) {
   return (
     <div className="space-y-2 stagger">
       {items.map((item) => {
-        if (item.kind === 'message') return <MessageBubble key={item.data.id} msg={item.data} />;
+        if (item.kind === 'message') return <MessageBubble key={item.data.id} msg={item.data} date={entry.date} />;
         if (item.kind === 'voice') return <VoiceBubble key={item.data.id} memo={item.data} date={entry.date} />;
         if (item.kind === 'image') return <ImageBubble key={item.data.id} image={item.data} date={entry.date} />;
       })}
@@ -704,14 +704,24 @@ function Section({
   );
 }
 
-function MessageBubble({ msg }: { msg: TextMessage }) {
+function MessageBubble({ msg, date }: { msg: TextMessage; date: string }) {
   const time = format(new Date(msg.timestamp), 'HH:mm');
   const spotifyLinks = extractSpotifyLinks(msg.content);
   const text = spotifyLinks.length > 0 ? stripSpotifyLinks(msg.content) : msg.content;
   return (
     <div
-      className={`flex ${msg.fromUser ? 'justify-end animate-slide-right' : 'justify-start animate-slide-left'}`}
+      className={`group flex items-end gap-1 ${msg.fromUser ? 'justify-end animate-slide-right' : 'justify-start animate-slide-left'}`}
     >
+      {msg.fromUser && (
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+          <MoveToDayButton
+            date={date}
+            title="Move message"
+            label="Move this message to"
+            move={(toDate) => api.entries.moveMessage(date, msg.id, toDate)}
+          />
+        </div>
+      )}
       <div
         className={`max-w-xs md:max-w-md rounded-2xl px-4 py-2.5 transition-transform duration-150 hover:scale-[1.01] ${
           msg.fromUser
@@ -732,6 +742,16 @@ function MessageBubble({ msg }: { msg: TextMessage }) {
         ))}
         <p className="text-xs mt-1 text-gray-400">{time}</p>
       </div>
+      {!msg.fromUser && (
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+          <MoveToDayButton
+            date={date}
+            title="Move message"
+            label="Move this message to"
+            move={(toDate) => api.entries.moveMessage(date, msg.id, toDate)}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -758,18 +778,6 @@ function VoiceBubble({
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['entry', date] });
       setEditing(false);
-    },
-  });
-
-  const [moving, setMoving] = useState(false);
-  const [moveTo, setMoveTo] = useState(date);
-  const move = useMutation({
-    mutationFn: () => api.entries.moveVoiceMemo(date, memo.id, moveTo),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['entry', date] });
-      qc.invalidateQueries({ queryKey: ['entry', moveTo] });
-      qc.invalidateQueries({ queryKey: ['entries'] });
-      setMoving(false);
     },
   });
 
@@ -807,17 +815,12 @@ function VoiceBubble({
           >
             <Pencil size={12} strokeWidth={2.5} />
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              setMoveTo(date);
-              setMoving(true);
-            }}
-            aria-label="Move voice memo to another day"
-            className="shrink-0 p-1 rounded text-gray-300 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-          >
-            <CalendarClock size={12} strokeWidth={2.5} />
-          </button>
+          <MoveToDayButton
+            date={date}
+            title="Move voice memo"
+            label="Move this voice memo to"
+            move={(toDate) => api.entries.moveVoiceMemo(date, memo.id, toDate)}
+          />
         </div>
       </div>
       {editing && (
@@ -832,10 +835,58 @@ function VoiceBubble({
           isSaving={isPending}
         />
       )}
-      {moving && (
+    </div>
+  );
+}
+
+function MoveToDayButton({
+  date,
+  title,
+  label,
+  move,
+  variant = 'ghost',
+}: {
+  date: string;
+  title: string;
+  label: string;
+  move: (toDate: string) => Promise<unknown>;
+  variant?: 'ghost' | 'overlay';
+}) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [moveTo, setMoveTo] = useState(date);
+  const m = useMutation({
+    mutationFn: () => move(moveTo),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['entry', date] });
+      qc.invalidateQueries({ queryKey: ['entry', moveTo] });
+      qc.invalidateQueries({ queryKey: ['entries'] });
+      setOpen(false);
+    },
+  });
+
+  const btnClass =
+    variant === 'overlay'
+      ? 'p-1.5 rounded-full bg-black/45 text-white opacity-0 group-hover/img:opacity-100 hover:bg-black/70 transition-opacity'
+      : 'shrink-0 p-1 rounded text-gray-300 hover:text-gray-700 hover:bg-gray-100 transition-colors';
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => {
+          setMoveTo(date);
+          setOpen(true);
+        }}
+        aria-label={title}
+        className={btnClass}
+      >
+        <CalendarClock size={variant === 'overlay' ? 13 : 12} strokeWidth={2.5} />
+      </button>
+      {open && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate-fade-up"
-          onClick={() => setMoving(false)}
+          onClick={() => setOpen(false)}
         >
           <div
             role="dialog"
@@ -844,17 +895,17 @@ function VoiceBubble({
             className="w-full max-w-sm rounded-2xl bg-white shadow-xl p-5"
           >
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-gray-900">Move voice memo</h2>
+              <h2 className="text-sm font-semibold text-gray-900">{title}</h2>
               <button
                 type="button"
-                onClick={() => setMoving(false)}
+                onClick={() => setOpen(false)}
                 aria-label="Close"
                 className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
               >
                 <X size={16} strokeWidth={2.5} />
               </button>
             </div>
-            <label className="block text-xs font-medium text-gray-500 mb-1.5">Move this voice memo to</label>
+            <label className="block text-xs font-medium text-gray-500 mb-1.5">{label}</label>
             <input
               type="date"
               value={moveTo}
@@ -862,32 +913,32 @@ function VoiceBubble({
               className="w-full text-sm text-gray-700 rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
             />
             <p className="text-xs text-gray-400 mt-2 leading-relaxed">
-              The memo keeps its time of day. If that day has no entry yet, one will be created.
+              It keeps its time of day. If that day has no entry yet, one will be created.
             </p>
-            {move.isError && (
-              <p className="text-xs text-rose-500 mt-2">Couldn't move the memo. Try again.</p>
+            {m.isError && (
+              <p className="text-xs text-rose-500 mt-2">Couldn't move it. Try again.</p>
             )}
             <div className="flex items-center justify-end gap-2 mt-4">
               <button
                 type="button"
-                onClick={() => setMoving(false)}
+                onClick={() => setOpen(false)}
                 className="px-3.5 py-1.5 rounded-lg text-gray-500 text-sm font-medium hover:bg-gray-100 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="button"
-                onClick={() => move.mutate()}
-                disabled={move.isPending || !moveTo || moveTo === date}
+                onClick={() => m.mutate()}
+                disabled={m.isPending || !moveTo || moveTo === date}
                 className="px-3.5 py-1.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-40"
               >
-                {move.isPending ? 'Moving…' : 'Move memo'}
+                {m.isPending ? 'Moving…' : 'Move'}
               </button>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 
@@ -961,9 +1012,17 @@ function ImageBubble({ image, date }: { image: JournalImage; date: string }) {
     <div className="flex justify-end animate-slide-right">
       <div className="max-w-xs md:max-w-md rounded-2xl rounded-br-sm bg-gray-50 border border-gray-200 overflow-hidden hover:border-gray-300 transition-all duration-150 hover:shadow-sm">
         <AnnotatedImage image={image} date={date} />
-        <div className="px-4 py-2">
-          {image.caption && <p className="text-xs text-gray-600">{image.caption}</p>}
-          <p className="text-xs text-gray-400 mt-0.5">{time}</p>
+        <div className="px-4 py-2 flex items-end justify-between gap-1">
+          <div>
+            {image.caption && <p className="text-xs text-gray-600">{image.caption}</p>}
+            <p className="text-xs text-gray-400 mt-0.5">{time}</p>
+          </div>
+          <MoveToDayButton
+            date={date}
+            title="Move image"
+            label="Move this image to"
+            move={(toDate) => api.entries.moveImage(date, image.id, toDate)}
+          />
         </div>
       </div>
     </div>

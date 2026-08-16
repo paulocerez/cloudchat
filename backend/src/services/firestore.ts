@@ -369,6 +369,102 @@ export async function moveVoiceMemo(
   });
 }
 
+export async function moveImage(
+  fromDate: string,
+  imageId: string,
+  toDate: string
+): Promise<JournalEntry | null> {
+  const fromRef = db.collection('entries').doc(fromDate);
+  const toRef = db.collection('entries').doc(toDate);
+
+  return db.runTransaction(async (tx) => {
+    const fromSnap = await tx.get(fromRef);
+    if (!fromSnap.exists) return null;
+    const source = fromSnap.data() as JournalEntry;
+    const image = source.images.find((i) => i.id === imageId);
+    if (!image) return null;
+
+    const toSnap = await tx.get(toRef);
+    const now = new Date().toISOString();
+    const shifted: JournalImage = {
+      ...image,
+      timestamp: shiftTimestampDate(image.timestamp, toDate),
+    };
+    const remaining = source.images.filter((i) => i.id !== imageId);
+
+    tx.update(fromRef, { images: remaining, updatedAt: now });
+
+    if (toSnap.exists) {
+      const target = toSnap.data() as JournalEntry;
+      tx.update(toRef, {
+        images: [...target.images, shifted],
+        updatedAt: now,
+      });
+    } else {
+      const created: JournalEntry = {
+        id: toDate,
+        date: toDate,
+        messages: [],
+        voiceMemos: [],
+        images: [shifted],
+        createdAt: now,
+        updatedAt: now,
+      };
+      tx.set(toRef, created);
+    }
+
+    return { ...source, images: remaining, updatedAt: now };
+  });
+}
+
+export async function moveTextMessage(
+  fromDate: string,
+  messageId: string,
+  toDate: string
+): Promise<JournalEntry | null> {
+  const fromRef = db.collection('entries').doc(fromDate);
+  const toRef = db.collection('entries').doc(toDate);
+
+  return db.runTransaction(async (tx) => {
+    const fromSnap = await tx.get(fromRef);
+    if (!fromSnap.exists) return null;
+    const source = fromSnap.data() as JournalEntry;
+    const message = source.messages.find((m) => m.id === messageId);
+    if (!message) return null;
+
+    const toSnap = await tx.get(toRef);
+    const now = new Date().toISOString();
+    const shifted: TextMessage = {
+      ...message,
+      timestamp: shiftTimestampDate(message.timestamp, toDate),
+    };
+    const remaining = source.messages.filter((m) => m.id !== messageId);
+
+    tx.update(fromRef, { messages: remaining, updatedAt: now });
+
+    if (toSnap.exists) {
+      const target = toSnap.data() as JournalEntry;
+      tx.update(toRef, {
+        messages: [...target.messages, shifted],
+        updatedAt: now,
+      });
+    } else {
+      const created: JournalEntry = {
+        id: toDate,
+        date: toDate,
+        messages: [shifted],
+        voiceMemos: [],
+        images: [],
+        createdAt: now,
+        updatedAt: now,
+      };
+      tx.set(toRef, created);
+    }
+
+    return { ...source, messages: remaining, updatedAt: now };
+  });
+}
+
 export async function setEntryHighlight(date: string, highlight: boolean): Promise<JournalEntry> {
   await getOrCreateEntry(date);
   const ref = db.collection('entries').doc(date);

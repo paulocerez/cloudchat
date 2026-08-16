@@ -15,6 +15,8 @@ import {
   setEntryHabit,
   moveEntry,
   moveVoiceMemo,
+  moveImage,
+  moveTextMessage,
 } from '../services/firestore';
 import { geocodePlaces } from '../services/mapbox';
 import { TextMessage } from '../types';
@@ -145,6 +147,44 @@ router.put('/:date/voice/:memoId/move', async (req: Request, res: Response) => {
   const entry = await moveVoiceMemo(req.params.date, req.params.memoId, toDate);
   if (!entry) {
     res.status(404).json({ error: 'Entry or voice memo not found' });
+    return;
+  }
+  res.json(entry);
+});
+
+// Move a single image to a different day.
+router.put('/:date/image/:imageId/move', async (req: Request, res: Response) => {
+  const { toDate } = req.body;
+  if (typeof toDate !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(toDate)) {
+    res.status(400).json({ error: 'toDate (YYYY-MM-DD) required' });
+    return;
+  }
+  if (toDate === req.params.date) {
+    res.status(400).json({ error: 'toDate must differ from the current date' });
+    return;
+  }
+  const entry = await moveImage(req.params.date, req.params.imageId, toDate);
+  if (!entry) {
+    res.status(404).json({ error: 'Entry or image not found' });
+    return;
+  }
+  res.json(entry);
+});
+
+// Move a single text message to a different day.
+router.put('/:date/messages/:messageId/move', async (req: Request, res: Response) => {
+  const { toDate } = req.body;
+  if (typeof toDate !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(toDate)) {
+    res.status(400).json({ error: 'toDate (YYYY-MM-DD) required' });
+    return;
+  }
+  if (toDate === req.params.date) {
+    res.status(400).json({ error: 'toDate must differ from the current date' });
+    return;
+  }
+  const entry = await moveTextMessage(req.params.date, req.params.messageId, toDate);
+  if (!entry) {
+    res.status(404).json({ error: 'Entry or message not found' });
     return;
   }
   res.json(entry);

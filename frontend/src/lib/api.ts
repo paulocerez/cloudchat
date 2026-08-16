@@ -72,6 +72,10 @@ export const api = {
       put<JournalEntry>(`/entries/${date}/move`, { toDate }),
     moveVoiceMemo: (date: string, memoId: string, toDate: string) =>
       put<JournalEntry>(`/entries/${date}/voice/${memoId}/move`, { toDate }),
+    moveImage: (date: string, imageId: string, toDate: string) =>
+      put<JournalEntry>(`/entries/${date}/image/${imageId}/move`, { toDate }),
+    moveMessage: (date: string, messageId: string, toDate: string) =>
+      put<JournalEntry>(`/entries/${date}/messages/${messageId}/move`, { toDate }),
     removeLocation: (date: string, name: string) =>
       del(`/entries/${date}/locations/${encodeURIComponent(name)}`).then(
         () => api.entries.get(date)
