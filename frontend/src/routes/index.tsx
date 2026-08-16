@@ -41,14 +41,16 @@ function Timeline() {
   return (
     <div className="animate-fade-up">
       <div className="flex items-center justify-between gap-3 mb-1">
-        <h1 className="text-lg font-semibold text-gray-900">Timeline</h1>
+        <h1 className="text-2xl font-bold text-gray-900 tracking-[-0.02em] leading-[1.1] [font-optical-sizing:auto]">
+          Timeline
+        </h1>
         <div className="flex items-center gap-2">
           <StreakBadge entries={entries} />
           <button
             type="button"
             onClick={() => setAddOpen(true)}
             title="Mark a period"
-            className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm bg-gray-100 text-gray-600 text-xs font-medium hover:bg-gray-200 transition-colors"
+            className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-600 text-xs font-medium hover:bg-gray-200 active:scale-[0.97] transition-all"
           >
             <CalendarRange size={15} strokeWidth={2.5} />
             <span className="hidden sm:inline">Period</span>
@@ -222,7 +224,7 @@ function StreakBadge({ entries }: { entries: JournalEntry[] }) {
   if (streak === 0) return null;
 
   return (
-    <span className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm bg-orange-50 text-orange-600 text-xs font-medium">
+    <span className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-orange-50 text-orange-600 text-xs font-medium">
       <Flame size={15} strokeWidth={2.5} className="fill-orange-400 text-orange-500" />
       {streak} day{streak === 1 ? '' : 's'}
     </span>
@@ -251,7 +253,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
     <Link
       to="/entry/$date"
       params={{ date: entry.date }}
-      className={`flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 py-4 px-3 rounded-lg transition-all duration-200 group cursor-pointer ${
+      className={`flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 py-4 px-3 rounded-lg transition-all duration-200 group cursor-pointer active:scale-[0.99] ${
         entry.highlight ? 'hover:bg-amber-100/60' : '-mx-3 hover:bg-gray-50'
       }`}
     >
@@ -298,7 +300,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
                 src={`${import.meta.env.VITE_API_URL ?? ''}/api/media/${img.messageId}/${img.mediaId}`}
                 alt=""
                 loading="lazy"
-                className="w-10 h-10 rounded-sm object-cover bg-gray-100"
+                className="w-10 h-10 rounded-md object-cover bg-gray-100"
               />
             ))}
           </div>
