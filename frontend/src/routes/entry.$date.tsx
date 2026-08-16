@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { createPortal } from 'react-dom';
 import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '~/lib/api';
@@ -12,6 +11,7 @@ import { format, startOfWeek, endOfWeek } from 'date-fns';
 import { tone } from '~/lib/periods';
 import { HabitManager } from '~/components/HabitManager';
 import { Modal, ModalHeader } from '~/components/Modal';
+import { ImageLightbox } from '~/components/ImageLightbox';
 import { rootRoute } from './__root';
 
 export const entryDateRoute = createRoute({
@@ -1049,38 +1049,14 @@ function AnnotatedImage({
       >
         <Pencil size={13} strokeWidth={2.5} />
       </button>
-      {zoomed &&
-        createPortal(
-          <div
-            className="glass-scrim fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-scrim cursor-zoom-out"
-            onClick={() => setZoomed(false)}
-          >
-            <button
-              type="button"
-              onClick={() => setZoomed(false)}
-              aria-label="Close"
-              className="absolute top-4 right-4 p-1.5 rounded-full bg-white/10 text-white hover:bg-white/20 active:scale-90 transition-all"
-            >
-              <X size={20} strokeWidth={2.5} />
-            </button>
-            <figure
-              className="max-w-full max-h-full flex flex-col items-center animate-materialize"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <img
-                src={src}
-                alt={image.annotation ?? image.caption ?? 'Journal image'}
-                className="max-w-full max-h-[85vh] object-contain rounded-lg"
-              />
-              {(image.annotation || image.caption) && (
-                <figcaption className="mt-3 text-center text-sm text-white/80 max-w-2xl">
-                  {image.annotation ?? image.caption}
-                </figcaption>
-              )}
-            </figure>
-          </div>,
-          document.body
-        )}
+      {zoomed && (
+        <ImageLightbox
+          src={src}
+          alt={image.annotation ?? image.caption ?? 'Journal image'}
+          caption={image.annotation ?? image.caption}
+          onClose={() => setZoomed(false)}
+        />
+      )}
       <Modal open={editing} onClose={() => setEditing(false)} className="max-w-md">
         <ModalHeader title="Annotate image" onClose={() => setEditing(false)} />
         <img src={src} alt="" className="w-full max-h-56 object-contain rounded-lg bg-gray-100 mb-3" />
