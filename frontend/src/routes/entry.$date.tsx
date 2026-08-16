@@ -1069,6 +1069,7 @@ function AnnotatedImage({
     `${import.meta.env.VITE_API_URL ?? ''}/api/media/${image.messageId}/${image.mediaId}`;
   const qc = useQueryClient();
   const [editing, setEditing] = useState(false);
+  const [zoomed, setZoomed] = useState(false);
   const [draft, setDraft] = useState(image.annotation ?? '');
   const { mutate, isPending } = useMutation({
     mutationFn: () => api.entries.updateImageAnnotation(date, image.id, draft.trim()),
@@ -1084,7 +1085,8 @@ function AnnotatedImage({
         src={src}
         alt={image.annotation ?? image.caption ?? 'Journal image'}
         loading="lazy"
-        className="w-full h-full object-cover transition-transform duration-300 group-hover/img:scale-[1.02]"
+        onClick={() => setZoomed(true)}
+        className="w-full h-full object-cover cursor-zoom-in transition-transform duration-300 group-hover/img:scale-[1.02]"
       />
       {image.annotation && (
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-3 pt-6 pb-2.5">
@@ -1104,6 +1106,33 @@ function AnnotatedImage({
       >
         <Pencil size={13} strokeWidth={2.5} />
       </button>
+      {zoomed && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 animate-fade-up cursor-zoom-out"
+          onClick={() => setZoomed(false)}
+        >
+          <button
+            type="button"
+            onClick={() => setZoomed(false)}
+            aria-label="Close"
+            className="absolute top-4 right-4 p-1.5 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+          >
+            <X size={20} strokeWidth={2.5} />
+          </button>
+          <figure className="max-w-full max-h-full flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={src}
+              alt={image.annotation ?? image.caption ?? 'Journal image'}
+              className="max-w-full max-h-[85vh] object-contain rounded-lg"
+            />
+            {(image.annotation || image.caption) && (
+              <figcaption className="mt-3 text-center text-sm text-white/80 max-w-2xl">
+                {image.annotation ?? image.caption}
+              </figcaption>
+            )}
+          </figure>
+        </div>
+      )}
       {editing && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate-fade-up"
