@@ -2,7 +2,8 @@
   {
     "origin": [
       "http://localhost:5173",
-      "https://YOUR-FRONTEND.vercel.app"
+      "https://usecloudchat.com",
+      "https://www.usecloudchat.com"
     ],
     "method": ["GET", "PUT"],
     "responseHeader": ["Content-Type", "x-goog-resumable"],
