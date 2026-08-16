@@ -95,22 +95,6 @@ body {
   animation: shimmer 1.2s linear infinite;
 }
 
-/* ── Voice waveform bars ────────────────────────────────────── */
-@keyframes wave-bar {
-  0%, 100% { transform: scaleY(0.4); }
-  50%       { transform: scaleY(1); }
-}
-.wave-bar {
-  width: 3px;
-  border-radius: 2px;
-  background: #9ca3af;
-  transform-origin: bottom;
-  animation: wave-bar 0.9s ease-in-out infinite;
-}
-.wave-bar:nth-child(2) { animation-delay: 0.15s; }
-.wave-bar:nth-child(3) { animation-delay: 0.3s; }
-.wave-bar:nth-child(4) { animation-delay: 0.15s; }
-
 /* ── Checkmark pop ──────────────────────────────────────────── */
 @keyframes pop {
   0%   { transform: scale(0); opacity: 0; }
@@ -183,7 +167,6 @@ body {
     filter: none !important;
   }
   .music-note,
-  .wave-bar,
   .btn-shimmer:hover {
     animation: none !important;
   }

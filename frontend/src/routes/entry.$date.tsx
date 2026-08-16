@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
 import { extractSpotifyLinks, spotifyEmbedUrl, stripSpotifyLinks, type SpotifyLink } from '~/lib/spotify';
 import { staticMapUrl } from '~/lib/mapbox';
-import { MapPin, Star, WandSparkles, List, LayoutGrid, MessageSquare, Image as ImageIcon, Mic, Music, Film, Upload, Pencil, X, Plus, Check, SlidersHorizontal, CalendarClock } from 'lucide-react';
+import { MapPin, Star, WandSparkles, List, LayoutGrid, MessageSquare, Image as ImageIcon, Mic, Music, Film, Upload, Pencil, X, Plus, Check, SlidersHorizontal, CalendarClock, Play, Pause } from 'lucide-react';
 import type { JournalEntry, TextMessage, VoiceMemo, JournalImage, JournalVideo, Habit } from '@cloudchat/shared';
 import { format, startOfWeek, endOfWeek } from 'date-fns';
 import { tone } from '~/lib/periods';
@@ -674,6 +674,134 @@ function MessageBubble({ msg, date }: { msg: TextMessage; date: string }) {
   );
 }
 
+// Deterministic waveform heights (0..1) seeded off the audio URL, so each memo
+// gets a distinct-but-stable shape without decoding the audio.
+function makeWaveform(seed: string, count = 42): number[] {
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    h ^= seed.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  const rand = () => {
+    h = (Math.imul(h, 1664525) + 1013904223) >>> 0;
+    return h / 4294967296;
+  };
+  return Array.from({ length: count }, () => 0.28 + rand() * 0.72);
+}
+
+function fmtDuration(s: number): string {
+  if (!Number.isFinite(s) || s < 0) return '0:00';
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return `${m}:${sec.toString().padStart(2, '0')}`;
+}
+
+// WhatsApp-style voice player: round play/pause control, an interactive
+// waveform with a draggable scrubber, and an elapsed/total time readout.
+function VoicePlayer({ src, time }: { src: string; time: string }) {
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [playing, setPlaying] = useState(false);
+  const [current, setCurrent] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [scrubbing, setScrubbing] = useState(false);
+  const bars = useMemo(() => makeWaveform(src), [src]);
+
+  const fraction = duration > 0 ? Math.min(current / duration, 1) : 0;
+
+  const toggle = () => {
+    const a = audioRef.current;
+    if (!a) return;
+    if (a.paused) a.play();
+    else a.pause();
+  };
+
+  const seekToClientX = (clientX: number) => {
+    const track = trackRef.current;
+    const a = audioRef.current;
+    if (!track || !a || !Number.isFinite(duration) || duration <= 0) return;
+    const rect = track.getBoundingClientRect();
+    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    a.currentTime = ratio * duration;
+    setCurrent(ratio * duration);
+  };
+
+  return (
+    <div className="flex items-center gap-2.5">
+      <button
+        type="button"
+        onClick={toggle}
+        aria-label={playing ? 'Pause' : 'Play'}
+        className="shrink-0 w-9 h-9 rounded-full bg-gray-900 text-white flex items-center justify-center hover:bg-gray-800 active:scale-95 transition-all"
+      >
+        {playing ? (
+          <Pause size={16} strokeWidth={2.5} className="fill-current" />
+        ) : (
+          <Play size={16} strokeWidth={2.5} className="fill-current translate-x-[1px]" />
+        )}
+      </button>
+
+      <div className="flex-1 min-w-0">
+        <div
+          ref={trackRef}
+          onPointerDown={(e) => {
+            e.currentTarget.setPointerCapture(e.pointerId);
+            setScrubbing(true);
+            seekToClientX(e.clientX);
+          }}
+          onPointerMove={(e) => {
+            if (scrubbing) seekToClientX(e.clientX);
+          }}
+          onPointerUp={() => setScrubbing(false)}
+          onPointerCancel={() => setScrubbing(false)}
+          className="relative flex items-center gap-[2px] h-7 cursor-pointer touch-none"
+        >
+          {bars.map((v, i) => {
+            const played = fraction >= (i + 0.5) / bars.length;
+            return (
+              <span
+                key={i}
+                className={`flex-1 rounded-full transition-colors ${played ? 'bg-gray-900' : 'bg-gray-300'}`}
+                style={{ height: `${Math.round(v * 100)}%` }}
+              />
+            );
+          })}
+          <span
+            className="absolute top-1/2 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gray-900 shadow-sm ring-2 ring-gray-50"
+            style={{ left: `${fraction * 100}%` }}
+          />
+        </div>
+        <div className="mt-1 flex items-center justify-between">
+          <span className="text-[11px] font-medium text-gray-400 tabular-nums">
+            {fmtDuration(playing || current > 0 ? current : duration)}
+          </span>
+          <span className="text-[11px] text-gray-300">{time}</span>
+        </div>
+      </div>
+
+      <span className="shrink-0 w-7 h-7 rounded-full bg-violet-100 text-violet-500 flex items-center justify-center self-start">
+        <Mic size={13} strokeWidth={2.5} />
+      </span>
+
+      <audio
+        ref={audioRef}
+        src={src}
+        preload="metadata"
+        className="hidden"
+        onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
+        onDurationChange={(e) => setDuration(e.currentTarget.duration)}
+        onTimeUpdate={(e) => setCurrent(e.currentTarget.currentTime)}
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
+        onEnded={() => {
+          setPlaying(false);
+          setCurrent(0);
+        }}
+      />
+    </div>
+  );
+}
+
 function VoiceBubble({
   memo,
   date,
@@ -701,20 +829,9 @@ function VoiceBubble({
 
   return (
     <div className={`flex ${align === 'right' ? 'justify-end animate-slide-right' : 'justify-start animate-slide-left'}`}>
-      <div className={`max-w-xs md:max-w-md rounded-2xl ${align === 'right' ? 'rounded-br-sm' : 'rounded-bl-sm'} bg-gray-50 border border-gray-200 px-4 py-3 hover:border-gray-300 transition-colors duration-150`}>
-        <div className="flex items-center gap-2 mb-2">
-          {/* Animated waveform */}
-          <div className="flex items-end gap-0.5 h-4">
-            <span className="wave-bar h-2" />
-            <span className="wave-bar h-4" />
-            <span className="wave-bar h-3" />
-            <span className="wave-bar h-4" />
-          </div>
-          <span className="text-xs text-gray-400 font-medium">Voice memo</span>
-          <span className="text-xs text-gray-300 ml-auto">{time}</span>
-        </div>
-        <audio controls preload="none" src={src} className="w-full h-9 mb-2" />
-        <div className="flex items-start gap-1.5">
+      <div className={`max-w-xs md:max-w-md rounded-2xl ${align === 'right' ? 'rounded-br-sm' : 'rounded-bl-sm'} bg-gray-50 border border-gray-200 px-3 py-2.5 hover:border-gray-300 transition-colors duration-150`}>
+        <VoicePlayer src={src} time={time} />
+        <div className="mt-2 flex items-start gap-1.5">
           {memo.transcription ? (
             <p className="text-sm text-gray-700 leading-relaxed italic flex-1">
               "{memo.transcription}"
