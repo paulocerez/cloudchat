@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '~/lib/api';
@@ -1106,33 +1107,38 @@ function AnnotatedImage({
       >
         <Pencil size={13} strokeWidth={2.5} />
       </button>
-      {zoomed && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 animate-fade-up cursor-zoom-out"
-          onClick={() => setZoomed(false)}
-        >
-          <button
-            type="button"
+      {zoomed &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 animate-fade-up cursor-zoom-out"
             onClick={() => setZoomed(false)}
-            aria-label="Close"
-            className="absolute top-4 right-4 p-1.5 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
           >
-            <X size={20} strokeWidth={2.5} />
-          </button>
-          <figure className="max-w-full max-h-full flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
-            <img
-              src={src}
-              alt={image.annotation ?? image.caption ?? 'Journal image'}
-              className="max-w-full max-h-[85vh] object-contain rounded-lg"
-            />
-            {(image.annotation || image.caption) && (
-              <figcaption className="mt-3 text-center text-sm text-white/80 max-w-2xl">
-                {image.annotation ?? image.caption}
-              </figcaption>
-            )}
-          </figure>
-        </div>
-      )}
+            <button
+              type="button"
+              onClick={() => setZoomed(false)}
+              aria-label="Close"
+              className="absolute top-4 right-4 p-1.5 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+            >
+              <X size={20} strokeWidth={2.5} />
+            </button>
+            <figure
+              className="max-w-full max-h-full flex flex-col items-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img
+                src={src}
+                alt={image.annotation ?? image.caption ?? 'Journal image'}
+                className="max-w-full max-h-[85vh] object-contain rounded-lg"
+              />
+              {(image.annotation || image.caption) && (
+                <figcaption className="mt-3 text-center text-sm text-white/80 max-w-2xl">
+                  {image.annotation ?? image.caption}
+                </figcaption>
+              )}
+            </figure>
+          </div>,
+          document.body
+        )}
       {editing && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate-fade-up"
