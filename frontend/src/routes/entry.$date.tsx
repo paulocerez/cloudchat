@@ -65,9 +65,9 @@ function EntryPage() {
           {entry.title}
         </p>
       )}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 mb-3">
+      <div className="mb-3">
         <h1 className="text-lg font-semibold text-gray-900">{formatEntryDate(entry.date)}</h1>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 mt-3">
           <EditSummaryButton entry={entry} />
           <VideoUploader date={entry.date} />
           <GenerateSummaryButton date={entry.date} hasSummary={Boolean(entry.summary)} />
@@ -273,7 +273,7 @@ function EditSummaryButton({ entry }: { entry: JournalEntry }) {
           setSummary(entry.summary ?? '');
           setOpen(true);
         }}
-        className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+        className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
       >
         <Pencil size={13} strokeWidth={2.5} />
         Edit
@@ -352,7 +352,7 @@ function GenerateSummaryButton({ date, hasSummary }: { date: string; hasSummary:
       type="button"
       onClick={() => mutate()}
       disabled={isPending}
-      className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors disabled:opacity-50"
+      className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors disabled:opacity-50"
     >
       <WandSparkles size={13} strokeWidth={2.5} />
       {isPending ? 'Generating…' : isError ? 'Retry' : hasSummary ? 'Regenerate' : 'Generate summary'}
@@ -375,7 +375,7 @@ function HighlightToggle({ date, highlight }: { date: string; highlight: boolean
       onClick={() => mutate()}
       disabled={isPending}
       aria-pressed={highlight}
-      className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-colors disabled:opacity-50 ${
+      className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 ${
         highlight
           ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
           : 'bg-amber-50 text-amber-600 hover:bg-amber-100'
@@ -1032,7 +1032,7 @@ function VideoUploader({ date }: { date: string }) {
   return (
     <>
       <label
-        className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer ${
+        className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors cursor-pointer ${
           busy ? 'opacity-60 pointer-events-none' : ''
         }`}
       >
