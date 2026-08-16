@@ -68,6 +68,8 @@ export const api = {
       post<JournalEntry>(`/entries/${date}/locations`, { name }),
     toggleHabit: (date: string, habitId: string, done: boolean) =>
       put<JournalEntry>(`/entries/${date}/habits`, { habitId, done }),
+    move: (date: string, toDate: string) =>
+      put<JournalEntry>(`/entries/${date}/move`, { toDate }),
     removeLocation: (date: string, name: string) =>
       del(`/entries/${date}/locations/${encodeURIComponent(name)}`).then(
         () => api.entries.get(date)

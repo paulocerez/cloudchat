@@ -13,6 +13,7 @@ import {
   getOrCreateEntry,
   addTextMessage,
   setEntryHabit,
+  moveEntry,
 } from '../services/firestore';
 import { geocodePlaces } from '../services/mapbox';
 import { TextMessage } from '../types';
@@ -107,6 +108,25 @@ router.post('/:date/messages', async (req: Request, res: Response) => {
   await getOrCreateEntry(date);
   await addTextMessage(date, msg);
   const entry = await getEntry(date);
+  res.json(entry);
+});
+
+// Move an entry to a different day (e.g. one logged late on the wrong date).
+router.put('/:date/move', async (req: Request, res: Response) => {
+  const { toDate } = req.body;
+  if (typeof toDate !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(toDate)) {
+    res.status(400).json({ error: 'toDate (YYYY-MM-DD) required' });
+    return;
+  }
+  if (toDate === req.params.date) {
+    res.status(400).json({ error: 'toDate must differ from the current date' });
+    return;
+  }
+  const entry = await moveEntry(req.params.date, toDate);
+  if (!entry) {
+    res.status(404).json({ error: 'Entry not found' });
+    return;
+  }
   res.json(entry);
 });
 

@@ -223,6 +223,100 @@ export async function removeEntryLocation(
   return (await ref.get()).data() as JournalEntry;
 }
 
+// Swap the date portion of a timestamp, keeping the time-of-day.
+function shiftTimestampDate(timestamp: string, newDate: string): string {
+  const tIdx = timestamp.indexOf('T');
+  return tIdx === -1 ? newDate : `${newDate}${timestamp.slice(tIdx)}`;
+}
+
+// Move an entry to a different day. Nested message/memo/image timestamps are
+// re-dated (time-of-day preserved). If the target day already has an entry the
+// two are merged; otherwise the doc is recreated under the new date. Runs in a
+// transaction so the old doc is only removed once the new one is written.
+export async function moveEntry(
+  fromDate: string,
+  toDate: string
+): Promise<JournalEntry | null> {
+  const fromRef = db.collection('entries').doc(fromDate);
+  const toRef = db.collection('entries').doc(toDate);
+
+  return db.runTransaction(async (tx) => {
+    const fromSnap = await tx.get(fromRef);
+    if (!fromSnap.exists) return null;
+    const source = fromSnap.data() as JournalEntry;
+    const toSnap = await tx.get(toRef);
+    const now = new Date().toISOString();
+
+    const messages = source.messages.map((m) => ({
+      ...m,
+      timestamp: shiftTimestampDate(m.timestamp, toDate),
+    }));
+    const voiceMemos = source.voiceMemos.map((v) => ({
+      ...v,
+      timestamp: shiftTimestampDate(v.timestamp, toDate),
+    }));
+    const images = source.images.map((i) => ({
+      ...i,
+      timestamp: shiftTimestampDate(i.timestamp, toDate),
+    }));
+
+    if (!toSnap.exists) {
+      const moved: JournalEntry = {
+        ...source,
+        id: toDate,
+        date: toDate,
+        messages,
+        voiceMemos,
+        images,
+        updatedAt: now,
+      };
+      tx.set(toRef, moved);
+      tx.delete(fromRef);
+      return moved;
+    }
+
+    // Merge into the existing target entry.
+    const target = toSnap.data() as JournalEntry;
+    const locations = [...(target.locations ?? [])];
+    const seen = new Set(locations.map((l) => l.name.trim().toLowerCase()));
+    for (const l of source.locations ?? []) {
+      const key = l.name.trim().toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        locations.push(l);
+      }
+    }
+    const habitsDone = Array.from(
+      new Set([...(target.habitsDone ?? []), ...(source.habitsDone ?? [])])
+    );
+
+    const merged: JournalEntry = {
+      id: toDate,
+      date: toDate,
+      messages: [...target.messages, ...messages],
+      voiceMemos: [...target.voiceMemos, ...voiceMemos],
+      images: [...target.images, ...images],
+      createdAt: target.createdAt,
+      updatedAt: now,
+    };
+    const title = target.title ?? source.title;
+    if (title !== undefined) merged.title = title;
+    const summary = target.summary ?? source.summary;
+    if (summary !== undefined) merged.summary = summary;
+    if (target.highlight || source.highlight) merged.highlight = true;
+    if (habitsDone.length) merged.habitsDone = habitsDone;
+    if (locations.length) merged.locations = locations;
+    const summaryGeneratedAt = target.summaryGeneratedAt ?? source.summaryGeneratedAt;
+    if (summaryGeneratedAt !== undefined) merged.summaryGeneratedAt = summaryGeneratedAt;
+    const locationsScannedAt = target.locationsScannedAt ?? source.locationsScannedAt;
+    if (locationsScannedAt !== undefined) merged.locationsScannedAt = locationsScannedAt;
+
+    tx.set(toRef, merged);
+    tx.delete(fromRef);
+    return merged;
+  });
+}
+
 export async function setEntryHighlight(date: string, highlight: boolean): Promise<JournalEntry> {
   await getOrCreateEntry(date);
   const ref = db.collection('entries').doc(date);
