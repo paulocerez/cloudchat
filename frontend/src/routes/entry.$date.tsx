@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { createRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
@@ -70,7 +70,6 @@ function EntryPage() {
         <div className="flex flex-wrap items-center gap-2">
           <EditSummaryButton entry={entry} />
           <VideoUploader date={entry.date} />
-          <MoveDateButton date={entry.date} />
           <GenerateSummaryButton date={entry.date} hasSummary={Boolean(entry.summary)} />
           <HighlightToggle date={entry.date} highlight={Boolean(entry.highlight)} />
         </div>
@@ -330,96 +329,6 @@ function EditSummaryButton({ entry }: { entry: JournalEntry }) {
                 className="px-3.5 py-1.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-50"
               >
                 {isPending ? 'Saving…' : 'Save'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
-
-function MoveDateButton({ date }: { date: string }) {
-  const qc = useQueryClient();
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const [newDate, setNewDate] = useState(date);
-
-  const { mutate, isPending, isError } = useMutation({
-    mutationFn: () => api.entries.move(date, newDate),
-    onSuccess: (entry) => {
-      qc.invalidateQueries({ queryKey: ['entries'] });
-      qc.invalidateQueries({ queryKey: ['entry', date] });
-      qc.invalidateQueries({ queryKey: ['entry', entry.date] });
-      setOpen(false);
-      navigate({ to: '/entry/$date', params: { date: entry.date } });
-    },
-  });
-
-  return (
-    <>
-      <button
-        type="button"
-        onClick={() => {
-          setNewDate(date);
-          setOpen(true);
-        }}
-        className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
-      >
-        <CalendarClock size={13} strokeWidth={2.5} />
-        Change date
-      </button>
-      {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 animate-fade-up"
-          onClick={() => setOpen(false)}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm rounded-2xl bg-white shadow-xl p-5"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-gray-900">Change entry date</h2>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                aria-label="Close"
-                className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-              >
-                <X size={16} strokeWidth={2.5} />
-              </button>
-            </div>
-            <label className="block text-xs font-medium text-gray-500 mb-1.5">Move this entry to</label>
-            <input
-              type="date"
-              value={newDate}
-              onChange={(e) => setNewDate(e.target.value)}
-              className="w-full text-sm text-gray-700 rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
-            />
-            <p className="text-xs text-gray-400 mt-2 leading-relaxed">
-              If that day already has an entry, the two will be merged. Message times keep
-              their time of day.
-            </p>
-            {isError && (
-              <p className="text-xs text-rose-500 mt-2">Couldn't move the entry. Try again.</p>
-            )}
-            <div className="flex items-center justify-end gap-2 mt-4">
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="px-3.5 py-1.5 rounded-lg text-gray-500 text-sm font-medium hover:bg-gray-100 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => mutate()}
-                disabled={isPending || !newDate || newDate === date}
-                className="px-3.5 py-1.5 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 transition-colors disabled:opacity-40"
-              >
-                {isPending ? 'Moving…' : 'Move entry'}
               </button>
             </div>
           </div>
