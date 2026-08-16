@@ -3,8 +3,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2, Plus, ChevronLeft } from 'lucide-react';
 import type { Habit, PeriodColor } from '@cloudchat/shared';
 import { api } from '~/lib/api';
-import { PERIOD_COLORS, HABIT_EMOJIS, tone } from '~/lib/periods';
+import { HABIT_EMOJIS, tone } from '~/lib/periods';
 import { Modal, ModalHeader } from '~/components/Modal';
+import { ColorPicker, EmojiPicker } from '~/components/Pickers';
 
 // Create / edit / delete a single habit.
 function HabitForm({
@@ -65,7 +66,9 @@ function HabitForm({
         <div>
           <label className="block text-xs font-medium text-gray-500 mb-1.5">Name</label>
           <div className="flex items-center gap-2">
-            <span className="text-lg leading-none select-none">{emoji}</span>
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-100/80 text-lg leading-none select-none">
+              {emoji}
+            </span>
             <input
               autoFocus
               value={name}
@@ -84,7 +87,7 @@ function HabitForm({
                 key={n}
                 type="button"
                 onClick={() => setWeeklyTarget(n)}
-                className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
+                className={`w-8 h-8 rounded-lg text-sm font-medium transition-all active:scale-90 ${
                   weeklyTarget === n
                     ? 'bg-gray-900 text-white'
                     : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
@@ -99,37 +102,12 @@ function HabitForm({
 
         <div>
           <label className="block text-xs font-medium text-gray-500 mb-1.5">Color</label>
-          <div className="flex flex-wrap items-center gap-2">
-            {PERIOD_COLORS.map((c) => (
-              <button
-                key={c}
-                type="button"
-                aria-label={c}
-                onClick={() => setColor(c)}
-                className={`w-7 h-7 rounded-full ${tone(c).swatch} transition-transform ${
-                  color === c ? `ring-2 ring-offset-2 ${tone(c).ring} scale-110` : 'hover:scale-110'
-                }`}
-              />
-            ))}
-          </div>
+          <ColorPicker value={color} onChange={setColor} />
         </div>
 
         <div>
           <label className="block text-xs font-medium text-gray-500 mb-1.5">Emoji</label>
-          <div className="flex flex-wrap items-center gap-1.5">
-            {HABIT_EMOJIS.map((e) => (
-              <button
-                key={e}
-                type="button"
-                onClick={() => setEmoji(e)}
-                className={`w-8 h-8 rounded-lg text-lg leading-none flex items-center justify-center transition-colors ${
-                  emoji === e ? 'bg-gray-900/5 ring-2 ring-gray-900/10' : 'hover:bg-gray-100'
-                }`}
-              >
-                {e}
-              </button>
-            ))}
-          </div>
+          <EmojiPicker value={emoji} onChange={setEmoji} emojis={HABIT_EMOJIS} />
         </div>
       </div>
 
