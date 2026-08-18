@@ -185,6 +185,14 @@ export async function addImage(date: string, image: JournalImage): Promise<void>
   });
 }
 
+export async function addVideo(date: string, video: JournalVideo): Promise<void> {
+  const ref = db.collection('entries').doc(date);
+  await ref.update({
+    videos: admin.firestore.FieldValue.arrayUnion(video),
+    updatedAt: new Date().toISOString(),
+  });
+}
+
 // ── App-sent message dedupe ─────────────────────────────────
 // The daily prompt is sent from the same WhatsApp account the user journals in,
 // so Unipile may echo it back via the webhook. We record ids we send and skip

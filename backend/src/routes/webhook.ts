@@ -5,13 +5,14 @@ import {
   addTextMessage,
   addVoiceMemo,
   addImage,
+  addVideo,
   updateVoiceMemoTranscription,
   isSentMessageId,
   uploadMedia,
 } from '../services/firestore';
 import { fetchMedia, isDailyPrompt } from '../services/whatsapp';
 import { transcribeAudio } from '../services/deepgram';
-import { TextMessage, VoiceMemo, JournalImage, UnipileMessageWebhook, UnipileAttachment } from '../types';
+import { TextMessage, VoiceMemo, JournalImage, JournalVideo, UnipileMessageWebhook, UnipileAttachment } from '../types';
 
 const router = Router();
 
@@ -45,6 +46,10 @@ function isImage(a: UnipileAttachment): boolean {
     a.attachment_type === 'image' ||
     (a.mimetype?.startsWith('image/') ?? false)
   );
+}
+
+function isVideo(a: UnipileAttachment): boolean {
+  return a.attachment_type === 'video' || (a.mimetype?.startsWith('video/') ?? false);
 }
 
 // Process before responding: on Vercel the function can be frozen once the
@@ -114,6 +119,20 @@ router.post('/', async (req: Request, res: Response) => {
           timestamp,
         };
         await addImage(date, image);
+      } else if (isVideo(att)) {
+        const { buffer, contentType } = await fetchMedia(body.message_id, att.attachment_id);
+        const ext = (contentType?.split('/')[1] ?? 'mp4').split(';')[0];
+        const path = `videos/${date}/${att.attachment_id}.${ext}`;
+        const url = await uploadMedia(path, buffer, contentType || 'video/mp4');
+        const video: JournalVideo = {
+          id: uuidv4(),
+          path,
+          url,
+          contentType: contentType || 'video/mp4',
+          size: att.attachment_size ?? buffer.length,
+          timestamp,
+        };
+        await addVideo(date, video);
       }
     }
   } catch (err) {
