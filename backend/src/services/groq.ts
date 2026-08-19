@@ -1,4 +1,5 @@
 import Groq from 'groq-sdk';
+import type { ChatCompletionCreateParamsNonStreaming } from 'groq-sdk/resources/chat/completions';
 import { JournalEntry } from '../types';
 
 let client: Groq;
@@ -6,6 +7,11 @@ let client: Groq;
 export function initGroq() {
   client = new Groq({ apiKey: process.env.GROQ_API_KEY });
 }
+
+// groq-sdk 0.5.0 predates the reasoning_effort field that gpt-oss models accept.
+type ChatParams = ChatCompletionCreateParamsNonStreaming & {
+  reasoning_effort?: 'low' | 'medium' | 'high';
+};
 
 export interface DaySummary {
   title: string; // a few words
@@ -26,25 +32,34 @@ export async function generateDaySummary(entry: JournalEntry): Promise<DaySummar
 
   if (!content) return { title: '', summary: '', locations: [] };
 
-  const completion = await client.chat.completions.create({
-    model: 'openai/gpt-oss-120b',
-    messages: [
-      {
-        role: 'system',
-        content:
-          'You are a personal journaling assistant. Summarize the user\'s journal for a single day. Respond with a JSON object with three keys: "title" — a specific, evocative headline of 2 to 5 words that names the standout moment, person, or place of the day (e.g. "Kino-Abend mit Anita" or "Cinema Night in Potsdam"), never a generic mood phrase like "Cooler Tag", "Great Day" or "Nice Time"; "summary" — a warm, reflective recap of 2 to 3 sentences that emphasizes the people involved (name them when mentioned), captures who the user was with, where they were, what they did together, and how they felt about it; and "locations" — an array of real-world place names explicitly mentioned (cities, neighborhoods, venues, landmarks, countries), each as a geocodable string like "Berlin" or "Golden Gate Bridge, San Francisco". Use an empty array if no places are mentioned. Write title and summary in the same language the user wrote in. Return only the JSON object, no preamble.',
-      },
-      {
-        role: 'user',
-        content: `Here is my journal for ${entry.date}:\n\n${content}`,
-      },
-    ],
-    temperature: 0.7,
-    max_tokens: 300,
-    response_format: { type: 'json_object' },
-  });
+  let raw = '{}';
+  try {
+    const completion = await client.chat.completions.create({
+      model: 'openai/gpt-oss-120b',
+      // gpt-oss is a reasoning model; without low effort it burns the token
+      // budget on hidden reasoning and never emits valid JSON (json_validate_failed).
+      reasoning_effort: 'low',
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You are a personal journaling assistant. Summarize the user\'s journal for a single day. Respond with a JSON object with three keys: "title" — a specific, evocative headline of 2 to 5 words that names the standout moment, person, or place of the day (e.g. "Kino-Abend mit Anita" or "Cinema Night in Potsdam"), never a generic mood phrase like "Cooler Tag", "Great Day" or "Nice Time"; "summary" — a warm, reflective recap of 2 to 3 sentences that emphasizes the people involved (name them when mentioned), captures who the user was with, where they were, what they did together, and how they felt about it; and "locations" — an array of real-world place names explicitly mentioned (cities, neighborhoods, venues, landmarks, countries), each as a geocodable string like "Berlin" or "Golden Gate Bridge, San Francisco". Use an empty array if no places are mentioned. Write title and summary in the same language the user wrote in. Return only the JSON object, no preamble.',
+        },
+        {
+          role: 'user',
+          content: `Here is my journal for ${entry.date}:\n\n${content}`,
+        },
+      ],
+      temperature: 0.7,
+      max_tokens: 1000,
+      response_format: { type: 'json_object' },
+    } as ChatParams);
+    raw = completion.choices[0]?.message?.content?.trim() ?? '{}';
+  } catch (err) {
+    console.error('generateDaySummary failed:', err);
+    return { title: '', summary: '', locations: [] };
+  }
 
-  const raw = completion.choices[0]?.message?.content?.trim() ?? '{}';
   try {
     const parsed = JSON.parse(raw) as Partial<DaySummary>;
     const locations = Array.isArray(parsed.locations)
@@ -92,6 +107,7 @@ export async function answerQuestion(
 
   const completion = await client.chat.completions.create({
     model: 'openai/gpt-oss-120b',
+    reasoning_effort: 'low',
     messages: [
       {
         role: 'system',
@@ -104,7 +120,7 @@ export async function answerQuestion(
     ],
     temperature: 0.4,
     max_tokens: 600,
-  });
+  } as ChatParams);
 
   return completion.choices[0]?.message?.content?.trim() ?? 'Sorry, I could not come up with an answer.';
 }
@@ -133,6 +149,7 @@ export async function generateSummary(
 
   const completion = await client.chat.completions.create({
     model: 'openai/gpt-oss-120b',
+    reasoning_effort: 'low',
     messages: [
       {
         role: 'system',
@@ -145,7 +162,7 @@ export async function generateSummary(
     ],
     temperature: 0.7,
     max_tokens: 1024,
-  });
+  } as ChatParams);
 
   return completion.choices[0]?.message?.content ?? 'Unable to generate summary.';
 }
