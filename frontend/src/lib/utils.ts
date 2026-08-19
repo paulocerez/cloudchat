@@ -1,6 +1,14 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { format, getISOWeek, getYear } from 'date-fns';
+import {
+  format,
+  getISOWeek,
+  getISOWeekYear,
+  getYear,
+  subWeeks,
+  startOfISOWeek,
+  endOfISOWeek,
+} from 'date-fns';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -30,4 +38,27 @@ export function getMonthLabel(year: number, month: number): string {
 
 export function getWeekLabel(year: number, week: number): string {
   return `Week ${week}, ${year}`;
+}
+
+export interface WeekOption {
+  year: number;
+  index: number;
+  label: string;
+}
+
+// Most recent ISO weeks, newest first, starting from the current week.
+// ISO week years can differ from the calendar year near year boundaries,
+// so year/index come from the ISO helpers rather than the date's month.
+export function getRecentWeeks(count: number): WeekOption[] {
+  const now = new Date();
+  return Array.from({ length: count }, (_, i) => {
+    const d = subWeeks(now, i);
+    const start = startOfISOWeek(d);
+    const end = endOfISOWeek(d);
+    return {
+      year: getISOWeekYear(d),
+      index: getISOWeek(d),
+      label: `Week ${getISOWeek(d)} · ${format(start, 'MMM d')}–${format(end, 'MMM d')}`,
+    };
+  });
 }

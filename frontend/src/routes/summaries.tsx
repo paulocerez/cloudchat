@@ -1,9 +1,15 @@
 import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '~/lib/api';
-import { getMonthLabel, getWeekLabel, getCurrentMonth, getCurrentWeek } from '~/lib/utils';
+import {
+  getMonthLabel,
+  getWeekLabel,
+  getCurrentMonth,
+  getCurrentWeek,
+  getRecentWeeks,
+} from '~/lib/utils';
 import type { AISummary } from '@cloudchat/shared';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { rootRoute } from './__root';
 
 export const summariesRoute = createRoute({
@@ -46,6 +52,7 @@ function SummariesPage() {
             index={currentWeek.index}
           />
         </div>
+        <EarlierWeeks />
       </section>
 
       <section>
@@ -71,6 +78,56 @@ function SummariesPage() {
           </div>
         )}
       </section>
+    </div>
+  );
+}
+
+function EarlierWeeks() {
+  // Skip the current week (index 0); it already has its own card above.
+  const weeks = useMemo(() => getRecentWeeks(13).slice(1), []);
+  const [sel, setSel] = useState(0);
+  const week = weeks[sel];
+  const qc = useQueryClient();
+  const { mutate, isPending, isSuccess, isError, reset } = useMutation({
+    mutationFn: () => api.summaries.generate('week', week.year, week.index),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['summaries'] }),
+  });
+
+  return (
+    <div className="mt-3 flex items-center gap-2 rounded-xl bg-white border border-gray-200 p-3">
+      <span className="text-xs text-gray-400 shrink-0">Earlier week</span>
+      <select
+        value={sel}
+        onChange={(e) => {
+          setSel(Number(e.target.value));
+          reset();
+        }}
+        className="flex-1 min-w-0 text-sm text-gray-900 bg-transparent focus:outline-none cursor-pointer"
+      >
+        {weeks.map((w, i) => (
+          <option key={`${w.year}-${w.index}`} value={i}>
+            {w.label}, {w.year}
+          </option>
+        ))}
+      </select>
+      <button
+        onClick={() => mutate()}
+        disabled={isPending || isSuccess}
+        className="shrink-0 text-xs font-medium rounded-lg px-3 py-1.5 bg-gray-900 text-white transition-all duration-150 hover:bg-gray-700 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-900"
+      >
+        {isPending ? (
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-full border-2 border-white/40 border-t-white animate-spin-slow" />
+            Generating…
+          </span>
+        ) : isSuccess ? (
+          <span className="animate-pop">✓ Done</span>
+        ) : isError ? (
+          'Retry'
+        ) : (
+          'Generate'
+        )}
+      </button>
     </div>
   );
 }
