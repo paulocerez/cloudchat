@@ -142,4 +142,9 @@ export interface UnipileMessageWebhook {
   attachments?: UnipileAttachment[];
   is_group?: boolean;
   is_sender?: boolean;
+  // Set by Unipile for non-message events (calls, unsupported system messages).
+  // Normal text messages leave this unset; event_type carries the specifics
+  // (8-13 = call notifications, 0 = provider event Unipile can't render).
+  is_event?: boolean;
+  event_type?: number;
 }

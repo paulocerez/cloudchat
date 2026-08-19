@@ -60,6 +60,9 @@ router.post('/', async (req: Request, res: Response) => {
 
     if (body?.event !== 'message_received') return;
     if (!isSelfChat(body)) return;
+    // Skip call notifications and other Unipile system events, which arrive as
+    // message_received with the notification text sitting in body.message.
+    if (body.is_event) return;
     // Skip our own daily prompt echoed back by Unipile.
     if (await isSentMessageId(body.message_id)) return;
 
