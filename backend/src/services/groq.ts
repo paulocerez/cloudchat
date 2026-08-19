@@ -27,7 +27,7 @@ export async function generateDaySummary(entry: JournalEntry): Promise<DaySummar
   if (!content) return { title: '', summary: '', locations: [] };
 
   const completion = await client.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
+    model: 'openai/gpt-oss-120b',
     messages: [
       {
         role: 'system',
@@ -91,7 +91,7 @@ export async function answerQuestion(
   }
 
   const completion = await client.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
+    model: 'openai/gpt-oss-120b',
     messages: [
       {
         role: 'system',
@@ -132,7 +132,7 @@ export async function generateSummary(
   if (!content) return 'No entries found for this period.';
 
   const completion = await client.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
+    model: 'openai/gpt-oss-120b',
     messages: [
       {
         role: 'system',
