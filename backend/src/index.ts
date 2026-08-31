@@ -3,7 +3,6 @@ import express from 'express';
 import cors from 'cors';
 import { initFirestore } from './services/firestore';
 import { initGroq } from './services/groq';
-import { startScheduler } from './services/scheduler';
 import webhookRouter from './routes/webhook';
 import entriesRouter from './routes/entries';
 import summariesRouter from './routes/summaries';
@@ -34,7 +33,6 @@ app.use('/api/chat', chatRouter);
 
 initFirestore();
 initGroq();
-startScheduler();
 
 // Local dev only. On Vercel the exported app is invoked as a serverless
 // handler — calling app.listen() there triggers legacy-proxy mode, which
