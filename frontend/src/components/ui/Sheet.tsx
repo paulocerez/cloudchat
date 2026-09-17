@@ -48,7 +48,7 @@ function useScrollLock(active: boolean) {
   }, [active]);
 }
 
-function useEscape(active: boolean, onEscape: () => void) {
+export function useEscape(active: boolean, onEscape: () => void) {
   useEffect(() => {
     if (!active) return;
     const onKey = (e: KeyboardEvent) => {
@@ -102,9 +102,13 @@ export function Sheet({
     else animate(y, 0, { type: 'spring', bounce: 0.2, duration: 0.4 });
   };
 
+  // Positioned against the portal wrapper, not the viewport, and with no
+  // z-index of its own — it and the panel are siblings, so the panel must be
+  // the one that paints last. Giving the scrim a z-index buried the panel
+  // under its own blur.
   const scrim = (
     <div
-      className="glass-scrim fixed inset-0 z-[90] bg-black/25 backdrop-blur-md animate-scrim"
+      className="glass-scrim absolute inset-0 bg-black/25 backdrop-blur-md animate-scrim"
       onClick={onClose}
     />
   );
@@ -117,7 +121,7 @@ export function Sheet({
           role="dialog"
           aria-modal="true"
           className={cn(
-            'glass-surface relative w-full max-h-[85vh] overflow-y-auto rounded-2xl bg-white/85 backdrop-blur-xl shadow-2xl ring-1 ring-black/[0.06] p-5 animate-materialize',
+            'glass-surface relative z-10 w-full max-h-[85vh] overflow-y-auto rounded-2xl bg-white/85 backdrop-blur-xl shadow-2xl ring-1 ring-black/[0.06] p-5 animate-materialize',
             className
           )}
         >
@@ -133,7 +137,7 @@ export function Sheet({
       {scrim}
       {/* The wrapper does the entrance slide so the inner motion transform
           stays free for the drag. */}
-      <div className="absolute inset-x-0 bottom-0 animate-sheet-up">
+      <div className="absolute inset-x-0 bottom-0 z-10 animate-sheet-up">
         <motion.div
           role="dialog"
           aria-modal="true"

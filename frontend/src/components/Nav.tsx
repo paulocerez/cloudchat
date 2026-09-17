@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link, useRouter, useRouterState } from '@tanstack/react-router';
 import { LogOut, MoreHorizontal, Settings } from 'lucide-react';
 import { Logo } from './Logo';
@@ -26,21 +26,27 @@ export default function Nav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { title, compact } = usePageTitle();
   const [menuOpen, setMenuOpen] = useState(false);
+  const moreRef = useRef<HTMLSpanElement>(null);
 
   if (!isAuthenticated()) return null;
 
   const isDetail = pathname.startsWith('/entry/') || pathname.startsWith('/summary/');
 
-  const overflow = (
-    <Button
-      variant="bare"
-      size="icon"
-      onClick={() => setMenuOpen(true)}
-      aria-label="Menu"
-      className={`shrink-0 ${pathname === '/settings' ? 'text-gray-900 bg-gray-500/10' : ''}`}
-    >
-      <MoreHorizontal size={19} strokeWidth={2.25} />
-    </Button>
+  // Only the desktop row carries the anchor — it's the one the dropdown hangs
+  // from, and the phone row gets a bottom sheet regardless.
+  const overflow = (ref?: React.Ref<HTMLSpanElement>) => (
+    <span ref={ref} className="shrink-0 inline-flex">
+      <Button
+        variant="bare"
+        size="icon"
+        onClick={() => setMenuOpen((v) => !v)}
+        aria-label="Menu"
+        aria-expanded={menuOpen}
+        className={pathname === '/settings' ? 'text-gray-900 bg-gray-500/10' : ''}
+      >
+        <MoreHorizontal size={19} strokeWidth={2.25} />
+      </Button>
+    </span>
   );
 
   return (
@@ -62,7 +68,7 @@ export default function Nav() {
         >
           {title}
         </span>
-        {overflow}
+        {overflow()}
       </div>
 
       {/* Desktop */}
@@ -98,12 +104,13 @@ export default function Nav() {
           })}
         </nav>
 
-        {overflow}
+        {overflow(moreRef)}
       </div>
 
       <MenuSheet
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
+        anchorRef={moreRef}
         items={[
           {
             icon: Settings,
