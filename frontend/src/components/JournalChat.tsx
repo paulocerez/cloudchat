@@ -5,7 +5,8 @@ import { X } from 'lucide-react';
 
 type ChatMessage = { role: 'user' | 'assistant'; content: string };
 
-export default function JournalChat() {
+/** `raised` lifts the launcher clear of the phone's bottom tab bar. */
+export default function JournalChat({ raised = false }: { raised?: boolean }) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -35,7 +36,11 @@ export default function JournalChat() {
   };
 
   return (
-    <div className="fixed bottom-10 sm:bottom-12 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center pointer-events-none">
+    <div
+      className={`fixed left-1/2 -translate-x-1/2 z-50 flex flex-col items-center pointer-events-none sm:bottom-12 ${
+        raised ? 'bottom-[calc(4.5rem+env(safe-area-inset-bottom))]' : 'bottom-10'
+      }`}
+    >
       {open && (
         <div className="pointer-events-auto mb-3 w-[calc(100vw-2rem)] max-w-2xl rounded-xl bg-white shadow-2xl border border-gray-200 flex flex-col overflow-hidden animate-fade-up">
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">

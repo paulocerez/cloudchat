@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight, Star, CalendarRange, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MoreHorizontal, Star, CalendarRange, X } from 'lucide-react';
 import {
   startOfMonth,
   endOfMonth,
@@ -16,6 +16,9 @@ import {
 import { api } from '~/lib/api';
 import { tone, coversDate } from '~/lib/periods';
 import { PeriodDialog } from '~/components/PeriodDialog';
+import { Button } from '~/components/ui/Button';
+import { MenuSheet } from '~/components/ui/MenuSheet';
+import { PageHeader } from '~/components/ui/PageHeader';
 import type { JournalEntry, TimePeriod } from '@cloudchat/shared';
 import { rootRoute } from './__root';
 
@@ -31,6 +34,7 @@ const MAX_BARS = 3; // period bars stacked under a single day cell
 function CalendarPage() {
   const [month, setMonth] = useState(() => startOfMonth(new Date()));
   const [selecting, setSelecting] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [rangeStart, setRangeStart] = useState<string | null>(null);
   const [draftRange, setDraftRange] = useState<{ startDate: string; endDate: string } | null>(null);
   const [editing, setEditing] = useState<TimePeriod | null>(null);
@@ -69,59 +73,73 @@ function CalendarPage() {
 
   return (
     <div className="animate-fade-up">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-lg font-semibold text-gray-900">{format(month, 'MMMM yyyy')}</h1>
-        <div className="flex items-center gap-1">
-          {selecting ? (
-            <button
-              type="button"
-              onClick={cancelSelect}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium text-gray-500 hover:bg-gray-100 transition-colors"
+      <PageHeader
+        eyebrow="Calendar"
+        title={format(month, 'MMMM yyyy')}
+        actions={
+          <>
+            <Button
+              variant="bare"
+              size="icon"
+              onClick={() => setMonth((m) => addMonths(m, -1))}
+              aria-label="Previous month"
             >
-              <X size={14} strokeWidth={2.5} /> Cancel
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setSelecting(true)}
-              title="Mark a period"
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium text-gray-500 hover:bg-gray-100 transition-colors"
+              <ChevronLeft size={19} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setMonth(startOfMonth(new Date()))}
             >
-              <CalendarRange size={14} strokeWidth={2.5} /> Period
-            </button>
-          )}
+              Today
+            </Button>
+            <Button
+              variant="bare"
+              size="icon"
+              onClick={() => setMonth((m) => addMonths(m, 1))}
+              aria-label="Next month"
+            >
+              <ChevronRight size={19} />
+            </Button>
+            <Button
+              variant="bare"
+              size="icon"
+              onClick={() => setMenuOpen(true)}
+              aria-label="Calendar menu"
+            >
+              <MoreHorizontal size={19} strokeWidth={2.25} />
+            </Button>
+          </>
+        }
+      />
+
+      <MenuSheet
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        items={[
+          { icon: CalendarRange, label: 'Mark a period', onSelect: () => setSelecting(true) },
+        ]}
+      />
+
+      {/* Range picking is a mode, so it gets a banner you can't miss — and an
+          exit that isn't hidden among the month controls. */}
+      {selecting && (
+        <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-xl bg-gray-900 text-white animate-fade-up">
+          <CalendarRange size={15} strokeWidth={2.5} className="shrink-0" />
+          <p className="text-xs flex-1 min-w-0">
+            {rangeStart
+              ? `Start ${format(new Date(rangeStart), 'MMM d')} — now pick the end day`
+              : 'Pick the first day of the period'}
+          </p>
           <button
             type="button"
-            onClick={() => setMonth((m) => addMonths(m, -1))}
-            aria-label="Previous month"
-            className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+            onClick={cancelSelect}
+            className="shrink-0 h-8 px-2.5 -mr-1.5 rounded-lg text-xs font-medium text-white/70 hover:text-white hover:bg-white/10 active:scale-[0.97] transition-all"
           >
-            <ChevronLeft size={18} />
-          </button>
-          <button
-            type="button"
-            onClick={() => setMonth(startOfMonth(new Date()))}
-            className="px-2.5 py-1 rounded-lg text-xs font-medium text-gray-500 hover:bg-gray-100 transition-colors"
-          >
-            Today
-          </button>
-          <button
-            type="button"
-            onClick={() => setMonth((m) => addMonths(m, 1))}
-            aria-label="Next month"
-            className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
-          >
-            <ChevronRight size={18} />
+            <X size={14} strokeWidth={2.5} className="inline mr-1" />
+            Cancel
           </button>
         </div>
-      </div>
-
-      {selecting && (
-        <p className="text-xs text-gray-500 mb-3">
-          {rangeStart
-            ? `Start ${format(new Date(rangeStart), 'MMM d')} — now pick the end day`
-            : 'Pick the first day of the period'}
-        </p>
       )}
 
       <div className="grid grid-cols-7 gap-1.5 mb-2">

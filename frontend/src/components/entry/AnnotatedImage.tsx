@@ -7,7 +7,7 @@ import { useLongPress } from '~/lib/useLongPress';
 import { ImageLightbox } from '~/components/ImageLightbox';
 import { Sheet, SheetHeader } from '~/components/ui/Sheet';
 import { Button } from '~/components/ui/Button';
-import { ItemActionsSheet } from './ItemActionsSheet';
+import { MenuSheet } from '~/components/ui/MenuSheet';
 import { MoveToDaySheet } from './MoveToDaySheet';
 import { mediaUrl } from './shared';
 
@@ -78,11 +78,11 @@ export function AnnotatedImage({
         />
       )}
 
-      <ItemActionsSheet
+      <MenuSheet
         open={actions}
         onClose={() => setActions(false)}
         title="Photo"
-        actions={[
+        items={[
           { icon: Pencil, label: image.annotation ? 'Edit note' : 'Add a note', onSelect: openEditor },
           {
             icon: CalendarClock,

@@ -10,6 +10,7 @@ import {
 } from '~/lib/utils';
 import type { AISummary } from '@cloudchat/shared';
 import { useMemo, useState } from 'react';
+import { PageHeader } from '~/components/ui/PageHeader';
 import { rootRoute } from './__root';
 
 export const summariesRoute = createRoute({
@@ -29,8 +30,11 @@ function SummariesPage() {
 
   return (
     <div className="animate-fade-up">
-      <h1 className="text-lg font-semibold text-gray-900 mb-1">Summaries</h1>
-      <p className="text-gray-400 text-sm mb-8">AI-generated reflections on your journal</p>
+      <PageHeader
+        title="Summaries"
+        subtitle="AI-generated reflections on your journal"
+        className="mb-8"
+      />
 
       <section className="mb-10">
         <p className="text-xs text-gray-400 font-medium uppercase tracking-wide mb-3">

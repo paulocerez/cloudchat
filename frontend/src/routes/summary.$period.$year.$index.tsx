@@ -2,6 +2,7 @@ import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '~/lib/api';
 import { getMonthLabel, getWeekLabel } from '~/lib/utils';
+import { PageHeader } from '~/components/ui/PageHeader';
 import { rootRoute } from './__root';
 
 export const summaryRoute = createRoute({
@@ -32,10 +33,7 @@ function SummaryPage() {
         ← Summaries
       </Link>
 
-      <div className="mb-6">
-        <p className="text-xs text-gray-400 capitalize mb-0.5">{period} summary</p>
-        <h1 className="text-lg font-semibold text-gray-900">{label}</h1>
-      </div>
+      <PageHeader eyebrow={`${period} summary`} title={label} />
 
       {isLoading && (
         <div className="space-y-3">

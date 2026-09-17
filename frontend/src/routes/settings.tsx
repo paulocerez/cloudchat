@@ -2,6 +2,7 @@ import { createRoute } from '@tanstack/react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { api } from '~/lib/api';
+import { PageHeader } from '~/components/ui/PageHeader';
 import { rootRoute } from './__root';
 import type { AppConfig } from '@cloudchat/shared';
 
@@ -135,10 +136,11 @@ export default function SettingsPage() {
 
   return (
     <div className="animate-fade-up">
-      <h1 className="text-lg font-semibold text-gray-900 mb-1">Settings</h1>
-      <p className="text-gray-400 text-sm mb-8">
-        Override environment variables. Values saved here take precedence over Vercel env vars.
-      </p>
+      <PageHeader
+        title="Settings"
+        subtitle="Override environment variables. Values saved here take precedence over Vercel env vars."
+        className="mb-8"
+      />
 
       <form
         onSubmit={(e) => {

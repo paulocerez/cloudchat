@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { MessageCircle, Mic, Image as ImageIcon, Music, MapPin, Flame, CalendarRange, Plus, Film, Play } from 'lucide-react';
+import { MessageCircle, Mic, Image as ImageIcon, Music, MapPin, Flame, CalendarRange, MoreHorizontal, Plus, Film, Play } from 'lucide-react';
 import { subDays, format as formatDate } from 'date-fns';
 import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
@@ -10,6 +10,9 @@ import { staticMapUrl } from '~/lib/mapbox';
 import { tone, coversDate } from '~/lib/periods';
 import { SpotifyChip } from '~/components/SpotifyChip';
 import { PeriodDialog } from '~/components/PeriodDialog';
+import { Button } from '~/components/ui/Button';
+import { MenuSheet } from '~/components/ui/MenuSheet';
+import { PageHeader } from '~/components/ui/PageHeader';
 import type { JournalEntry, TextMessage, VoiceMemo, JournalImage, JournalVideo, TimePeriod } from '@cloudchat/shared';
 import { rootRoute } from './__root';
 
@@ -30,34 +33,52 @@ function Timeline() {
   });
 
   const [addOpen, setAddOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [editing, setEditing] = useState<TimePeriod | null>(null);
 
-  if (isLoading) return <LoadingState />;
-  if (isError) return <ErrorState />;
-  if (!entries || entries.length === 0) return <EmptyState />;
+  // The nav no longer names the page on a phone, so the heading stays put even
+  // while there's nothing under it.
+  if (isLoading || isError || !entries || entries.length === 0)
+    return (
+      <div className="animate-fade-up">
+        <PageHeader title="Timeline" />
+        {isLoading ? <LoadingState /> : isError ? <ErrorState /> : <EmptyState />}
+      </div>
+    );
 
   const activePeriods = periods ?? [];
 
   return (
     <div className="animate-fade-up">
-      <div className="flex items-center justify-between gap-3 mb-1">
-        <h1 className="text-2xl font-bold text-gray-900 tracking-[-0.02em] leading-[1.1] [font-optical-sizing:auto]">
-          Timeline
-        </h1>
-        <div className="flex items-center gap-2">
-          <StreakBadge entries={entries} />
-          <button
-            type="button"
-            onClick={() => setAddOpen(true)}
-            title="Mark a period"
-            className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-600 text-xs font-medium hover:bg-gray-200 active:scale-[0.97] transition-all"
-          >
-            <CalendarRange size={15} strokeWidth={2.5} />
-            <span className="hidden sm:inline">Period</span>
-          </button>
-        </div>
-      </div>
-      <p className="text-sm text-gray-400 mb-6">Hey Paulo, what's on your mind? Here's your timeline</p>
+      <PageHeader
+        title="Timeline"
+        subtitle={<TimelineMeta entries={entries} periods={activePeriods} />}
+        actions={
+          <>
+            <StreakBadge entries={entries} />
+            <Button
+              variant="bare"
+              size="icon"
+              onClick={() => setMenuOpen(true)}
+              aria-label="Timeline menu"
+            >
+              <MoreHorizontal size={19} strokeWidth={2.25} />
+            </Button>
+          </>
+        }
+      />
+
+      <MenuSheet
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        items={[
+          {
+            icon: CalendarRange,
+            label: 'Mark a period',
+            onSelect: () => setAddOpen(true),
+          },
+        ]}
+      />
 
       <PeriodTimeline entries={entries} periods={activePeriods} onEditPeriod={setEditing} />
 
@@ -207,6 +228,20 @@ function PeriodTimeline({
   );
 }
 
+// Replaces the "Hey Paulo, what's on your mind?" line. A greeting says nothing
+// you don't already know; the shape of the archive does.
+function TimelineMeta({ entries, periods }: { entries: JournalEntry[]; periods: TimePeriod[] }) {
+  const highlights = entries.filter((e) => e.highlight).length;
+  const oldest = entries[entries.length - 1];
+  const parts = [
+    `${entries.length} day${entries.length === 1 ? '' : 's'}`,
+    highlights > 0 ? `${highlights} highlighted` : null,
+    periods.length > 0 ? `${periods.length} period${periods.length === 1 ? '' : 's'}` : null,
+    oldest ? `since ${formatDate(new Date(oldest.date + 'T00:00:00'), 'MMM yyyy')}` : null,
+  ].filter(Boolean);
+  return <>{parts.join(' · ')}</>;
+}
+
 function StreakBadge({ entries }: { entries: JournalEntry[] }) {
   const hasContent = (e: JournalEntry) =>
     e.messages.length > 0 || e.voiceMemos.length > 0 || e.images.length > 0;
@@ -224,9 +259,12 @@ function StreakBadge({ entries }: { entries: JournalEntry[] }) {
   if (streak === 0) return null;
 
   return (
-    <span className="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-orange-50 text-orange-600 text-xs font-medium">
+    <span
+      title={`${streak} day streak`}
+      className="shrink-0 inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg bg-orange-50 text-orange-600 text-xs font-medium tabular-nums"
+    >
       <Flame size={15} strokeWidth={2.5} className="fill-orange-400 text-orange-500" />
-      {streak} day{streak === 1 ? '' : 's'}
+      {streak}
     </span>
   );
 }

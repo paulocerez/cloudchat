@@ -9,7 +9,7 @@ import { useLongPress } from '~/lib/useLongPress';
 import { Sheet, SheetHeader } from '~/components/ui/Sheet';
 import { Button } from '~/components/ui/Button';
 import { AnnotatedImage } from './AnnotatedImage';
-import { ItemActionsSheet } from './ItemActionsSheet';
+import { MenuSheet } from '~/components/ui/MenuSheet';
 import { MoveToDaySheet, MoveToDayButton } from './MoveToDaySheet';
 import { VoicePlayer } from './VoicePlayer';
 import { mediaUrl } from './shared';
@@ -65,11 +65,11 @@ export function MessageBubble({ msg, date }: { msg: TextMessage; date: string })
       </div>
       {!msg.fromUser && move}
 
-      <ItemActionsSheet
+      <MenuSheet
         open={actions}
         onClose={() => setActions(false)}
         title="Message"
-        actions={[
+        items={[
           { icon: CalendarClock, label: 'Move to another day', onSelect: () => setMoving(true) },
         ]}
       />
@@ -156,11 +156,11 @@ export function VoiceBubble({
         </div>
       </div>
 
-      <ItemActionsSheet
+      <MenuSheet
         open={actions}
         onClose={() => setActions(false)}
         title="Voice memo"
-        actions={[
+        items={[
           { icon: Pencil, label: 'Edit transcription', onSelect: openEditor },
           { icon: CalendarClock, label: 'Move to another day', onSelect: () => setMoving(true) },
         ]}
