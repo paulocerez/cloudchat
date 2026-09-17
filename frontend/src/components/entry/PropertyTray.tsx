@@ -3,7 +3,6 @@ import { Film, Image as ImageIcon, MapPin, MessageSquare, Mic, Music, Plus, Star
 import type { JournalEntry } from '@cloudchat/shared';
 import { api } from '~/lib/api';
 import { extractSpotifyLinks, stripSpotifyLinks } from '~/lib/spotify';
-import pocketLogo from '~/assets/pocket-logo.png';
 import { Pill, PillTray } from '~/components/ui/Pill';
 import { useHabits } from './HabitSheet';
 import { pocketMemos, whatsappMemos, type EntrySection } from './shared';
@@ -112,8 +111,7 @@ export function PropertyTray({
         <Pill
           label={
             <span className="inline-flex items-center gap-1.5">
-              <img src={pocketLogo} alt="" className="h-3 w-auto opacity-60" />
-              {pocket.length}
+              Pocket {pocket.length}
               {pocketTasks > 0 && <span className="text-gray-400">· {pocketTasks} tasks</span>}
             </span>
           }

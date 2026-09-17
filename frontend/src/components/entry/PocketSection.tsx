@@ -3,7 +3,6 @@ import { format } from 'date-fns';
 import { Check, ChevronDown } from 'lucide-react';
 import type { JournalEntry, VoiceMemo } from '@cloudchat/shared';
 import { api } from '~/lib/api';
-import pocketLogo from '~/assets/pocket-logo.png';
 import { PocketSummary } from '~/components/PocketSummary';
 import { MoveToDayButton } from './MoveToDaySheet';
 import { VoicePlayer } from './VoicePlayer';
@@ -20,9 +19,10 @@ export function PocketSection({ entry }: { entry: JournalEntry }) {
       id={sectionId('pocket')}
       className="mt-10 pt-6 border-t border-gray-100 scroll-mt-32 animate-fade-up"
     >
-      <div className="flex items-baseline gap-2.5 mb-3">
-        <img src={pocketLogo} alt="Pocket" className="h-3.5 w-auto opacity-70" />
-        <span className="text-xs text-gray-400">
+      {/* Matches the Section headers used elsewhere on the page. */}
+      <div className="flex items-baseline gap-2 mb-3">
+        <h2 className="text-xs font-medium tracking-wide uppercase text-gray-400">Pocket</h2>
+        <span className="text-xs text-gray-300">
           {recordings.length} recording{recordings.length === 1 ? '' : 's'}
           {tasks > 0 && ` · ${tasks} action item${tasks === 1 ? '' : 's'}`}
         </span>
