@@ -12,7 +12,6 @@ import { tone } from '~/lib/periods';
 import { HabitManager } from '~/components/HabitManager';
 import { Modal, ModalHeader } from '~/components/Modal';
 import { ImageLightbox } from '~/components/ImageLightbox';
-import pocketLogo from '~/assets/pocket-logo.png';
 import { PocketSummary } from '~/components/PocketSummary';
 import { rootRoute } from './__root';
 
@@ -638,9 +637,10 @@ function PocketSection({ entry }: { entry: JournalEntry }) {
 
   return (
     <section className="mt-10 pt-6 border-t border-gray-100 animate-fade-up">
-      <div className="flex items-baseline gap-2.5 mb-3">
-        <img src={pocketLogo} alt="Pocket" className="h-3.5 w-auto opacity-70" />
-        <span className="text-xs text-gray-400">
+      {/* Matches the Section headers used elsewhere on the page. */}
+      <div className="flex items-baseline gap-2 mb-3">
+        <h2 className="text-xs font-medium tracking-wide uppercase text-gray-400">Pocket</h2>
+        <span className="text-xs text-gray-300">
           {recordings.length} recording{recordings.length === 1 ? '' : 's'}
           {tasks > 0 && ` · ${tasks} action item${tasks === 1 ? '' : 's'}`}
         </span>
