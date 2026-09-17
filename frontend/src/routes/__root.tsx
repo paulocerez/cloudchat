@@ -14,13 +14,16 @@ export const rootRoute = createRootRoute({
 
 function RootLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  // The entry page pins its own composer to the bottom edge, so the floating
+  // chat button would land on top of it — and the page reserves its own room.
+  const showChat = pathname !== '/login' && !pathname.startsWith('/entry/');
   return (
     <div className="min-h-screen text-gray-900">
       <Nav />
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 md:px-8 py-8 pb-28">
+      <main className={`max-w-2xl mx-auto px-4 sm:px-6 md:px-8 py-8 ${showChat ? 'pb-28' : ''}`}>
         <Outlet />
       </main>
-      {pathname !== '/login' && <JournalChat />}
+      {showChat && <JournalChat />}
     </div>
   );
 }

@@ -12,6 +12,18 @@ body {
   overscroll-behavior: none;
 }
 
+/* ── Touch ──────────────────────────────────────────────────── */
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+button,
+a,
+label,
+[role='button'] {
+  /* Kills the 300ms tap delay without disabling pinch-zoom on the page. */
+  touch-action: manipulation;
+}
+
 /* ── Safe area helpers ───────────────────────────────────────── */
 .safe-top    { padding-top:    env(safe-area-inset-top); }
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
@@ -153,12 +165,22 @@ body {
   transform-origin: center;
 }
 
+/* ── Bottom sheet: rises from the edge it's anchored to ─────── */
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.animate-sheet-up {
+  animation: sheet-up 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 /* ── Accessibility: gentle, non-vestibular fallbacks ────────── */
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-up,
   .animate-slide-right,
   .animate-slide-left,
   .animate-materialize,
+  .animate-sheet-up,
   .animate-pop,
   .animate-logo,
   .stagger > * {
