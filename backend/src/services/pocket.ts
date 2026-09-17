@@ -120,15 +120,18 @@ function pickSummarization(summarizations: PocketSummarizations): PocketSummariz
 }
 
 function actionItems(sum: PocketSummarization | undefined): PocketActionItem[] {
-  const raw = sum?.v2?.actionItems?.actionItems ?? [];
+  const raw = sum?.v2?.actionItems?.actions ?? sum?.v2?.actionItems?.actionItems ?? [];
   return raw
     .map((a) => {
       const item: PocketActionItem = {
-        id: a.id ?? a.globalActionItemId ?? uuidv4(),
-        title: (a.title ?? '').trim(),
+        // `id` is only unique within a recording ("1", "2"…), so prefer the global one.
+        id: a.globalActionItemId ?? a.id ?? uuidv4(),
+        title: (a.label ?? a.title ?? '').trim(),
         isCompleted: Boolean(a.isCompleted ?? a.is_completed ?? a.status === 'DONE'),
       };
       if (a.dueDate) item.dueDate = a.dueDate;
+      if (a.context) item.context = a.context.trim();
+      if (a.priority) item.priority = a.priority;
       return item;
     })
     .filter((a) => a.title);

@@ -54,6 +54,8 @@ export interface PocketActionItem {
   title: string;
   dueDate?: string;
   isCompleted: boolean;
+  context?: string; // Pocket's one-line justification for the item
+  priority?: string; // 'high' | 'medium' | 'low'
 }
 
 export interface JournalImage {
@@ -186,6 +188,19 @@ export type PocketTranscript =
   | string
   | null;
 
+export interface PocketApiActionItem {
+  id?: string;
+  globalActionItemId?: string;
+  label?: string; // live API
+  title?: string; // documented webhook shape
+  context?: string;
+  priority?: string;
+  dueDate?: string | null;
+  status?: string;
+  isCompleted?: boolean;
+  is_completed?: boolean;
+}
+
 export interface PocketSummarization {
   id?: string;
   summarizationId?: string;
@@ -198,16 +213,11 @@ export interface PocketSummarization {
       markdown?: string;
       bulletPoints?: string[];
     };
+    // The live API nests these under `actions` with a `label`, while the
+    // published webhook docs show `actionItems` with a `title`. Accept both.
     actionItems?: {
-      actionItems?: Array<{
-        id?: string;
-        globalActionItemId?: string;
-        title?: string;
-        dueDate?: string;
-        status?: string;
-        isCompleted?: boolean;
-        is_completed?: boolean;
-      }>;
+      actions?: PocketApiActionItem[];
+      actionItems?: PocketApiActionItem[];
     };
   };
 }

@@ -54,6 +54,8 @@ export interface PocketActionItem {
   title: string;
   dueDate?: string;
   isCompleted: boolean;
+  context?: string; // Pocket's one-line justification for the item
+  priority?: string; // 'high' | 'medium' | 'low'
 }
 
 export interface JournalImage {

@@ -711,12 +711,22 @@ function PocketCard({ memo, date }: { memo: VoiceMemo; date: string }) {
                 >
                   {item.isCompleted && <Check size={11} strokeWidth={3} className="text-white" />}
                 </span>
-                <span
-                  className={item.isCompleted ? 'text-gray-400 line-through' : 'text-gray-700'}
-                >
-                  {item.title}
+                <span className="min-w-0">
+                  <span
+                    className={item.isCompleted ? 'text-gray-400 line-through' : 'text-gray-700'}
+                  >
+                    {item.title}
+                  </span>
+                  {item.priority === 'high' && !item.isCompleted && (
+                    <span className="text-xs text-amber-600 ml-1.5">high</span>
+                  )}
                   {item.dueDate && (
                     <span className="text-xs text-gray-400 ml-1.5">due {item.dueDate}</span>
+                  )}
+                  {item.context && (
+                    <span className="block text-xs text-gray-400 leading-relaxed mt-0.5">
+                      {item.context}
+                    </span>
                   )}
                 </span>
               </li>
