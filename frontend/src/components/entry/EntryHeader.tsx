@@ -35,9 +35,10 @@ export function EntryHeader({
   useEffect(() => {
     const el = titleRef.current;
     if (!el) return;
+    // This bar is 40px; on `sm` and up the 56px nav sits above it too.
+    const offset = window.matchMedia('(min-width: 640px)').matches ? 96 : 40;
     const io = new IntersectionObserver(([e]) => setTitleHidden(!e.isIntersecting), {
-      // The nav (56px) plus this bar (48px) sit above the scroll port.
-      rootMargin: '-104px 0px 0px 0px',
+      rootMargin: `-${offset}px 0px 0px 0px`,
       threshold: 0,
     });
     io.observe(el);
@@ -51,7 +52,9 @@ export function EntryHeader({
 
   return (
     <>
-      <div className="sticky top-14 z-20 -mx-4 sm:-mx-6 md:-mx-8 -mt-8 px-4 sm:px-6 md:px-8 pt-8 pb-2 bg-white/70 backdrop-blur-xl backdrop-saturate-150 glass-surface [mask-image:linear-gradient(to_bottom,black_calc(100%-14px),transparent)]">
+      {/* Below `sm` the global nav hides on detail screens, so this is the only
+          bar and it owns the top edge. From `sm` up it tucks under the nav. */}
+      <div className="sticky top-0 sm:top-14 z-20 -mx-4 sm:-mx-6 md:-mx-8 -mt-8 px-4 sm:px-6 md:px-8 pt-8 pb-2 bg-white/70 backdrop-blur-xl backdrop-saturate-150 glass-surface [mask-image:linear-gradient(to_bottom,black_calc(100%-14px),transparent)]">
         <div className="flex items-center gap-2 h-10">
           <Button variant="icon" size="icon" onClick={goBack} aria-label="Back">
             <ChevronLeft size={19} strokeWidth={2.25} />

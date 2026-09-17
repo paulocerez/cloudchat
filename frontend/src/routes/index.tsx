@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { MessageCircle, Mic, Image as ImageIcon, Music, MapPin, Flame, CalendarRange, MoreHorizontal, Plus, Film, Play } from 'lucide-react';
+import { MessageCircle, Mic, Image as ImageIcon, Music, MapPin, Flame, CalendarRange, Plus, Film, Play } from 'lucide-react';
 import { subDays, format as formatDate } from 'date-fns';
 import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
@@ -11,7 +11,6 @@ import { tone, coversDate } from '~/lib/periods';
 import { SpotifyChip } from '~/components/SpotifyChip';
 import { PeriodDialog } from '~/components/PeriodDialog';
 import { Button } from '~/components/ui/Button';
-import { MenuSheet } from '~/components/ui/MenuSheet';
 import { PageHeader } from '~/components/ui/PageHeader';
 import type { JournalEntry, TextMessage, VoiceMemo, JournalImage, JournalVideo, TimePeriod } from '@cloudchat/shared';
 import { rootRoute } from './__root';
@@ -33,7 +32,6 @@ function Timeline() {
   });
 
   const [addOpen, setAddOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [editing, setEditing] = useState<TimePeriod | null>(null);
 
   // The nav no longer names the page on a phone, so the heading stays put even
@@ -56,28 +54,19 @@ function Timeline() {
         actions={
           <>
             <StreakBadge entries={entries} />
+            {/* An explicit button, not a second "…" — the nav already owns that
+                glyph, and two of them in one corner reads as a mistake. */}
             <Button
               variant="bare"
               size="icon"
-              onClick={() => setMenuOpen(true)}
-              aria-label="Timeline menu"
+              onClick={() => setAddOpen(true)}
+              title="Mark a period"
+              aria-label="Mark a period"
             >
-              <MoreHorizontal size={19} strokeWidth={2.25} />
+              <CalendarRange size={18} strokeWidth={2} />
             </Button>
           </>
         }
-      />
-
-      <MenuSheet
-        open={menuOpen}
-        onClose={() => setMenuOpen(false)}
-        items={[
-          {
-            icon: CalendarRange,
-            label: 'Mark a period',
-            onSelect: () => setAddOpen(true),
-          },
-        ]}
       />
 
       <PeriodTimeline entries={entries} periods={activePeriods} onEditPeriod={setEditing} />

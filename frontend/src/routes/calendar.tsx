@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight, MoreHorizontal, Star, CalendarRange, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Star, CalendarRange, X } from 'lucide-react';
 import {
   startOfMonth,
   endOfMonth,
@@ -17,7 +17,6 @@ import { api } from '~/lib/api';
 import { tone, coversDate } from '~/lib/periods';
 import { PeriodDialog } from '~/components/PeriodDialog';
 import { Button } from '~/components/ui/Button';
-import { MenuSheet } from '~/components/ui/MenuSheet';
 import { PageHeader } from '~/components/ui/PageHeader';
 import type { JournalEntry, TimePeriod } from '@cloudchat/shared';
 import { rootRoute } from './__root';
@@ -34,7 +33,6 @@ const MAX_BARS = 3; // period bars stacked under a single day cell
 function CalendarPage() {
   const [month, setMonth] = useState(() => startOfMonth(new Date()));
   const [selecting, setSelecting] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [rangeStart, setRangeStart] = useState<string | null>(null);
   const [draftRange, setDraftRange] = useState<{ startDate: string; endDate: string } | null>(null);
   const [editing, setEditing] = useState<TimePeriod | null>(null);
@@ -104,21 +102,14 @@ function CalendarPage() {
             <Button
               variant="bare"
               size="icon"
-              onClick={() => setMenuOpen(true)}
-              aria-label="Calendar menu"
+              onClick={() => setSelecting(true)}
+              title="Mark a period"
+              aria-label="Mark a period"
             >
-              <MoreHorizontal size={19} strokeWidth={2.25} />
+              <CalendarRange size={18} strokeWidth={2} />
             </Button>
           </>
         }
-      />
-
-      <MenuSheet
-        open={menuOpen}
-        onClose={() => setMenuOpen(false)}
-        items={[
-          { icon: CalendarRange, label: 'Mark a period', onSelect: () => setSelecting(true) },
-        ]}
       />
 
       {/* Range picking is a mode, so it gets a banner you can't miss — and an

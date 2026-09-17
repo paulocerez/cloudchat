@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { createRoute, Link } from '@tanstack/react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { WandSparkles } from 'lucide-react';
 import { api } from '~/lib/api';
+import { ActionsBlock } from '~/components/entry/ActionsBlock';
 import { Composer } from '~/components/entry/Composer';
 import { EditEntrySheet } from '~/components/entry/EditEntrySheet';
 import { EntryActionsSheet } from '~/components/entry/EntryActionsSheet';
@@ -11,10 +12,9 @@ import { HabitSheet } from '~/components/entry/HabitSheet';
 import { LocationSheet } from '~/components/entry/LocationSheet';
 import { OrganizedView } from '~/components/entry/OrganizedView';
 import { PocketSection } from '~/components/entry/PocketSection';
-import { PropertyTray } from '~/components/entry/PropertyTray';
 import { TimelineView } from '~/components/entry/TimelineView';
+import { TodosSheet } from '~/components/entry/TodosSheet';
 import { ViewToggle, type ViewMode } from '~/components/entry/ViewToggle';
-import { sectionId, type EntrySection } from '~/components/entry/shared';
 import { useVideoUpload, VideoUploadStatus } from '~/components/entry/useVideoUpload';
 import { rootRoute } from './__root';
 
@@ -24,7 +24,7 @@ export const entryDateRoute = createRoute({
   component: EntryPage,
 });
 
-type OpenSheet = 'edit' | 'actions' | 'places' | 'habits' | null;
+type OpenSheet = 'edit' | 'actions' | 'places' | 'habits' | 'todos' | null;
 
 function EntryPage() {
   const { date } = entryDateRoute.useParams();
@@ -37,28 +37,12 @@ function EntryPage() {
   };
 
   const [sheet, setSheet] = useState<OpenSheet>(null);
-  const [pendingJump, setPendingJump] = useState<EntrySection | null>(null);
   const video = useVideoUpload(date);
 
   const { data: entry, isLoading, isError } = useQuery({
     queryKey: ['entry', date],
     queryFn: () => api.entries.get(date),
   });
-
-  // A count pill jumps to its block. Everything but Pocket only has a heading
-  // in the organized view, so switch there first and scroll on the next render.
-  useEffect(() => {
-    if (!pendingJump) return;
-    document
-      .getElementById(sectionId(pendingJump))
-      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    setPendingJump(null);
-  }, [pendingJump, view]);
-
-  const jump = (section: EntrySection) => {
-    if (section !== 'pocket' && view !== 'organized') setViewMode('organized');
-    setPendingJump(section);
-  };
 
   if (isLoading)
     return (
@@ -88,12 +72,11 @@ function EntryPage() {
 
       {/* Clears the fixed composer, plus the home indicator underneath it. */}
       <div className="animate-fade-up pb-[calc(4.5rem+env(safe-area-inset-bottom))]">
-        <PropertyTray
+        <ActionsBlock
           entry={entry}
           onOpenPlaces={() => setSheet('places')}
           onOpenHabits={() => setSheet('habits')}
-          onOpenActions={() => setSheet('actions')}
-          onJump={jump}
+          onOpenTodos={() => setSheet('todos')}
         />
 
         <div className="mt-4">
@@ -119,6 +102,7 @@ function EntryPage() {
 
       <EditEntrySheet entry={entry} open={sheet === 'edit'} onClose={() => setSheet(null)} />
       <LocationSheet entry={entry} open={sheet === 'places'} onClose={() => setSheet(null)} />
+      <TodosSheet entry={entry} open={sheet === 'todos'} onClose={() => setSheet(null)} />
       <HabitSheet
         date={entry.date}
         habitsDone={entry.habitsDone ?? []}

@@ -1,9 +1,14 @@
+import { useEffect, useRef } from 'react';
 import { cn } from '~/lib/utils';
+import { usePageTitle } from '~/lib/pageTitle';
 
 /**
  * One heading shape for every route. Pages used to disagree — the timeline was
  * text-2xl bold, everything else text-lg semibold — which made the app feel
  * like four apps once the nav stopped carrying the page name.
+ *
+ * It also hands its title to the nav, which shows a compact copy once this one
+ * has scrolled away.
  */
 export function PageHeader({
   eyebrow,
@@ -13,11 +18,35 @@ export function PageHeader({
   className,
 }: {
   eyebrow?: React.ReactNode;
-  title: React.ReactNode;
+  title: string;
   subtitle?: React.ReactNode;
   actions?: React.ReactNode;
   className?: string;
 }) {
+  const { setTitle, setCompact } = usePageTitle();
+  const ref = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    setTitle(title);
+    return () => {
+      setTitle('');
+      setCompact(false);
+    };
+  }, [title, setTitle, setCompact]);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    // The nav is 56px tall and sticky, so the handover happens exactly as the
+    // large title passes under it.
+    const io = new IntersectionObserver(([e]) => setCompact(!e.isIntersecting), {
+      rootMargin: '-56px 0px 0px 0px',
+      threshold: 0,
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [setCompact]);
+
   return (
     <header className={cn('mb-6', className)}>
       {/* Wraps rather than squeezes: the calendar's month stepper drops onto
@@ -30,7 +59,10 @@ export function PageHeader({
               {eyebrow}
             </p>
           )}
-          <h1 className="text-2xl font-bold text-gray-900 tracking-[-0.02em] leading-[1.1] [font-optical-sizing:auto] text-balance">
+          <h1
+            ref={ref}
+            className="text-[26px] font-bold text-gray-900 tracking-[-0.03em] leading-[1.15] [font-optical-sizing:auto] text-balance"
+          >
             {title}
           </h1>
         </div>
