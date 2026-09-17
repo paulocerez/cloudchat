@@ -5,14 +5,15 @@ import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
 import { extractSpotifyLinks, spotifyEmbedUrl, stripSpotifyLinks, type SpotifyLink } from '~/lib/spotify';
 import { staticMapUrl } from '~/lib/mapbox';
-import { MapPin, Star, WandSparkles, List, LayoutGrid, MessageSquare, Image as ImageIcon, Mic, Music, Film, Upload, Pencil, X, Plus, Check, SlidersHorizontal, CalendarClock, Play, Pause } from 'lucide-react';
+import { MapPin, Star, WandSparkles, List, LayoutGrid, MessageSquare, Image as ImageIcon, Mic, Music, Film, Upload, Pencil, X, Plus, Check, SlidersHorizontal, CalendarClock, Play, Pause, ChevronDown } from 'lucide-react';
 import type { JournalEntry, TextMessage, VoiceMemo, JournalImage, JournalVideo, Habit } from '@cloudchat/shared';
 import { format, startOfWeek, endOfWeek } from 'date-fns';
 import { tone } from '~/lib/periods';
 import { HabitManager } from '~/components/HabitManager';
 import { Modal, ModalHeader } from '~/components/Modal';
 import { ImageLightbox } from '~/components/ImageLightbox';
-import pocketLogo from '~/assets/pocket-logo.jpg';
+import pocketLogo from '~/assets/pocket-logo.png';
+import { PocketSummary } from '~/components/PocketSummary';
 import { rootRoute } from './__root';
 
 export const entryDateRoute = createRoute({
@@ -616,149 +617,172 @@ function whatsappMemos(entry: JournalEntry): VoiceMemo[] {
   return entry.voiceMemos.filter((m) => !isPocket(m));
 }
 
+// Recordings run to the hour, so show h:mm rather than a bare minute count.
 function formatDuration(seconds?: number): string | null {
   if (!seconds || seconds <= 0) return null;
-  const m = Math.floor(seconds / 60);
-  const s = Math.round(seconds % 60);
-  return `${m}:${String(s).padStart(2, '0')}`;
+  const total = Math.round(seconds);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  return m > 0 ? `${m} min` : '<1 min';
 }
 
 function PocketSection({ entry }: { entry: JournalEntry }) {
-  const recordings = entry.voiceMemos.filter(isPocket);
+  const recordings = entry.voiceMemos
+    .filter(isPocket)
+    .slice()
+    .sort((a, b) => a.timestamp.localeCompare(b.timestamp));
   if (recordings.length === 0) return null;
+
+  const tasks = recordings.reduce((n, m) => n + (m.actionItems?.length ?? 0), 0);
 
   return (
     <section className="mt-10 pt-6 border-t border-gray-100 animate-fade-up">
-      <div className="flex items-center gap-2 mb-4">
-        <img
-          src={pocketLogo}
-          alt="Pocket"
-          className="h-6 w-auto rounded-md border border-gray-200"
-        />
-        <span className="text-xs text-gray-300">{recordings.length}</span>
+      <div className="flex items-baseline gap-2.5 mb-3">
+        <img src={pocketLogo} alt="Pocket" className="h-3.5 w-auto opacity-70" />
+        <span className="text-xs text-gray-400">
+          {recordings.length} recording{recordings.length === 1 ? '' : 's'}
+          {tasks > 0 && ` · ${tasks} action item${tasks === 1 ? '' : 's'}`}
+        </span>
       </div>
-      <div className="space-y-3">
-        {recordings
-          .slice()
-          .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
-          .map((memo) => (
-            <PocketCard key={memo.id} memo={memo} date={entry.date} />
-          ))}
+      {/* One hairline-separated list rather than 7 boxes — at a recording an
+          hour, stacked cards turn the foot of the page into a wall. */}
+      <div className="rounded-2xl border border-gray-200 bg-white divide-y divide-gray-100 overflow-hidden">
+        {recordings.map((memo) => (
+          <PocketCard key={memo.id} memo={memo} date={entry.date} />
+        ))}
       </div>
     </section>
   );
 }
 
+// Collapsed a recording shows only what's scannable — time, title, and the
+// tasks it produced. The summary and hour-long transcript stay folded away.
 function PocketCard({ memo, date }: { memo: VoiceMemo; date: string }) {
+  const [open, setOpen] = useState(false);
   const [showTranscript, setShowTranscript] = useState(false);
   const time = format(new Date(memo.timestamp), 'HH:mm');
   const duration = formatDuration(memo.duration);
+  const items = memo.actionItems ?? [];
   // Signed Pocket audio URLs expire, so the backend mints a fresh one per play.
   const src = `${import.meta.env.VITE_API_URL ?? ''}/api/media/pocket/${memo.pocketRecordingId ?? memo.mediaId}`;
 
   return (
-    <article className="rounded-2xl border border-gray-200 bg-white p-4 hover:border-gray-300 transition-colors duration-150">
-      <header className="flex items-start justify-between gap-2 mb-3">
-        <div className="min-w-0">
-          {memo.title && (
-            <h3 className="text-sm font-semibold text-gray-900 leading-snug">{memo.title}</h3>
-          )}
-          <p className="text-xs text-gray-400 mt-0.5">
-            {time}
-            {duration && ` · ${duration}`}
-            {memo.language && ` · ${memo.language}`}
-          </p>
-        </div>
-        <MoveToDayButton
-          date={date}
-          title="Move recording"
-          label="Move this recording to"
-          move={(toDate) => api.entries.moveVoiceMemo(date, memo.id, toDate)}
+    <article className="group">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-gray-50/70 transition-colors duration-150"
+      >
+        <span className="shrink-0 w-11 pt-0.5 text-xs tabular-nums text-gray-400">{time}</span>
+        <span className="flex-1 min-w-0">
+          <span className="block text-sm font-medium text-gray-900 leading-snug">
+            {memo.title || 'Recording'}
+          </span>
+          <span className="block text-xs text-gray-400 mt-0.5">
+            {duration}
+            {items.length > 0 && ` · ${items.length} action item${items.length === 1 ? '' : 's'}`}
+          </span>
+        </span>
+        <ChevronDown
+          size={15}
+          strokeWidth={2}
+          className={`shrink-0 mt-0.5 text-gray-300 group-hover:text-gray-500 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
         />
-      </header>
+      </button>
 
-      <VoicePlayer src={src} time={time} />
-
-      {memo.summaryMarkdown && (
-        <div className="mt-3 space-y-2">
-          {renderMarkdownBlocks(memo.summaryMarkdown)}
-        </div>
-      )}
-
-      {memo.bulletPoints && memo.bulletPoints.length > 0 && (
-        <ul className="mt-3 space-y-1.5">
-          {memo.bulletPoints.map((point, i) => (
-            <li key={i} className="flex gap-2 text-sm text-gray-700 leading-relaxed">
-              <span className="text-gray-300 select-none">•</span>
-              <span>{point}</span>
+      {/* Action items are the payload of a recording — always visible, indented
+          to line up with the title above. */}
+      {items.length > 0 && (
+        <ul className="px-4 pb-3 pl-[4.25rem] space-y-1.5">
+          {items.map((item) => (
+            <li key={item.id} className="flex items-start gap-2 text-sm">
+              <span
+                className={`mt-[3px] shrink-0 w-3.5 h-3.5 rounded-[4px] border flex items-center justify-center ${
+                  item.isCompleted ? 'bg-gray-900 border-gray-900' : 'border-gray-300'
+                }`}
+              >
+                {item.isCompleted && <Check size={9} strokeWidth={3.5} className="text-white" />}
+              </span>
+              <span className="min-w-0">
+                <span className={item.isCompleted ? 'text-gray-400 line-through' : 'text-gray-700'}>
+                  {item.title}
+                </span>
+                {item.priority === 'high' && !item.isCompleted && (
+                  <span className="text-[11px] text-amber-600 ml-1.5 align-[1px]">high</span>
+                )}
+                {item.dueDate && (
+                  <span className="text-[11px] text-gray-400 ml-1.5 align-[1px]">
+                    due {item.dueDate}
+                  </span>
+                )}
+                {open && item.context && (
+                  <span className="block text-xs text-gray-400 leading-relaxed mt-0.5">
+                    {item.context}
+                  </span>
+                )}
+              </span>
             </li>
           ))}
         </ul>
       )}
 
-      {memo.actionItems && memo.actionItems.length > 0 && (
-        <div className="mt-4">
-          <p className="text-xs font-medium tracking-wide uppercase text-gray-400 mb-2">
-            Action items
-          </p>
-          <ul className="space-y-1.5">
-            {memo.actionItems.map((item) => (
-              <li key={item.id} className="flex items-start gap-2 text-sm">
+      {open && (
+        <div className="px-4 pb-4 pl-[4.25rem] space-y-3 animate-fade-up">
+          {/* No trailing clock label — the row header above already shows it,
+              and next to the elapsed counter it reads as a duration. */}
+          <VoicePlayer src={src} time="" />
+
+          {memo.summaryMarkdown && <PocketSummary markdown={memo.summaryMarkdown} />}
+
+          {memo.bulletPoints && memo.bulletPoints.length > 0 && (
+            <ul className="space-y-1.5">
+              {memo.bulletPoints.map((point, i) => (
+                <li key={i} className="flex gap-2 text-sm text-gray-700 leading-relaxed">
+                  <span className="text-gray-300 select-none">•</span>
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {memo.tags && memo.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {memo.tags.map((tag) => (
                 <span
-                  className={`mt-0.5 shrink-0 w-4 h-4 rounded border flex items-center justify-center ${
-                    item.isCompleted ? 'bg-gray-900 border-gray-900' : 'border-gray-300'
-                  }`}
+                  key={tag}
+                  className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500"
                 >
-                  {item.isCompleted && <Check size={11} strokeWidth={3} className="text-white" />}
+                  {tag}
                 </span>
-                <span className="min-w-0">
-                  <span
-                    className={item.isCompleted ? 'text-gray-400 line-through' : 'text-gray-700'}
-                  >
-                    {item.title}
-                  </span>
-                  {item.priority === 'high' && !item.isCompleted && (
-                    <span className="text-xs text-amber-600 ml-1.5">high</span>
-                  )}
-                  {item.dueDate && (
-                    <span className="text-xs text-gray-400 ml-1.5">due {item.dueDate}</span>
-                  )}
-                  {item.context && (
-                    <span className="block text-xs text-gray-400 leading-relaxed mt-0.5">
-                      {item.context}
-                    </span>
-                  )}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+              ))}
+            </div>
+          )}
 
-      {memo.tags && memo.tags.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {memo.tags.map((tag) => (
-            <span
-              key={tag}
-              className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500"
-            >
-              {tag}
+          <div className="flex items-center gap-3">
+            {memo.transcription && (
+              <button
+                type="button"
+                onClick={() => setShowTranscript((v) => !v)}
+                className="text-xs text-gray-400 hover:text-gray-700 transition-colors"
+              >
+                {showTranscript ? 'Hide transcript' : 'Show transcript'}
+              </button>
+            )}
+            {memo.language && <span className="text-xs text-gray-300">{memo.language}</span>}
+            <span className="ml-auto">
+              <MoveToDayButton
+                date={date}
+                title="Move recording"
+                label="Move this recording to"
+                move={(toDate) => api.entries.moveVoiceMemo(date, memo.id, toDate)}
+              />
             </span>
-          ))}
-        </div>
-      )}
+          </div>
 
-      {memo.transcription && (
-        <div className="mt-3 pt-3 border-t border-gray-100">
-          <button
-            type="button"
-            onClick={() => setShowTranscript((v) => !v)}
-            className="text-xs text-gray-400 hover:text-gray-700 transition-colors"
-          >
-            {showTranscript ? 'Hide transcript' : 'Show transcript'}
-          </button>
-          {showTranscript && (
-            <p className="mt-2 text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
+          {showTranscript && memo.transcription && (
+            <p className="text-sm text-gray-500 leading-relaxed whitespace-pre-wrap max-h-96 overflow-y-auto pr-1">
               {memo.transcription}
             </p>
           )}
@@ -766,48 +790,6 @@ function PocketCard({ memo, date }: { memo: VoiceMemo; date: string }) {
       )}
     </article>
   );
-}
-
-// Pocket's summary arrives as markdown. Rather than pull in a renderer, split
-// it the way weekly summaries are split and strip the leading list/heading
-// markers — the content is plain prose and bullets.
-function renderMarkdownBlocks(markdown: string) {
-  return markdown
-    .split('\n\n')
-    .map((block) => block.trim())
-    .filter(Boolean)
-    .map((block, i) => {
-      const heading = block.match(/^#{1,6}\s+(.*)$/);
-      if (heading) {
-        return (
-          <p key={i} className="text-xs font-medium tracking-wide uppercase text-gray-400">
-            {heading[1]}
-          </p>
-        );
-      }
-      const lines = block.split('\n').map((l) => l.trim());
-      if (lines.every((l) => /^[-*]\s+/.test(l))) {
-        return (
-          <ul key={i} className="space-y-1.5">
-            {lines.map((l, j) => (
-              <li key={j} className="flex gap-2 text-sm text-gray-700 leading-relaxed">
-                <span className="text-gray-300 select-none">•</span>
-                <span>{stripEmphasis(l.replace(/^[-*]\s+/, ''))}</span>
-              </li>
-            ))}
-          </ul>
-        );
-      }
-      return (
-        <p key={i} className="text-sm text-gray-700 leading-relaxed">
-          {stripEmphasis(block)}
-        </p>
-      );
-    });
-}
-
-function stripEmphasis(text: string): string {
-  return text.replace(/\*\*(.+?)\*\*/g, '$1').replace(/(?<!\*)\*(?!\*)(.+?)\*(?!\*)/g, '$1');
 }
 
 function Section({
