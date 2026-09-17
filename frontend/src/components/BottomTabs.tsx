@@ -10,7 +10,7 @@ export function BottomTabs() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
-    <nav className="sm:hidden fixed bottom-0 inset-x-0 z-40 border-t border-gray-900/[0.06] bg-white/80 backdrop-blur-xl backdrop-saturate-150 glass-surface">
+    <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-gray-900/[0.06] bg-white/80 backdrop-blur-xl backdrop-saturate-150 glass-surface">
       <div className="max-w-2xl mx-auto grid grid-cols-3 pb-[env(safe-area-inset-bottom)]">
         {TABS.map(({ to, label, Icon }) => {
           const active = isTabActive(to, pathname);

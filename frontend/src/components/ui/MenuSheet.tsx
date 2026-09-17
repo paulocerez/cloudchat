@@ -31,6 +31,7 @@ export function MenuSheet({
   items,
   closeOnSelect = true,
   anchorRef,
+  align = 'end',
 }: {
   open: boolean;
   onClose: () => void;
@@ -40,6 +41,8 @@ export function MenuSheet({
   closeOnSelect?: boolean;
   /** Anchor for the desktop dropdown. Without it, desktop gets the dialog. */
   anchorRef?: React.RefObject<HTMLElement | null>;
+  /** Which edge of the anchor the dropdown lines up with. */
+  align?: 'start' | 'end';
 }) {
   const compact = useIsCompact();
 
@@ -50,7 +53,7 @@ export function MenuSheet({
 
   if (anchorRef && !compact) {
     return (
-      <AnchoredMenu open={open} onClose={onClose} anchorRef={anchorRef}>
+      <AnchoredMenu open={open} onClose={onClose} anchorRef={anchorRef} align={align}>
         {items.map((item) => (
           <button
             key={item.label}
@@ -114,14 +117,16 @@ function AnchoredMenu({
   open,
   onClose,
   anchorRef,
+  align,
   children,
 }: {
   open: boolean;
   onClose: () => void;
   anchorRef: React.RefObject<HTMLElement | null>;
+  align: 'start' | 'end';
   children: React.ReactNode;
 }) {
-  const [pos, setPos] = useState<{ top: number; right: number } | null>(null);
+  const [pos, setPos] = useState<React.CSSProperties | null>(null);
 
   useEscape(open, onClose);
 
@@ -130,7 +135,11 @@ function AnchoredMenu({
     const place = () => {
       const r = anchorRef.current?.getBoundingClientRect();
       if (!r) return;
-      setPos({ top: r.bottom + 8, right: Math.max(8, window.innerWidth - r.right) });
+      setPos(
+        align === 'start'
+          ? { top: r.bottom + 6, left: Math.max(8, r.left) }
+          : { top: r.bottom + 6, right: Math.max(8, window.innerWidth - r.right) }
+      );
     };
     place();
     window.addEventListener('resize', place);
@@ -139,7 +148,7 @@ function AnchoredMenu({
       window.removeEventListener('resize', place);
       window.removeEventListener('scroll', place, true);
     };
-  }, [open, anchorRef]);
+  }, [open, anchorRef, align]);
 
   if (!open || !pos) return null;
 
@@ -149,8 +158,8 @@ function AnchoredMenu({
       <div className="fixed inset-0 z-[88]" onClick={onClose} />
       <div
         role="menu"
-        style={{ top: pos.top, right: pos.right }}
-        className="fixed z-[90] min-w-[11rem] rounded-xl bg-white p-1 shadow-xl ring-1 ring-gray-900/[0.08] origin-top-right animate-fade-up"
+        style={pos}
+        className="fixed z-[90] min-w-[11rem] rounded-xl bg-white p-1 shadow-xl ring-1 ring-gray-900/[0.08] animate-fade-up"
       >
         {children}
       </div>

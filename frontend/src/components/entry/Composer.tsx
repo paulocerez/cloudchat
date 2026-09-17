@@ -24,7 +24,8 @@ export function Composer({ date, onAdd }: { date: string; onAdd: () => void }) {
   const canSend = content.trim().length > 0 && !isPending;
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-40 border-t border-gray-900/[0.06] bg-white/80 backdrop-blur-xl backdrop-saturate-150 glass-surface">
+    // Inset past the desktop rail, or it lies across the sidebar's own rows.
+    <div className="fixed bottom-0 right-0 left-0 lg:left-56 z-40 border-t border-gray-900/[0.06] bg-white/80 backdrop-blur-xl backdrop-saturate-150 glass-surface">
       <form
         onSubmit={(e) => {
           e.preventDefault();

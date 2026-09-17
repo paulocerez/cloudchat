@@ -35,10 +35,10 @@ export function EntryHeader({
   useEffect(() => {
     const el = titleRef.current;
     if (!el) return;
-    // This bar is 40px; on `sm` and up the 56px nav sits above it too.
-    const offset = window.matchMedia('(min-width: 640px)').matches ? 96 : 40;
+    // Detail screens hide the top bar at every width, so this 40px bar is the
+    // only thing above the scroll port.
     const io = new IntersectionObserver(([e]) => setTitleHidden(!e.isIntersecting), {
-      rootMargin: `-${offset}px 0px 0px 0px`,
+      rootMargin: '-40px 0px 0px 0px',
       threshold: 0,
     });
     io.observe(el);
@@ -52,9 +52,12 @@ export function EntryHeader({
 
   return (
     <>
-      {/* Below `sm` the global nav hides on detail screens, so this is the only
-          bar and it owns the top edge. From `sm` up it tucks under the nav. */}
-      <div className="sticky top-0 sm:top-14 z-20 -mx-4 sm:-mx-6 md:-mx-8 -mt-8 px-4 sm:px-6 md:px-8 pt-8 pb-2 bg-white/70 backdrop-blur-xl backdrop-saturate-150 glass-surface [mask-image:linear-gradient(to_bottom,black_calc(100%-14px),transparent)]">
+      {/* The global top bar steps aside on detail screens, and the desktop rail
+          is a column beside us, so this owns the top edge at every width.
+          The scroll-edge fade is a sibling gradient rather than a mask-image on
+          this element: masking a backdrop-filter makes Chromium composite
+          garbage into the bar. */}
+      <div className="sticky top-0 z-20 relative -mx-4 sm:-mx-6 md:-mx-8 -mt-8 px-4 sm:px-6 md:px-8 pt-8 pb-2 bg-white/70 backdrop-blur-xl backdrop-saturate-150 glass-surface">
         <div className="flex items-center gap-2 h-10">
           <Button variant="icon" size="icon" onClick={goBack} aria-label="Back">
             <ChevronLeft size={19} strokeWidth={2.25} />
@@ -76,6 +79,11 @@ export function EntryHeader({
             <MoreHorizontal size={18} strokeWidth={2.25} />
           </Button>
         </div>
+        {/* Content dissolves into the glass instead of hitting a hard edge. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-full h-4 bg-gradient-to-b from-white/70 to-transparent"
+        />
       </div>
 
       <div ref={titleRef} className="pt-4 animate-fade-up">
