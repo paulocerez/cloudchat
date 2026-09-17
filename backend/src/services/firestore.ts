@@ -161,6 +161,36 @@ export async function updateVoiceMemoTranscription(
   return (await ref.get()).data() as JournalEntry;
 }
 
+// ── Pocket AI recordings ────────────────────────────────────
+// Webhook delivery is at-least-once and several events fire per recording
+// (transcription.completed, then summary.completed…), so this merges into the
+// existing row keyed by pocketRecordingId instead of appending a duplicate.
+// The whole array is rewritten because arrayUnion can't replace an element.
+export async function upsertPocketMemo(date: string, memo: VoiceMemo): Promise<JournalEntry> {
+  await getOrCreateEntry(date);
+  const ref = db.collection('entries').doc(date);
+  const entry = (await ref.get()).data() as JournalEntry;
+  const memos = entry.voiceMemos ?? [];
+
+  const i = memos.findIndex((m) => m.pocketRecordingId === memo.pocketRecordingId);
+  // Keep the original id and any field the user edited but this event omits.
+  const next =
+    i >= 0 ? memos.map((m, j) => (j === i ? { ...m, ...memo, id: m.id } : m)) : [...memos, memo];
+
+  await ref.update({ voiceMemos: next, updatedAt: new Date().toISOString() });
+  return (await ref.get()).data() as JournalEntry;
+}
+
+export async function removePocketMemo(date: string, recordingId: string): Promise<void> {
+  const ref = db.collection('entries').doc(date);
+  const snap = await ref.get();
+  if (!snap.exists) return;
+  const entry = snap.data() as JournalEntry;
+  const memos = (entry.voiceMemos ?? []).filter((m) => m.pocketRecordingId !== recordingId);
+  if (memos.length === (entry.voiceMemos ?? []).length) return;
+  await ref.update({ voiceMemos: memos, updatedAt: new Date().toISOString() });
+}
+
 export async function updateImageAnnotation(
   date: string,
   imageId: string,

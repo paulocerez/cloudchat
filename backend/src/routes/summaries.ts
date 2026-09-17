@@ -10,19 +10,10 @@ import {
 import { generateSummary, generateDaySummary } from '../services/groq';
 import { geocodePlaces } from '../services/mapbox';
 import { AISummary } from '../types';
+import { berlinToday } from '../utils/date';
 import { v4 as uuidv4 } from 'uuid';
 
 const router = Router();
-
-// Today's date in the Europe/Berlin timezone (YYYY-MM-DD).
-function berlinToday(): string {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Europe/Berlin',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(new Date());
-}
 
 // Generate + store the daily summary on the entry. Invoked by the Vercel cron
 // each night; also callable manually with ?date=YYYY-MM-DD to (re)generate.

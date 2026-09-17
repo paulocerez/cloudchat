@@ -45,6 +45,20 @@ const FIELDS: {
     hint: 'Your own number, country code, no + (used for the self-chat)',
     placeholder: '4917612345678',
   },
+  {
+    key: 'pocketApiKey',
+    label: 'Pocket API Key',
+    hint: 'pk_… from your Pocket account — reads recordings and audio',
+    sensitive: true,
+    placeholder: 'pk_xxxxxxxx…',
+  },
+  {
+    key: 'pocketWebhookSecret',
+    label: 'Pocket Webhook Secret',
+    hint: 'Signing secret Pocket shows once when you create the webhook',
+    sensitive: true,
+    placeholder: 'whsec_xxxxxxxx…',
+  },
 ];
 
 function sourceBadge(source: 'db' | 'env' | 'unset') {
@@ -86,6 +100,8 @@ export default function SettingsPage() {
         unipileAccountId: cfg.unipileAccountId,
         userPhoneNumber: cfg.userPhoneNumber,
         cronSchedule: cfg.cronSchedule,
+        pocketApiKey: '',
+        pocketWebhookSecret: '',
       });
     }
   }, [cfg]);
@@ -183,6 +199,16 @@ export default function SettingsPage() {
           )}
         </div>
       </form>
+
+      <div className="mt-12 pt-6 border-t border-gray-100">
+        <p className="text-sm font-medium text-gray-700 mb-2">Pocket webhook</p>
+        <p className="text-xs text-gray-400 leading-relaxed">
+          Point your Pocket webhook at this URL so recordings land on the day's entry:
+        </p>
+        <code className="mt-2 block text-xs text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 break-all">
+          {`${import.meta.env.VITE_API_URL ?? window.location.origin}/webhook/pocket`}
+        </code>
+      </div>
 
       <div className="mt-12 pt-6 border-t border-gray-100">
         <p className="text-sm font-medium text-gray-700 mb-3">Integrations</p>

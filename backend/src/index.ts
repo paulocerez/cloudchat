@@ -4,6 +4,7 @@ import cors from 'cors';
 import { initFirestore } from './services/firestore';
 import { initGroq } from './services/groq';
 import webhookRouter from './routes/webhook';
+import pocketWebhookRouter, { pocketApiRouter } from './routes/pocket';
 import entriesRouter from './routes/entries';
 import summariesRouter from './routes/summaries';
 import periodsRouter from './routes/periods';
@@ -18,11 +19,21 @@ const PORT = process.env.PORT ?? 3001;
 app.use(cors({ origin: process.env.FRONTEND_URL ?? 'http://localhost:5173' }));
 // Unipile mislabels webhook POSTs as application/x-www-form-urlencoded while
 // sending JSON, so parse every content-type as JSON.
-app.use(express.json({ type: () => true }));
+// Pocket signs the exact raw bytes it sent, so keep a copy before parsing.
+app.use(
+  express.json({
+    type: () => true,
+    verify: (req, _res, buf) => {
+      (req as express.Request & { rawBody?: string }).rawBody = buf.toString('utf8');
+    },
+  })
+);
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
+app.use('/webhook/pocket', pocketWebhookRouter);
 app.use('/webhook', webhookRouter);
+app.use('/api/pocket', pocketApiRouter);
 app.use('/api/entries', entriesRouter);
 app.use('/api/summaries', summariesRouter);
 app.use('/api/periods', periodsRouter);

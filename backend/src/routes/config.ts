@@ -13,6 +13,8 @@ router.get('/', async (_req: Request, res: Response) => {
     unipileAccountId: cfg.unipileAccountId ?? '',
     userPhoneNumber: cfg.userPhoneNumber ?? '',
     cronSchedule: cfg.cronSchedule ?? '',
+    pocketApiKey: cfg.pocketApiKey ? '••••••••' : '',
+    pocketWebhookSecret: cfg.pocketWebhookSecret ? '••••••••' : '',
     // tell the frontend which fields are currently set (via env or Firestore)
     _sources: {
       unipileApiKey: cfg.unipileApiKey ? 'db' : process.env.UNIPILE_API_KEY ? 'env' : 'unset',
@@ -20,6 +22,12 @@ router.get('/', async (_req: Request, res: Response) => {
       unipileAccountId: cfg.unipileAccountId ? 'db' : process.env.UNIPILE_ACCOUNT_ID ? 'env' : 'unset',
       userPhoneNumber: cfg.userPhoneNumber ? 'db' : process.env.USER_PHONE_NUMBER ? 'env' : 'unset',
       cronSchedule: cfg.cronSchedule ? 'db' : process.env.CRON_SCHEDULE ? 'env' : 'unset',
+      pocketApiKey: cfg.pocketApiKey ? 'db' : process.env.POCKET_API_KEY ? 'env' : 'unset',
+      pocketWebhookSecret: cfg.pocketWebhookSecret
+        ? 'db'
+        : process.env.POCKET_WEBHOOK_SECRET
+          ? 'env'
+          : 'unset',
     },
     // read-only presence check for env-only integration tokens
     _integrations: {

@@ -12,6 +12,7 @@ import { tone } from '~/lib/periods';
 import { HabitManager } from '~/components/HabitManager';
 import { Modal, ModalHeader } from '~/components/Modal';
 import { ImageLightbox } from '~/components/ImageLightbox';
+import pocketLogo from '~/assets/pocket-logo.jpg';
 import { rootRoute } from './__root';
 
 export const entryDateRoute = createRoute({
@@ -92,6 +93,7 @@ function EntryPage() {
         </div>
         {view === 'timeline' ? <EntryContent entry={entry} /> : <OrganizedContent entry={entry} />}
         <MessageComposer date={entry.date} />
+        <PocketSection entry={entry} />
       </div>
     </>
   );
@@ -486,9 +488,10 @@ function EntryContent({ entry }: { entry: JournalEntry }) {
     | { kind: 'image'; data: JournalImage }
     | { kind: 'video'; data: JournalVideo };
 
+  // Pocket recordings get their own block at the bottom of the page.
   const items: Item[] = [
     ...entry.messages.map((m: TextMessage): Item => ({ kind: 'message', data: m })),
-    ...entry.voiceMemos.map((v: VoiceMemo): Item => ({ kind: 'voice', data: v })),
+    ...whatsappMemos(entry).map((v: VoiceMemo): Item => ({ kind: 'voice', data: v })),
     ...entry.images.map((img: JournalImage): Item => ({ kind: 'image', data: img })),
     ...(entry.videos ?? []).map((v: JournalVideo): Item => ({ kind: 'video', data: v })),
   ].sort((a, b) => a.data.timestamp.localeCompare(b.data.timestamp));
@@ -514,10 +517,12 @@ function OrganizedContent({ entry }: { entry: JournalEntry }) {
   const textMessages = entry.messages.filter((m) => stripSpotifyLinks(m.content).length > 0);
 
   const videos = entry.videos ?? [];
+  // Pocket recordings get their own block at the bottom of the page.
+  const memos = whatsappMemos(entry);
   const isEmpty =
     songs.length === 0 &&
     entry.images.length === 0 &&
-    entry.voiceMemos.length === 0 &&
+    memos.length === 0 &&
     videos.length === 0 &&
     textMessages.length === 0;
 
@@ -569,10 +574,10 @@ function OrganizedContent({ entry }: { entry: JournalEntry }) {
         </Section>
       )}
 
-      {entry.voiceMemos.length > 0 && (
-        <Section icon={Mic} title="Voice memos" count={entry.voiceMemos.length}>
+      {memos.length > 0 && (
+        <Section icon={Mic} title="Voice memos" count={memos.length}>
           <div className="space-y-2">
-            {entry.voiceMemos.map((memo) => (
+            {memos.map((memo) => (
               <VoiceBubble key={memo.id} memo={memo} date={entry.date} align="left" />
             ))}
           </div>
@@ -597,6 +602,202 @@ function OrganizedContent({ entry }: { entry: JournalEntry }) {
       )}
     </div>
   );
+}
+
+// ── Pocket AI ───────────────────────────────────────────────
+// Recordings from the Pocket device land in voiceMemos with source: 'pocket'.
+// They carry their own title, summary and action items, so they're shown in a
+// dedicated block at the foot of the page rather than mixed into the timeline.
+function isPocket(memo: VoiceMemo): boolean {
+  return memo.source === 'pocket';
+}
+
+function whatsappMemos(entry: JournalEntry): VoiceMemo[] {
+  return entry.voiceMemos.filter((m) => !isPocket(m));
+}
+
+function formatDuration(seconds?: number): string | null {
+  if (!seconds || seconds <= 0) return null;
+  const m = Math.floor(seconds / 60);
+  const s = Math.round(seconds % 60);
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+function PocketSection({ entry }: { entry: JournalEntry }) {
+  const recordings = entry.voiceMemos.filter(isPocket);
+  if (recordings.length === 0) return null;
+
+  return (
+    <section className="mt-10 pt-6 border-t border-gray-100 animate-fade-up">
+      <div className="flex items-center gap-2 mb-4">
+        <img
+          src={pocketLogo}
+          alt="Pocket"
+          className="h-6 w-auto rounded-md border border-gray-200"
+        />
+        <span className="text-xs text-gray-300">{recordings.length}</span>
+      </div>
+      <div className="space-y-3">
+        {recordings
+          .slice()
+          .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
+          .map((memo) => (
+            <PocketCard key={memo.id} memo={memo} date={entry.date} />
+          ))}
+      </div>
+    </section>
+  );
+}
+
+function PocketCard({ memo, date }: { memo: VoiceMemo; date: string }) {
+  const [showTranscript, setShowTranscript] = useState(false);
+  const time = format(new Date(memo.timestamp), 'HH:mm');
+  const duration = formatDuration(memo.duration);
+  // Signed Pocket audio URLs expire, so the backend mints a fresh one per play.
+  const src = `${import.meta.env.VITE_API_URL ?? ''}/api/media/pocket/${memo.pocketRecordingId ?? memo.mediaId}`;
+
+  return (
+    <article className="rounded-2xl border border-gray-200 bg-white p-4 hover:border-gray-300 transition-colors duration-150">
+      <header className="flex items-start justify-between gap-2 mb-3">
+        <div className="min-w-0">
+          {memo.title && (
+            <h3 className="text-sm font-semibold text-gray-900 leading-snug">{memo.title}</h3>
+          )}
+          <p className="text-xs text-gray-400 mt-0.5">
+            {time}
+            {duration && ` · ${duration}`}
+            {memo.language && ` · ${memo.language}`}
+          </p>
+        </div>
+        <MoveToDayButton
+          date={date}
+          title="Move recording"
+          label="Move this recording to"
+          move={(toDate) => api.entries.moveVoiceMemo(date, memo.id, toDate)}
+        />
+      </header>
+
+      <VoicePlayer src={src} time={time} />
+
+      {memo.summaryMarkdown && (
+        <div className="mt-3 space-y-2">
+          {renderMarkdownBlocks(memo.summaryMarkdown)}
+        </div>
+      )}
+
+      {memo.bulletPoints && memo.bulletPoints.length > 0 && (
+        <ul className="mt-3 space-y-1.5">
+          {memo.bulletPoints.map((point, i) => (
+            <li key={i} className="flex gap-2 text-sm text-gray-700 leading-relaxed">
+              <span className="text-gray-300 select-none">•</span>
+              <span>{point}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {memo.actionItems && memo.actionItems.length > 0 && (
+        <div className="mt-4">
+          <p className="text-xs font-medium tracking-wide uppercase text-gray-400 mb-2">
+            Action items
+          </p>
+          <ul className="space-y-1.5">
+            {memo.actionItems.map((item) => (
+              <li key={item.id} className="flex items-start gap-2 text-sm">
+                <span
+                  className={`mt-0.5 shrink-0 w-4 h-4 rounded border flex items-center justify-center ${
+                    item.isCompleted ? 'bg-gray-900 border-gray-900' : 'border-gray-300'
+                  }`}
+                >
+                  {item.isCompleted && <Check size={11} strokeWidth={3} className="text-white" />}
+                </span>
+                <span
+                  className={item.isCompleted ? 'text-gray-400 line-through' : 'text-gray-700'}
+                >
+                  {item.title}
+                  {item.dueDate && (
+                    <span className="text-xs text-gray-400 ml-1.5">due {item.dueDate}</span>
+                  )}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {memo.tags && memo.tags.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {memo.tags.map((tag) => (
+            <span
+              key={tag}
+              className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {memo.transcription && (
+        <div className="mt-3 pt-3 border-t border-gray-100">
+          <button
+            type="button"
+            onClick={() => setShowTranscript((v) => !v)}
+            className="text-xs text-gray-400 hover:text-gray-700 transition-colors"
+          >
+            {showTranscript ? 'Hide transcript' : 'Show transcript'}
+          </button>
+          {showTranscript && (
+            <p className="mt-2 text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">
+              {memo.transcription}
+            </p>
+          )}
+        </div>
+      )}
+    </article>
+  );
+}
+
+// Pocket's summary arrives as markdown. Rather than pull in a renderer, split
+// it the way weekly summaries are split and strip the leading list/heading
+// markers — the content is plain prose and bullets.
+function renderMarkdownBlocks(markdown: string) {
+  return markdown
+    .split('\n\n')
+    .map((block) => block.trim())
+    .filter(Boolean)
+    .map((block, i) => {
+      const heading = block.match(/^#{1,6}\s+(.*)$/);
+      if (heading) {
+        return (
+          <p key={i} className="text-xs font-medium tracking-wide uppercase text-gray-400">
+            {heading[1]}
+          </p>
+        );
+      }
+      const lines = block.split('\n').map((l) => l.trim());
+      if (lines.every((l) => /^[-*]\s+/.test(l))) {
+        return (
+          <ul key={i} className="space-y-1.5">
+            {lines.map((l, j) => (
+              <li key={j} className="flex gap-2 text-sm text-gray-700 leading-relaxed">
+                <span className="text-gray-300 select-none">•</span>
+                <span>{stripEmphasis(l.replace(/^[-*]\s+/, ''))}</span>
+              </li>
+            ))}
+          </ul>
+        );
+      }
+      return (
+        <p key={i} className="text-sm text-gray-700 leading-relaxed">
+          {stripEmphasis(block)}
+        </p>
+      );
+    });
+}
+
+function stripEmphasis(text: string): string {
+  return text.replace(/\*\*(.+?)\*\*/g, '$1').replace(/(?<!\*)\*(?!\*)(.+?)\*(?!\*)/g, '$1');
 }
 
 function Section({

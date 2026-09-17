@@ -6,6 +6,8 @@ export interface AppConfig {
   unipileAccountId?: string;
   userPhoneNumber?: string;
   cronSchedule?: string;
+  pocketApiKey?: string;
+  pocketWebhookSecret?: string;
 }
 
 const DOC = 'config/main';
@@ -63,4 +65,16 @@ export async function getUserPhoneNumber(): Promise<string> {
 export async function getCronSchedule(): Promise<string> {
   const cfg = await getConfig();
   return cfg.cronSchedule ?? process.env.CRON_SCHEDULE ?? '0 20 * * *';
+}
+
+// Pocket AI public API key (pk_xxx), used to read recordings and audio URLs.
+export async function getPocketApiKey(): Promise<string> {
+  const cfg = await getConfig();
+  return cfg.pocketApiKey ?? process.env.POCKET_API_KEY ?? '';
+}
+
+// Signing secret Pocket shows once when the webhook is created.
+export async function getPocketWebhookSecret(): Promise<string> {
+  const cfg = await getConfig();
+  return cfg.pocketWebhookSecret ?? process.env.POCKET_WEBHOOK_SECRET ?? '';
 }

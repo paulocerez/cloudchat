@@ -1,6 +1,6 @@
 import Groq from 'groq-sdk';
 import type { ChatCompletionCreateParamsNonStreaming } from 'groq-sdk/resources/chat/completions';
-import { JournalEntry } from '../types';
+import { JournalEntry, VoiceMemo } from '../types';
 
 let client: Groq;
 
@@ -13,6 +13,14 @@ type ChatParams = ChatCompletionCreateParamsNonStreaming & {
   reasoning_effort?: 'low' | 'medium' | 'high';
 };
 
+// Everything a memo contributes to a summary prompt. WhatsApp memos only have
+// a transcription; Pocket recordings also bring a title and their own summary.
+function memoText(v: VoiceMemo): string {
+  const head = v.title ? `Recording: ${v.title}` : '';
+  const body = v.summaryMarkdown || v.bulletPoints?.map((b) => `- ${b}`).join('\n') || '';
+  return [head, body, v.transcription].filter(Boolean).join('\n');
+}
+
 export interface DaySummary {
   title: string; // a few words
   summary: string; // one sentence
@@ -24,10 +32,7 @@ export async function generateDaySummary(entry: JournalEntry): Promise<DaySummar
     .filter((m) => m.fromUser)
     .map((m) => m.content)
     .join('\n');
-  const transcripts = entry.voiceMemos
-    .filter((v) => v.transcription)
-    .map((v) => v.transcription)
-    .join('\n');
+  const transcripts = entry.voiceMemos.map(memoText).filter(Boolean).join('\n\n');
   const content = `${texts}\n${transcripts}`.trim();
 
   if (!content) return { title: '', summary: '', locations: [] };
@@ -136,10 +141,7 @@ export async function generateSummary(
         .filter((m) => m.fromUser)
         .map((m) => m.content)
         .join('\n');
-      const transcripts = e.voiceMemos
-        .filter((v) => v.transcription)
-        .map((v) => v.transcription)
-        .join('\n');
+      const transcripts = e.voiceMemos.map(memoText).filter(Boolean).join('\n\n');
       return `## ${e.date}\n${texts}\n${transcripts}`.trim();
     })
     .filter(Boolean)

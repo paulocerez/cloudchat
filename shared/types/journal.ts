@@ -37,6 +37,23 @@ export interface VoiceMemo {
   transcription?: string;
   duration?: number;
   timestamp: string;
+  // ── Pocket AI recordings ──
+  // Absent source means the memo came in through WhatsApp (all legacy memos).
+  source?: 'whatsapp' | 'pocket';
+  pocketRecordingId?: string;
+  title?: string; // Pocket's AI-generated headline
+  summaryMarkdown?: string;
+  bulletPoints?: string[];
+  actionItems?: PocketActionItem[];
+  tags?: string[];
+  language?: string;
+}
+
+export interface PocketActionItem {
+  id: string;
+  title: string;
+  dueDate?: string;
+  isCompleted: boolean;
 }
 
 export interface JournalImage {
@@ -67,6 +84,8 @@ export interface AppConfig {
   unipileAccountId: string;
   userPhoneNumber: string;
   cronSchedule: string;
+  pocketApiKey: string;
+  pocketWebhookSecret: string;
   _sources: Record<string, 'db' | 'env' | 'unset'>;
   _integrations?: Record<string, boolean>;
 }

@@ -37,6 +37,23 @@ export interface VoiceMemo {
   transcription?: string;
   duration?: number;
   timestamp: string;
+  // ── Pocket AI recordings ──
+  // Absent source means the memo came in through WhatsApp (all legacy memos).
+  source?: 'whatsapp' | 'pocket';
+  pocketRecordingId?: string; // stable key used to upsert on repeat webhooks
+  title?: string; // Pocket's AI-generated headline
+  summaryMarkdown?: string;
+  bulletPoints?: string[];
+  actionItems?: PocketActionItem[];
+  tags?: string[];
+  language?: string;
+}
+
+export interface PocketActionItem {
+  id: string;
+  title: string;
+  dueDate?: string;
+  isCompleted: boolean;
 }
 
 export interface JournalImage {
@@ -147,4 +164,77 @@ export interface UnipileMessageWebhook {
   // (8-13 = call notifications, 0 = provider event Unipile can't render).
   is_event?: boolean;
   event_type?: number;
+}
+
+// ── Pocket AI ───────────────────────────────────────────────
+// https://docs.heypocketai.com/docs/api — the webhook payload nests the
+// recording under `recording` and uses camelCase, while the REST API returns
+// it flat under `data` in snake_case. Both shapes are modelled loosely because
+// the published schema types transcript/summarizations as `null`.
+
+export interface PocketTranscriptSegment {
+  speaker?: string;
+  text?: string;
+  start?: number;
+  end?: number;
+}
+
+// Either an array of segments, a wrapper around one, or pre-joined text.
+export type PocketTranscript =
+  | PocketTranscriptSegment[]
+  | { segments?: PocketTranscriptSegment[]; utterances?: PocketTranscriptSegment[]; text?: string }
+  | string
+  | null;
+
+export interface PocketSummarization {
+  id?: string;
+  summarizationId?: string;
+  processingStatus?: string;
+  createdAt?: string;
+  v2?: {
+    summary?: {
+      title?: string;
+      emoji?: string;
+      markdown?: string;
+      bulletPoints?: string[];
+    };
+    actionItems?: {
+      actionItems?: Array<{
+        id?: string;
+        globalActionItemId?: string;
+        title?: string;
+        dueDate?: string;
+        status?: string;
+        isCompleted?: boolean;
+        is_completed?: boolean;
+      }>;
+    };
+  };
+}
+
+// Keyed by summarization id in webhooks, a plain array in REST responses.
+export type PocketSummarizations = Record<string, PocketSummarization> | PocketSummarization[] | null;
+
+export interface PocketRecording {
+  id: string;
+  title?: string;
+  description?: string;
+  duration?: number; // seconds
+  language?: string;
+  createdAt?: string; // webhook casing
+  created_at?: string; // REST casing
+  recording_at?: string; // when it was actually recorded
+  tags?: Array<{ id?: string; name?: string; color?: string }>;
+  transcript?: PocketTranscript;
+  summarizations?: PocketSummarizations;
+}
+
+export interface PocketWebhookBody {
+  event: string; // 'summary.completed', 'recording.deleted', …
+  timestamp?: string;
+  user?: { id?: string; email?: string };
+  organization?: { id?: string };
+  recording?: PocketRecording;
+  summarizations?: PocketSummarizations;
+  transcript?: PocketTranscript;
 }
