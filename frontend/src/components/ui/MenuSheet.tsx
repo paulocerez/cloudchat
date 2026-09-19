@@ -62,9 +62,7 @@ export function MenuSheet({
             onClick={choose(item)}
             className={cn(
               'w-full flex items-center gap-2.5 h-9 px-2.5 rounded-lg text-sm font-medium text-left transition-colors disabled:opacity-50',
-              item.danger
-                ? 'text-rose-600 hover:bg-rose-50'
-                : 'text-[#241F2E] hover:bg-gray-900/[0.05]'
+              item.danger ? 'text-danger hover:bg-danger-wash' : 'text-ink hover:bg-hover'
             )}
           >
             <Glyph item={item} size={16} />
@@ -78,7 +76,7 @@ export function MenuSheet({
   return (
     <Sheet open={open} onClose={onClose} className="max-w-sm">
       {title && (
-        <p className="px-3 pb-2 text-xs font-medium uppercase tracking-wide text-gray-400 truncate">
+        <p className="px-3 pb-2 text-xs font-medium uppercase tracking-wide text-faint truncate">
           {title}
         </p>
       )}
@@ -89,7 +87,7 @@ export function MenuSheet({
             size="row"
             variant={item.danger ? 'danger' : 'ghost'}
             disabled={item.disabled}
-            className={item.danger ? '' : 'text-[#241F2E]'}
+            className={item.danger ? '' : 'text-ink'}
             onClick={choose(item)}
           >
             <Glyph item={item} size={17} />
@@ -153,7 +151,7 @@ function AnchoredMenu({
       <div
         role="menu"
         style={pos}
-        className="fixed z-[90] min-w-[11rem] rounded-2xl bg-white p-1 shadow-2xl ring-1 ring-gray-900/[0.08] animate-fade-up"
+        className="fixed z-[90] min-w-[11rem] rounded-2xl bg-surface-2 p-1 shadow-2xl ring-1 ring-line animate-fade-up"
       >
         {children}
       </div>

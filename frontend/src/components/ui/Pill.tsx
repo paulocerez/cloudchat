@@ -24,14 +24,16 @@ export function Pill({
     <>
       {Icon && <Icon size={13} strokeWidth={2.5} className="shrink-0" />}
       {label != null && <span className="truncate">{label}</span>}
-      {value != null && <span className="tabular-nums text-gray-400">{value}</span>}
+      {value != null && <span className="tabular-nums text-faint">{value}</span>}
     </>
   );
 
   const base = cn(
     'inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg text-xs font-medium',
-    'bg-white ring-1 ring-gray-900/[0.05] shadow-[0_1px_1.5px_rgba(0,0,0,0.03)]',
-    active ? 'text-gray-900' : 'text-gray-600',
+    // `raised`, not `surface`: the pill has to read as lifted off its tray,
+    // which in dark means stepping up from the tray rather than to the page.
+    'bg-raised ring-1 ring-line shadow-[0_1px_1.5px_rgba(0,0,0,0.03)]',
+    active ? 'text-ink' : 'text-secondary',
     className
   );
 
@@ -49,19 +51,19 @@ export function Pill({
       onClick={onClick}
       title={title}
       aria-label={label == null ? title : undefined}
-      className={cn(base, 'hover:bg-gray-50 active:scale-[0.97] transition-all')}
+      className={cn(base, 'hover:bg-raised-hover active:scale-[0.97] transition-all')}
     >
       {body}
     </button>
   );
 }
 
-// The gray tray the pills sit in. Wraps freely; on a phone it lands on two
+// The recessed tray the pills sit in. Wraps freely; on a phone it lands on two
 // rows at most for a busy day.
 export function PillTray({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('flex flex-wrap items-center gap-1.5 rounded-xl bg-gray-100/80 p-1.5', className)}
+      className={cn('flex flex-wrap items-center gap-1.5 rounded-xl bg-sunken p-1.5', className)}
       {...props}
     />
   );
