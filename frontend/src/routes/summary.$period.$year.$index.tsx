@@ -40,7 +40,7 @@ function SummaryPage() {
           {[100, 75, 90, 60].map((w, i) => (
             <div
               key={i}
-              className="h-4 bg-sunken rounded animate-pulse"
+              className="h-4 bg-sunken rounded-md animate-pulse"
               style={{ width: `${w}%`, animationDelay: `${i * 0.08}s` }}
             />
           ))}
@@ -58,7 +58,7 @@ function SummaryPage() {
                   key={i}
                   src={url}
                   alt=""
-                  className="rounded-xl aspect-square object-cover w-full transition-transform duration-300 hover:scale-[1.03] hover:shadow-md"
+                  className="rounded-md aspect-square object-cover w-full transition-transform duration-300 hover:scale-[1.03] hover:shadow-md"
                   style={{ animationDelay: `${i * 0.06}s` }}
                 />
               ))}
@@ -84,7 +84,7 @@ function SummaryPage() {
                     key={date}
                     to="/entry/$date"
                     params={{ date }}
-                    className="text-xs border border-line hover:border-ink hover:text-ink rounded-lg px-3 py-1.5 text-muted transition-all duration-150 hover:-translate-y-0.5"
+                    className="text-xs border border-line hover:border-ink hover:text-ink rounded-md px-3 py-1.5 text-muted transition-all duration-150 hover:-translate-y-0.5"
                   >
                     {date}
                   </Link>

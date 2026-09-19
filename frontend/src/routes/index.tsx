@@ -1,13 +1,14 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { MessageCircle, Mic, Image as ImageIcon, Music, MapPin, Flame, Bookmark, CalendarRange, Plus, Film, Play } from 'lucide-react';
+import { MessageCircle, Mic, Image as ImageIcon, Music, MapPin, Flame, CalendarRange, Plus, Film, Play } from 'lucide-react';
 import { subDays, format as formatDate } from 'date-fns';
 import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
 import { extractSpotifyLinks, stripSpotifyLinks } from '~/lib/spotify';
 import { staticMapUrl } from '~/lib/mapbox';
 import { tone, coversDate } from '~/lib/periods';
+import { iconFor } from '~/lib/icons';
 import { SpotifyChip } from '~/components/SpotifyChip';
 import { PeriodDialog } from '~/components/PeriodDialog';
 import { Button } from '~/components/ui/Button';
@@ -65,7 +66,7 @@ function Timeline() {
               to="/entry/$date"
               params={{ date: formatDate(new Date(), 'yyyy-MM-dd') }}
               title="Go to today"
-              className="h-9 px-3 inline-flex items-center rounded-full surface-solid text-[13px] font-semibold text-ink hover:bg-surface-hover active:scale-[0.96] transition-transform"
+              className="h-9 px-3 inline-flex items-center rounded-md surface-solid text-[13px] font-semibold text-ink hover:bg-surface-hover active:scale-[0.96] transition-transform"
             >
               Today
             </Link>
@@ -203,6 +204,7 @@ function PeriodTimeline({
       <div className="pointer-events-none absolute inset-0">
         {bands.map((b) => {
           const t = tone(b.period.color);
+          const Icon = iconFor(b.period.icon);
           const left = 8 + b.lane * LANE_WIDTH;
           return (
             <button
@@ -213,12 +215,12 @@ function PeriodTimeline({
               className="pointer-events-auto absolute flex flex-col items-center group/period focus:outline-none"
               style={{ top: b.top, height: b.height, left }}
             >
-              <Bookmark
-                size={13}
+              <Icon
+                size={14}
                 strokeWidth={2.25}
-                className={`mb-1 shrink-0 fill-current ${t.text} transition-transform group-hover/period:scale-125`}
+                className={`mb-1 shrink-0 ${t.text} transition-transform group-hover/period:scale-125`}
               />
-              <span className={`w-1.5 flex-1 rounded-full ${t.line} transition-all group-hover/period:w-2`} />
+              <span className={`w-1.5 flex-1 rounded-md ${t.line} transition-all group-hover/period:w-2`} />
               <span
                 className={`absolute top-7 left-2.5 [writing-mode:vertical-rl] text-[10px] font-semibold uppercase tracking-wide ${t.text} whitespace-nowrap overflow-hidden`}
                 style={{ maxHeight: Math.max(b.height - 32, 0) }}
@@ -286,7 +288,7 @@ function StreakBadge({ entries }: { entries: JournalEntry[] }) {
   return (
     <span
       title={`${streak} day streak`}
-      className="shrink-0 inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg bg-orange-50 dark:bg-orange-400/12 text-orange-600 dark:text-orange-300 text-xs font-medium tabular-nums"
+      className="shrink-0 inline-flex items-center gap-1.5 h-9 px-2.5 rounded-md bg-orange-50 dark:bg-orange-400/12 text-orange-600 dark:text-orange-300 text-xs font-medium tabular-nums"
     >
       <Flame size={15} strokeWidth={2.5} className="fill-orange-400 text-orange-500" />
       {streak}
@@ -318,7 +320,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
     <Link
       to="/entry/$date"
       params={{ date: entry.date }}
-      className={`squish flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 py-3.5 px-4 rounded-[22px] group cursor-pointer ${
+      className={`squish flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 py-3.5 px-4 rounded-md group cursor-pointer ${
         entry.highlight ? 'surface-warm' : 'surface hover:bg-surface-hover'
       }`}
     >
@@ -429,7 +431,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
               </span>
             )}
             {entry.locations && entry.locations.length > 0 && (
-              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-rose-50 dark:bg-rose-400/12 text-rose-600 dark:text-rose-300 font-medium">
+              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-rose-50 dark:bg-rose-400/12 text-danger dark:text-rose-300 font-medium">
                 <MapPin size={13} strokeWidth={2.5} />
                 {entry.locations.length}
               </span>
@@ -449,7 +451,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
                 src={mapUrl}
                 alt="Map preview"
                 loading="lazy"
-                className="w-40 h-[90px] object-cover rounded-lg border border-line bg-sunken"
+                className="w-40 h-[90px] object-cover rounded-md border border-line bg-sunken"
               />
             )}
             <span className="flex items-center gap-1 text-danger font-medium sm:text-right max-w-full sm:max-w-[10rem] truncate">
@@ -471,10 +473,10 @@ function LoadingState() {
     <div className="divide-y divide-line">
       {[1, 2, 3].map((i) => (
         <div key={i} className="flex gap-4 py-4 animate-pulse">
-          <div className="w-0.5 h-12 bg-sunken rounded-full shrink-0 mt-1" />
+          <div className="w-0.5 h-12 bg-sunken rounded-md shrink-0 mt-1" />
           <div className="flex-1">
-            <div className="h-2.5 bg-sunken rounded w-28 mb-2" />
-            <div className="h-4 bg-sunken rounded w-3/4" />
+            <div className="h-2.5 bg-sunken rounded-md w-28 mb-2" />
+            <div className="h-4 bg-sunken rounded-md w-3/4" />
           </div>
         </div>
       ))}
@@ -494,10 +496,10 @@ function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-24 animate-fade-up select-none">
       <div className="relative mb-6">
-        <div className="w-16 h-16 rounded-2xl bg-sunken flex items-center justify-center">
+        <div className="w-16 h-16 rounded-md bg-sunken flex items-center justify-center">
           <MessageCircle size={28} strokeWidth={1.5} className="text-faint" />
         </div>
-        <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-400 border-2 border-page" />
+        <span className="absolute -top-1 -right-1 w-4 h-4 rounded-md bg-green-400 border-2 border-page" />
       </div>
       <p className="text-ink font-semibold text-base mb-1.5">Nothing here yet</p>
       <p className="text-faint text-sm max-w-[220px] text-center leading-relaxed">

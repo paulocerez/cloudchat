@@ -4,8 +4,9 @@ import { Trash2 } from 'lucide-react';
 import type { PeriodColor, TimePeriod } from '@cloudchat/shared';
 import { api } from '~/lib/api';
 import { tone } from '~/lib/periods';
+import { DEFAULT_ICON, iconFor } from '~/lib/icons';
 import { Modal, ModalHeader } from '~/components/Modal';
-import { ColorPicker } from '~/components/Pickers';
+import { ColorPicker, IconPicker } from '~/components/Pickers';
 
 interface PeriodDialogProps {
   open: boolean;
@@ -24,12 +25,15 @@ export function PeriodDialog({ open, onClose, period, defaultRange }: PeriodDial
   const [startDate, setStartDate] = useState(period?.startDate ?? defaultRange?.startDate ?? '');
   const [endDate, setEndDate] = useState(period?.endDate ?? defaultRange?.endDate ?? '');
   const [color, setColor] = useState<PeriodColor>(period?.color ?? 'amber');
+  const [icon, setIcon] = useState(period?.icon ?? DEFAULT_ICON);
+
+  const Icon = iconFor(icon);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ['periods'] });
 
   const save = useMutation({
     mutationFn: () => {
-      const body = { name: name.trim(), startDate, endDate, color };
+      const body = { name: name.trim(), startDate, endDate, color, icon };
       return period ? api.periods.update(period.id, body) : api.periods.create(body);
     },
     onSuccess: () => {
@@ -58,16 +62,18 @@ export function PeriodDialog({ open, onClose, period, defaultRange }: PeriodDial
         <div>
           <label className="block text-xs font-medium text-muted mb-1.5">Name</label>
           <div className="flex items-center gap-2">
-            {/* The period's colour is its identity now that emoji are gone. */}
-            <span className={`h-9 w-9 shrink-0 rounded-xl ${tone(color).soft}`}>
-              <span className={`block m-[0.6875rem] h-[0.875rem] w-[0.875rem] rounded-full ${tone(color).swatch}`} />
+            {/* Live preview of the icon + colour this period will carry. */}
+            <span
+              className={`h-9 w-9 shrink-0 rounded-md flex items-center justify-center ${tone(color).soft} ${tone(color).text}`}
+            >
+              <Icon size={17} strokeWidth={2} />
             </span>
             <input
               autoFocus
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Summer in Italy"
-              className="flex-1 px-3 py-2 rounded-lg border border-line text-sm text-ink placeholder:text-placeholder focus:outline-none focus:ring-2 focus:ring-focus/20 focus:border-line-strong"
+              className="flex-1 px-3 py-2 rounded-md border border-line text-sm text-ink placeholder:text-placeholder focus:outline-none focus:ring-2 focus:ring-focus/20 focus:border-line-strong"
             />
           </div>
         </div>
@@ -81,7 +87,7 @@ export function PeriodDialog({ open, onClose, period, defaultRange }: PeriodDial
               value={startDate}
               max={endDate || undefined}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-line text-sm text-ink focus:outline-none focus:ring-2 focus:ring-focus/20 focus:border-line-strong"
+              className="w-full px-3 py-2 rounded-md border border-line text-sm text-ink focus:outline-none focus:ring-2 focus:ring-focus/20 focus:border-line-strong"
             />
           </div>
           <div>
@@ -91,13 +97,19 @@ export function PeriodDialog({ open, onClose, period, defaultRange }: PeriodDial
               value={endDate}
               min={startDate || undefined}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-line text-sm text-ink focus:outline-none focus:ring-2 focus:ring-focus/20 focus:border-line-strong"
+              className="w-full px-3 py-2 rounded-md border border-line text-sm text-ink focus:outline-none focus:ring-2 focus:ring-focus/20 focus:border-line-strong"
             />
           </div>
         </div>
         {rangeInvalid && (
           <p className="text-xs text-danger -mt-2">End date must be after the start date.</p>
         )}
+
+        {/* Icon */}
+        <div>
+          <label className="block text-xs font-medium text-muted mb-1.5">Icon</label>
+          <IconPicker value={icon} onChange={setIcon} color={color} />
+        </div>
 
         {/* Color */}
         <div>
@@ -114,7 +126,7 @@ export function PeriodDialog({ open, onClose, period, defaultRange }: PeriodDial
             type="button"
             onClick={() => remove.mutate()}
             disabled={remove.isPending}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-danger hover:bg-danger-wash active:scale-[0.97] transition-all disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium text-danger hover:bg-danger-wash active:scale-[0.97] transition-all disabled:opacity-50"
           >
             <Trash2 size={15} strokeWidth={2} />
             Delete
@@ -126,7 +138,7 @@ export function PeriodDialog({ open, onClose, period, defaultRange }: PeriodDial
           <button
             type="button"
             onClick={onClose}
-            className="px-3 py-2 rounded-lg text-sm font-medium text-muted hover:bg-hover active:scale-[0.97] transition-all"
+            className="px-3 py-2 rounded-md text-sm font-medium text-muted hover:bg-hover active:scale-[0.97] transition-all"
           >
             Cancel
           </button>
@@ -134,7 +146,7 @@ export function PeriodDialog({ open, onClose, period, defaultRange }: PeriodDial
             type="button"
             onClick={() => save.mutate()}
             disabled={!canSave || save.isPending}
-            className="px-4 py-2 rounded-lg text-sm font-medium bg-ink text-on-ink hover:bg-ink-hover active:scale-[0.97] transition-all disabled:opacity-40"
+            className="px-4 py-2 rounded-md text-sm font-medium bg-ink text-on-ink hover:bg-ink-hover active:scale-[0.97] transition-all disabled:opacity-40"
           >
             {save.isPending ? 'Saving…' : editing ? 'Save' : 'Add period'}
           </button>

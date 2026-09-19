@@ -199,7 +199,7 @@ export function PocketSummary({ markdown }: { markdown: string }) {
               <ol className="border-l border-line space-y-2.5 pl-3.5">
                 {block.rows.map((cells, j) => (
                   <li key={j} className="relative">
-                    <span className="absolute -left-[18px] top-[7px] w-1.5 h-1.5 rounded-full bg-line-strong" />
+                    <span className="absolute -left-[18px] top-[7px] w-1.5 h-1.5 rounded-md bg-line-strong" />
                     <span className="text-sm text-ink">{cells[0]}</span>
                     {cells[1] && <span className="text-sm text-muted"> · {cells[1]}</span>}
                     {cells[2] && (
@@ -223,7 +223,7 @@ export function PocketSummary({ markdown }: { markdown: string }) {
             )}
             <div className="space-y-2">
               {block.branches.map((b, j) => (
-                <div key={j} className="rounded-lg bg-sunken px-3 py-2">
+                <div key={j} className="rounded-md bg-sunken px-3 py-2">
                   <p className="text-sm text-ink">
                     {b.label}
                     {b.heading && <span className="text-faint font-normal"> — {b.heading}</span>}

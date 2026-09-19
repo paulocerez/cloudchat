@@ -14,7 +14,7 @@ export function ViewToggle({
     { mode: 'organized', Icon: LayoutGrid, label: 'Organized view' },
   ];
   return (
-    <div className="inline-flex items-center gap-0.5 p-0.5 rounded-2xl bg-sunken">
+    <div className="inline-flex items-center gap-0.5 p-0.5 rounded-md bg-sunken">
       {opts.map(({ mode, Icon, label }) => (
         <button
           key={mode}
@@ -22,7 +22,7 @@ export function ViewToggle({
           onClick={() => onChange(mode)}
           aria-label={label}
           aria-pressed={view === mode}
-          className={`h-9 w-10 flex items-center justify-center rounded-[14px] transition-all active:scale-95 ${
+          className={`h-9 w-10 flex items-center justify-center rounded-md transition-all active:scale-95 ${
             // `raised`, not `surface-solid` — the selected segment sits on a
             // sunken track and has to read as lifted off it in both themes.
             view === mode

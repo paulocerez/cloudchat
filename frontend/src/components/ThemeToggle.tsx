@@ -41,7 +41,7 @@ export function ThemeToggle({
     <div
       role="radiogroup"
       aria-label="Colour theme"
-      className={cn('inline-flex items-center gap-0.5 p-0.5 rounded-2xl bg-sunken', className)}
+      className={cn('inline-flex items-center gap-0.5 p-0.5 rounded-md bg-sunken', className)}
     >
       {OPTS.map(({ value, Icon, label }, i) => {
         const on = theme === value;
@@ -59,7 +59,7 @@ export function ThemeToggle({
             onClick={() => setTheme(value)}
             onKeyDown={(e) => onKeyDown(e, i)}
             className={cn(
-              'flex items-center justify-center rounded-[14px] transition-all active:scale-95',
+              'flex items-center justify-center rounded-md transition-all active:scale-95',
               size === 'sm' ? 'h-7 w-8' : 'h-9 w-10',
               on
                 ? 'bg-raised text-ink shadow-[0_0_0_1px_var(--line),0_1px_2px_rgb(0_0_0/0.06)]'

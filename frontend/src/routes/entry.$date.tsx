@@ -48,7 +48,7 @@ function EntryPage() {
   if (isLoading)
     return (
       <div className="flex items-center justify-center py-16 gap-2 text-muted animate-fade-up">
-        <span className="w-4 h-4 rounded-full border-2 border-line-strong border-t-muted animate-spin-slow" />
+        <span className="w-4 h-4 rounded-md border-2 border-line-strong border-t-muted animate-spin-slow" />
         <span className="text-sm">Loading…</span>
       </div>
     );
@@ -142,7 +142,7 @@ function GenerateSummaryRow({ date }: { date: string }) {
       type="button"
       onClick={() => mutate()}
       disabled={isPending}
-      className="inline-flex items-center gap-1.5 h-9 -ml-1 px-2 rounded-full text-sm text-muted hover:text-ink hover:bg-hover active:scale-[0.97] transition-all disabled:opacity-50"
+      className="inline-flex items-center gap-1.5 h-9 -ml-1 px-2 rounded-md text-sm text-muted hover:text-ink hover:bg-hover active:scale-[0.97] transition-all disabled:opacity-50"
     >
       <WandSparkles size={15} strokeWidth={2} />
       {isPending ? 'Generating summary…' : isError ? 'Retry summary' : 'Generate summary'}

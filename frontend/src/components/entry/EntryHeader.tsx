@@ -115,7 +115,7 @@ export function EntryHeader({
               to="/entry/$date"
               params={{ date: shiftDate(entry.date, -1) }}
               aria-label="Previous day"
-              className="h-8 w-8 flex items-center justify-center rounded-full text-faint hover:text-ink hover:bg-hover active:scale-90 transition-all"
+              className="h-8 w-8 flex items-center justify-center rounded-md text-faint hover:text-ink hover:bg-hover active:scale-90 transition-all"
             >
               <ChevronLeft size={17} strokeWidth={2.25} />
             </Link>
@@ -124,7 +124,7 @@ export function EntryHeader({
                 to="/entry/$date"
                 params={{ date: shiftDate(entry.date, 1) }}
                 aria-label="Next day"
-                className="h-8 w-8 flex items-center justify-center rounded-full text-faint hover:text-ink hover:bg-hover active:scale-90 transition-all"
+                className="h-8 w-8 flex items-center justify-center rounded-md text-faint hover:text-ink hover:bg-hover active:scale-90 transition-all"
               >
                 <ChevronRight size={17} strokeWidth={2.25} />
               </Link>

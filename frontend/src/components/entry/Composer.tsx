@@ -54,7 +54,7 @@ export function Composer({
           placeholder="Add a note…"
           enterKeyHint="send"
           // 16px keeps iOS Safari from zooming the viewport on focus.
-          className="flex-1 min-w-0 h-10 text-base sm:text-sm text-ink rounded-full surface-solid px-4 placeholder:text-placeholder focus:outline-none focus:ring-2 focus:ring-focus/70 transition-shadow"
+          className="flex-1 min-w-0 h-10 text-base sm:text-sm text-ink rounded-md surface-solid px-4 placeholder:text-placeholder focus:outline-none focus:ring-2 focus:ring-focus/70 transition-shadow"
         />
 
         <Button
@@ -63,7 +63,7 @@ export function Composer({
           size="icon"
           disabled={!canSend}
           aria-label="Add note"
-          className={`rounded-full transition-all duration-200 ${
+          className={`rounded-md transition-all duration-200 ${
             canSend ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'
           }`}
         >

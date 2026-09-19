@@ -20,6 +20,8 @@ export interface TimePeriod {
   startDate: string; // YYYY-MM-DD, inclusive
   endDate: string; // YYYY-MM-DD, inclusive
   color: PeriodColor;
+  // Name of a lucide icon from the curated set (see frontend/src/lib/icons.ts).
+  icon?: string;
   emoji?: string;
   createdAt: string;
   updatedAt: string;

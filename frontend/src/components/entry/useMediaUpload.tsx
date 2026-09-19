@@ -116,9 +116,9 @@ export function UploadStatus({
     <div className="mb-3 animate-fade-up">
       {progress !== null && (
         <div className="flex items-center gap-2.5">
-          <div className="h-1.5 flex-1 rounded-full bg-sunken overflow-hidden">
+          <div className="h-1.5 flex-1 rounded-md bg-sunken overflow-hidden">
             <div
-              className="h-full rounded-full bg-ink transition-[width] duration-200"
+              className="h-full rounded-md bg-ink transition-[width] duration-200"
               style={{ width: `${progress}%` }}
             />
           </div>

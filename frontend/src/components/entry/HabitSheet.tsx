@@ -4,6 +4,7 @@ import { endOfWeek, format, startOfWeek } from 'date-fns';
 import { Check, Plus, SlidersHorizontal } from 'lucide-react';
 import { api } from '~/lib/api';
 import { tone } from '~/lib/periods';
+import { iconFor } from '~/lib/icons';
 import { HabitManager } from '~/components/HabitManager';
 import { Sheet, SheetHeader } from '~/components/ui/Sheet';
 import { Button } from '~/components/ui/Button';
@@ -86,20 +87,26 @@ export function HabitSheet({
               const count = weeklyCount(h.id);
               const met = count >= h.weeklyTarget;
               const t = tone(h.color);
+              const Icon = iconFor(h.icon);
               return (
                 <button
                   key={h.id}
                   type="button"
                   disabled={toggle.isPending}
                   onClick={() => toggle.mutate({ habitId: h.id, done: !done })}
-                  className="flex items-center gap-3 h-12 px-2 -mx-2 rounded-xl text-left hover:bg-hover active:scale-[0.99] transition-all disabled:opacity-60"
+                  className="flex items-center gap-3 h-12 px-2 -mx-2 rounded-md text-left hover:bg-hover active:scale-[0.99] transition-all disabled:opacity-60"
                 >
                   <span
                     className={`w-6 h-6 shrink-0 rounded-md flex items-center justify-center transition-colors ${
                       done ? `${t.line} text-white` : 'bg-field border border-line-strong'
                     }`}
                   >
-                    {done && <Check size={15} strokeWidth={3} />}
+                    {done ? (
+                      <Check size={15} strokeWidth={3} />
+                    ) : (
+                      // The habit's icon keeps unchecked rows identifiable.
+                      <Icon size={13} strokeWidth={2} className="text-faintest" />
+                    )}
                   </span>
                   <span
                     className={`text-[15px] font-medium ${done ? 'text-ink' : 'text-secondary'}`}

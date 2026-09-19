@@ -12,7 +12,7 @@ export function Card({
 }: React.HTMLAttributes<HTMLDivElement> & { solid?: boolean }) {
   return (
     <div
-      className={cn('rounded-[22px]', solid ? 'surface-solid' : 'surface', className)}
+      className={cn('rounded-md', solid ? 'surface-solid' : 'surface', className)}
       {...props}
     />
   );

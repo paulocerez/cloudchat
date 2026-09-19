@@ -44,14 +44,14 @@ export function EditEntrySheet({
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Short headline"
-        className="w-full text-sm text-strong rounded-lg border border-line-strong bg-field px-3 py-2.5 mb-3 focus:outline-none focus:ring-2 focus:ring-focus focus:border-transparent"
+        className="w-full text-sm text-strong rounded-md border border-line-strong bg-field px-3 py-2.5 mb-3 focus:outline-none focus:ring-2 focus:ring-focus focus:border-transparent"
       />
       <label className="block text-xs font-medium text-muted mb-1">Summary</label>
       <textarea
         value={summary}
         onChange={(e) => setSummary(e.target.value)}
         rows={7}
-        className="w-full text-sm text-strong leading-relaxed rounded-lg border border-line-strong bg-field px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-focus focus:border-transparent resize-y"
+        className="w-full text-sm text-strong leading-relaxed rounded-md border border-line-strong bg-field px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-focus focus:border-transparent resize-y"
       />
       <div className="flex items-center justify-end gap-2 mt-4">
         <Button variant="ghost" onClick={onClose}>

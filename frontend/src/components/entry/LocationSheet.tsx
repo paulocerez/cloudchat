@@ -57,13 +57,13 @@ export function LocationSheet({
         <img
           src={mapUrl}
           alt="Map of places mentioned"
-          className="w-full block rounded-xl mb-3 ring-1 ring-line"
+          className="w-full block rounded-md mb-3 ring-1 ring-line"
         />
       )}
 
       <div className="flex items-center gap-1.5 mb-3">
         <span
-          className={`w-1.5 h-1.5 rounded-full ${scanned ? 'bg-emerald-500' : 'bg-line-strong'}`}
+          className={`w-1.5 h-1.5 rounded-md ${scanned ? 'bg-emerald-500' : 'bg-line-strong'}`}
         />
         <span className={`text-xs font-medium ${scanned ? 'text-emerald-600 dark:text-emerald-400' : 'text-faint'}`}>
           {status}
@@ -75,7 +75,7 @@ export function LocationSheet({
           {locations.map((loc) => (
             <span
               key={loc.name}
-              className="flex items-center gap-1 h-9 pl-2.5 pr-1 rounded-full bg-sunken text-secondary text-xs font-medium"
+              className="flex items-center gap-1 h-9 pl-2.5 pr-1 rounded-md bg-sunken text-secondary text-xs font-medium"
             >
               <MapPin size={12} strokeWidth={2.5} />
               {loc.name}
@@ -84,7 +84,7 @@ export function LocationSheet({
                 onClick={() => remove.mutate(loc.name)}
                 disabled={remove.isPending}
                 aria-label={`Remove ${loc.name}`}
-                className="h-7 w-7 flex items-center justify-center rounded-full text-faint hover:text-strong hover:bg-sunken-hover active:scale-90 transition-all disabled:opacity-50"
+                className="h-7 w-7 flex items-center justify-center rounded-md text-faint hover:text-strong hover:bg-sunken-hover active:scale-90 transition-all disabled:opacity-50"
               >
                 <X size={12} strokeWidth={2.5} />
               </button>
@@ -104,7 +104,7 @@ export function LocationSheet({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Add a place…"
-          className="flex-1 min-w-0 text-sm text-strong rounded-lg border border-line-strong px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-focus focus:border-transparent"
+          className="flex-1 min-w-0 text-sm text-strong rounded-md border border-line-strong px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-focus focus:border-transparent"
         />
         <Button
           type="submit"

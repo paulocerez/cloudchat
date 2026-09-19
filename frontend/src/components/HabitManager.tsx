@@ -4,8 +4,9 @@ import { Trash2, Plus, ChevronLeft } from 'lucide-react';
 import type { Habit, PeriodColor } from '@cloudchat/shared';
 import { api } from '~/lib/api';
 import { tone } from '~/lib/periods';
+import { DEFAULT_ICON, iconFor } from '~/lib/icons';
 import { Modal, ModalHeader } from '~/components/Modal';
-import { ColorPicker } from '~/components/Pickers';
+import { ColorPicker, IconPicker } from '~/components/Pickers';
 
 // Create / edit / delete a single habit.
 function HabitForm({
@@ -22,6 +23,9 @@ function HabitForm({
   const [name, setName] = useState(habit?.name ?? '');
   const [color, setColor] = useState<PeriodColor>(habit?.color ?? 'green');
   const [weeklyTarget, setWeeklyTarget] = useState(habit?.weeklyTarget ?? 3);
+  const [icon, setIcon] = useState(habit?.icon ?? DEFAULT_ICON);
+
+  const Icon = iconFor(icon);
 
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ['habits'] });
@@ -30,7 +34,7 @@ function HabitForm({
 
   const save = useMutation({
     mutationFn: () => {
-      const body = { name: name.trim(), color, weeklyTarget };
+      const body = { name: name.trim(), color, weeklyTarget, icon };
       return habit ? api.habits.update(habit.id, body) : api.habits.create(body);
     },
     onSuccess: () => {
@@ -53,7 +57,7 @@ function HabitForm({
         <button
           type="button"
           onClick={onBack}
-          className="p-1 rounded text-faint hover:text-strong hover:bg-hover transition-colors"
+          className="p-1 rounded-md text-faint hover:text-strong hover:bg-hover transition-colors"
           aria-label="Back"
         >
           <ChevronLeft size={16} strokeWidth={2.5} />
@@ -65,15 +69,17 @@ function HabitForm({
         <div>
           <label className="block text-xs font-medium text-muted mb-1.5">Name</label>
           <div className="flex items-center gap-2">
-            <span className={`h-9 w-9 shrink-0 rounded-xl ${tone(color).soft}`}>
-              <span className={`block m-[0.6875rem] h-[0.875rem] w-[0.875rem] rounded-full ${tone(color).swatch}`} />
+            <span
+              className={`h-9 w-9 shrink-0 rounded-md flex items-center justify-center ${tone(color).soft} ${tone(color).text}`}
+            >
+              <Icon size={17} strokeWidth={2} />
             </span>
             <input
               autoFocus
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Morning run"
-              className="flex-1 px-3 py-2 rounded-lg border border-line text-sm text-ink placeholder:text-placeholder focus:outline-none focus:ring-2 focus:ring-focus/20 focus:border-line-strong"
+              className="flex-1 px-3 py-2 rounded-md border border-line text-sm text-ink placeholder:text-placeholder focus:outline-none focus:ring-2 focus:ring-focus/20 focus:border-line-strong"
             />
           </div>
         </div>
@@ -86,7 +92,7 @@ function HabitForm({
                 key={n}
                 type="button"
                 onClick={() => setWeeklyTarget(n)}
-                className={`w-8 h-8 rounded-lg text-sm font-medium transition-all active:scale-90 ${
+                className={`w-8 h-8 rounded-md text-sm font-medium transition-all active:scale-90 ${
                   weeklyTarget === n
                     ? 'bg-ink text-on-ink'
                     : 'bg-sunken text-muted hover:bg-sunken-hover'
@@ -97,6 +103,11 @@ function HabitForm({
             ))}
             <span className="ml-1 text-xs text-faint">× / week</span>
           </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-muted mb-1.5">Icon</label>
+          <IconPicker value={icon} onChange={setIcon} color={color} />
         </div>
 
         <div>
@@ -112,7 +123,7 @@ function HabitForm({
             type="button"
             onClick={() => remove.mutate()}
             disabled={remove.isPending}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-danger hover:bg-danger-wash active:scale-[0.97] transition-all disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium text-danger hover:bg-danger-wash active:scale-[0.97] transition-all disabled:opacity-50"
           >
             <Trash2 size={15} strokeWidth={2} /> Delete
           </button>
@@ -123,7 +134,7 @@ function HabitForm({
           type="button"
           onClick={() => save.mutate()}
           disabled={!name.trim() || save.isPending}
-          className="px-4 py-2 rounded-lg text-sm font-medium bg-ink text-on-ink hover:bg-ink-hover active:scale-[0.97] transition-all disabled:opacity-40"
+          className="px-4 py-2 rounded-md text-sm font-medium bg-ink text-on-ink hover:bg-ink-hover active:scale-[0.97] transition-all disabled:opacity-40"
         >
           {save.isPending ? 'Saving…' : editing ? 'Save' : 'Add habit'}
         </button>
@@ -157,26 +168,30 @@ export function HabitManager({ open, onClose }: { open: boolean; onClose: () => 
                   No habits yet. Add one to start tracking.
                 </p>
               )}
-              {list.map((h) => (
-                <button
-                  key={h.id}
-                  type="button"
-                  onClick={() => setMode({ view: 'form', habit: h })}
-                  className="flex items-center gap-2.5 px-2 py-2 -mx-2 rounded-lg text-left hover:bg-hover transition-colors"
-                >
-                  <span className={`w-1 self-stretch min-h-5 rounded-full ${tone(h.color).line}`} />
-                  <span className="font-medium text-ink text-sm truncate">{h.name}</span>
-                  <span className="ml-auto shrink-0 text-xs text-faint">
-                    {h.weeklyTarget}× / week
-                  </span>
-                </button>
-              ))}
+              {list.map((h) => {
+                const Icon = iconFor(h.icon);
+                return (
+                  <button
+                    key={h.id}
+                    type="button"
+                    onClick={() => setMode({ view: 'form', habit: h })}
+                    className="flex items-center gap-2.5 px-2 py-2 -mx-2 rounded-md text-left hover:bg-hover transition-colors"
+                  >
+                    <span className={`w-1 self-stretch min-h-5 rounded-md ${tone(h.color).line}`} />
+                    <Icon size={14} strokeWidth={2.25} className={`shrink-0 ${tone(h.color).text}`} />
+                    <span className="font-medium text-ink text-sm truncate">{h.name}</span>
+                    <span className="ml-auto shrink-0 text-xs text-faint">
+                      {h.weeklyTarget}× / week
+                    </span>
+                  </button>
+                );
+              })}
             </div>
 
           <button
             type="button"
             onClick={() => setMode({ view: 'form' })}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-ink text-on-ink hover:bg-ink-hover active:scale-[0.97] transition-all"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium bg-ink text-on-ink hover:bg-ink-hover active:scale-[0.97] transition-all"
           >
             <Plus size={15} strokeWidth={2.5} /> New habit
           </button>

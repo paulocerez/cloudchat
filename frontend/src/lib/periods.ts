@@ -33,7 +33,7 @@ export const PERIOD_TONES: Record<PeriodColor, PeriodTone> = {
     line: 'bg-rose-400',
     soft: 'bg-rose-100 dark:bg-rose-400/15',
     softHover: 'hover:bg-rose-100 dark:hover:bg-rose-400/20',
-    text: 'text-rose-600 dark:text-rose-300',
+    text: 'text-danger dark:text-rose-300',
     ring: 'ring-rose-300 dark:ring-rose-400/50',
     swatch: 'bg-rose-400',
   },

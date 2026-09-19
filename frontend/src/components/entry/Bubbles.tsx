@@ -18,7 +18,7 @@ import { mediaUrl } from './shared';
 // every touch device, and long-press alone is undiscoverable — nothing on
 // screen tells you it's there.
 const HANDLE =
-  'shrink-0 h-7 w-7 flex items-center justify-center rounded-full text-faintest hover:text-ink hover:bg-hover active:scale-90 transition-all';
+  'shrink-0 h-7 w-7 flex items-center justify-center rounded-md text-faintest hover:text-ink hover:bg-hover active:scale-90 transition-all';
 
 export function MessageBubble({ msg, date }: { msg: TextMessage; date: string }) {
   const time = format(new Date(msg.timestamp), 'HH:mm');
@@ -46,10 +46,10 @@ export function MessageBubble({ msg, date }: { msg: TextMessage; date: string })
       {msg.fromUser && handle}
       <div
         {...longPress}
-        className={`max-w-[80%] md:max-w-md rounded-[22px] px-4 py-3 squish ${
+        className={`max-w-[80%] md:max-w-md rounded-md px-4 py-3 squish ${
           msg.fromUser
-            ? 'bg-ink text-on-ink rounded-br-lg shadow-[0_6px_18px_-6px_var(--ink-shadow)]'
-            : 'surface text-ink rounded-bl-lg'
+            ? 'bg-ink text-on-ink rounded-md shadow-[0_6px_18px_-6px_var(--ink-shadow)]'
+            : 'surface text-ink rounded-md'
         }`}
       >
         {text && <p className="text-[15px] leading-relaxed">{text}</p>}
@@ -60,7 +60,7 @@ export function MessageBubble({ msg, date }: { msg: TextMessage; date: string })
             title="Spotify player"
             loading="lazy"
             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            className={`w-full rounded-xl border-0 ${text ? 'mt-2' : ''} ${link.kind === 'track' || link.kind === 'episode' ? 'h-[152px]' : 'h-[352px]'}`}
+            className={`w-full rounded-md border-0 ${text ? 'mt-2' : ''} ${link.kind === 'track' || link.kind === 'episode' ? 'h-[152px]' : 'h-[352px]'}`}
           />
         ))}
         <p className="text-[11px] mt-1 opacity-50">{time}</p>
@@ -128,7 +128,7 @@ export function VoiceBubble({
       className={`group flex ${align === 'right' ? 'justify-end animate-slide-right' : 'justify-start animate-slide-left'}`}
     >
       <div
-        className={`max-w-[85%] md:max-w-md rounded-[22px] ${align === 'right' ? 'rounded-br-lg' : 'rounded-bl-lg'} surface px-3.5 py-3`}
+        className="max-w-[85%] md:max-w-md rounded-md surface px-3.5 py-3"
       >
         <VoicePlayer src={src} time={time} />
         <div className="mt-2 flex items-start gap-1.5" {...longPress}>
@@ -208,7 +208,7 @@ function TranscriptionDialog({
         onChange={(e) => onChange(e.target.value)}
         rows={8}
         autoFocus
-        className="w-full text-sm text-strong leading-relaxed rounded-lg border border-line-strong bg-field px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-focus focus:border-transparent resize-y"
+        className="w-full text-sm text-strong leading-relaxed rounded-md border border-line-strong bg-field px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-focus focus:border-transparent resize-y"
       />
       <div className="flex items-center justify-end gap-2 mt-4">
         <Button variant="ghost" onClick={onCancel}>
@@ -226,7 +226,7 @@ export function ImageBubble({ image, date }: { image: JournalImage; date: string
   const time = format(new Date(image.timestamp), 'HH:mm');
   return (
     <div className="group flex justify-end animate-slide-right">
-      <div className="max-w-[80%] md:max-w-md rounded-[22px] rounded-br-lg surface overflow-hidden squish">
+      <div className="max-w-[80%] md:max-w-md rounded-md surface overflow-hidden squish">
         <AnnotatedImage image={image} date={date} />
         <div className="px-4 py-2 flex items-end justify-between gap-1">
           <div>
@@ -249,7 +249,7 @@ export function VideoBubble({ video }: { video: JournalVideo }) {
   const time = format(new Date(video.timestamp), 'HH:mm');
   return (
     <div className="flex justify-end animate-slide-right">
-      <div className="max-w-[85%] md:max-w-md rounded-[22px] rounded-br-lg surface overflow-hidden">
+      <div className="max-w-[85%] md:max-w-md rounded-md surface overflow-hidden">
         <video controls preload="metadata" src={video.url} className="w-full bg-black max-h-96" />
         <div className="px-4 py-2">
           {video.caption && <p className="text-xs text-secondary">{video.caption}</p>}

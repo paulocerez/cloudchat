@@ -13,7 +13,7 @@ export function Logo({ size = 'md', variant = 'chip', className = '' }: LogoProp
     lg: variant === 'chip' ? 'text-3xl px-4 py-3' : 'text-3xl',
   };
   const surface =
-    variant === 'chip' ? 'bg-surface rounded-lg shadow-sm border border-line' : '';
+    variant === 'chip' ? 'bg-surface rounded-md shadow-sm border border-line' : '';
 
   return (
     <div

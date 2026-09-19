@@ -112,6 +112,7 @@ export interface TimePeriod {
   startDate: string; // YYYY-MM-DD, inclusive
   endDate: string; // YYYY-MM-DD, inclusive
   color: PeriodColor;
+  icon?: string;
   emoji?: string;
   createdAt: string;
   updatedAt: string;
@@ -121,6 +122,7 @@ export interface TimePeriod {
 export interface Habit {
   id: string;
   name: string;
+  icon?: string;
   emoji?: string;
   color: PeriodColor;
   weeklyTarget: number; // 1–7 days per week

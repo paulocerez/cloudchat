@@ -61,7 +61,7 @@ export function MenuSheet({
             disabled={item.disabled}
             onClick={choose(item)}
             className={cn(
-              'w-full flex items-center gap-2.5 h-9 px-2.5 rounded-lg text-sm font-medium text-left transition-colors disabled:opacity-50',
+              'w-full flex items-center gap-2.5 h-9 px-2.5 rounded-md text-sm font-medium text-left transition-colors disabled:opacity-50',
               item.danger ? 'text-danger hover:bg-danger-wash' : 'text-ink hover:bg-hover'
             )}
           >
@@ -151,7 +151,7 @@ function AnchoredMenu({
       <div
         role="menu"
         style={pos}
-        className="fixed z-[90] min-w-[11rem] rounded-2xl bg-surface-2 p-1 shadow-2xl ring-1 ring-line animate-fade-up"
+        className="fixed z-[90] min-w-[11rem] rounded-md bg-surface-2 p-1 shadow-2xl ring-1 ring-line animate-fade-up"
       >
         {children}
       </div>

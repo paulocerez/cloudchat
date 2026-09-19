@@ -64,7 +64,7 @@ export function AnnotatedImage({
         type="button"
         onClick={openEditor}
         aria-label="Annotate image"
-        className="hidden sm:block absolute top-2 right-2 p-1.5 rounded-full bg-black/45 text-white opacity-0 group-hover/img:opacity-100 hover:bg-black/70 transition-opacity"
+        className="hidden sm:block absolute top-2 right-2 p-1.5 rounded-md bg-black/45 text-white opacity-0 group-hover/img:opacity-100 hover:bg-black/70 transition-opacity"
       >
         <Pencil size={13} strokeWidth={2.5} />
       </button>
@@ -105,14 +105,14 @@ export function AnnotatedImage({
 
       <Sheet open={editing} onClose={() => setEditing(false)} className="max-w-md">
         <SheetHeader title="Annotate image" onClose={() => setEditing(false)} />
-        <img src={src} alt="" className="w-full max-h-56 object-contain rounded-lg bg-sunken mb-3" />
+        <img src={src} alt="" className="w-full max-h-56 object-contain rounded-md bg-sunken mb-3" />
         <textarea
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           rows={3}
           autoFocus
           placeholder="Add a note for this photo…"
-          className="w-full text-sm text-strong leading-relaxed rounded-lg border border-line-strong bg-field px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-focus focus:border-transparent resize-y"
+          className="w-full text-sm text-strong leading-relaxed rounded-md border border-line-strong bg-field px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-focus focus:border-transparent resize-y"
         />
         <div className="flex items-center justify-end gap-2 mt-4">
           <Button variant="ghost" onClick={() => setEditing(false)}>

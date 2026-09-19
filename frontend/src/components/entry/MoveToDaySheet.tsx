@@ -39,7 +39,7 @@ export function MoveToDaySheet({
         type="date"
         value={moveTo}
         onChange={(e) => setMoveTo(e.target.value)}
-        className="w-full text-sm text-strong rounded-lg border border-line-strong bg-field px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-focus focus:border-transparent"
+        className="w-full text-sm text-strong rounded-md border border-line-strong bg-field px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-focus focus:border-transparent"
       />
       <p className="text-xs text-faint mt-2 leading-relaxed">
         It keeps its time of day. If that day has no entry yet, one will be created.
@@ -80,8 +80,8 @@ export function MoveToDayButton({
 
   const btnClass =
     variant === 'overlay'
-      ? 'p-1.5 rounded-full bg-black/45 text-white hover:bg-black/70 transition-colors'
-      : 'shrink-0 p-1 rounded text-faintest hover:text-strong hover:bg-hover transition-colors';
+      ? 'p-1.5 rounded-md bg-black/45 text-white hover:bg-black/70 transition-colors'
+      : 'shrink-0 p-1 rounded-md text-faintest hover:text-strong hover:bg-hover transition-colors';
 
   return (
     <>

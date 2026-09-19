@@ -121,7 +121,7 @@ export function Sheet({
           role="dialog"
           aria-modal="true"
           className={cn(
-            'relative z-10 w-full max-h-[85vh] overflow-y-auto rounded-[26px] bg-surface-2 shadow-2xl ring-1 ring-line p-5 animate-materialize',
+            'relative z-10 w-full max-h-[85vh] overflow-y-auto rounded-md bg-surface-2 shadow-2xl ring-1 ring-line p-5 animate-materialize',
             className
           )}
         >
@@ -149,13 +149,13 @@ export function Sheet({
           dragMomentum={false}
           onDragEnd={onDragEnd}
           style={{ y }}
-          className="mx-auto w-full max-w-lg rounded-t-[26px] bg-surface-2 shadow-2xl ring-1 ring-line"
+          className="mx-auto w-full max-w-lg rounded-t-md bg-surface-2 shadow-2xl ring-1 ring-line"
         >
           <div
             onPointerDown={(e) => dragControls.start(e)}
             className="flex justify-center py-3 cursor-grab active:cursor-grabbing touch-none"
           >
-            <span className="h-1 w-10 rounded-full bg-line-strong" />
+            <span className="h-1 w-10 rounded-md bg-line-strong" />
           </div>
           <div className="max-h-[80vh] overflow-y-auto overscroll-contain px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
             {children}
@@ -176,7 +176,7 @@ export function SheetHeader({ title, onClose }: { title: string; onClose: () => 
         type="button"
         onClick={onClose}
         aria-label="Close"
-        className="h-9 w-9 -mr-2 flex items-center justify-center rounded-full text-faint hover:text-strong hover:bg-hover active:scale-90 transition-all"
+        className="h-9 w-9 -mr-2 flex items-center justify-center rounded-md text-faint hover:text-strong hover:bg-hover active:scale-90 transition-all"
       >
         <X size={16} strokeWidth={2.5} />
       </button>
