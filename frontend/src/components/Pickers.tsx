@@ -23,7 +23,7 @@ export function ColorPicker({
             aria-label={c}
             aria-pressed={selected}
             onClick={() => onChange(c)}
-            className={`aspect-square rounded-sm ${tone(c).swatch} flex items-center justify-center transition-transform active:scale-90 ${
+            className={`aspect-square rounded-md ${tone(c).swatch} flex items-center justify-center transition-transform active:scale-90 ${
               selected ? 'scale-105' : 'opacity-80 hover:opacity-100 hover:scale-105'
             }`}
           >
@@ -58,7 +58,7 @@ export function IconPicker({
             aria-label={name}
             aria-pressed={selected}
             onClick={() => onChange(name)}
-            className={`aspect-square rounded-sm flex items-center justify-center transition-transform active:scale-90 ${
+            className={`aspect-square rounded-md flex items-center justify-center transition-transform active:scale-90 ${
               selected
                 ? `${t.soft} ${t.text} scale-105`
                 : 'bg-gray-100 text-gray-400 hover:text-gray-600 hover:scale-105'

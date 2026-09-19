@@ -30,7 +30,7 @@ export default function Nav() {
                 key={to}
                 to={to}
                 aria-current={active ? 'page' : undefined}
-                className={`flex items-center gap-1.5 h-8 px-3 rounded-sm text-[13.5px] font-medium transition-colors duration-150 ${
+                className={`flex items-center gap-1.5 h-8 px-3 rounded-md text-[13.5px] font-medium transition-colors duration-150 ${
                   active
                     ? 'bg-gray-900/[0.06] text-[#17171C]'
                     : 'text-[#71717D] hover:text-[#17171C] hover:bg-gray-900/[0.04]'

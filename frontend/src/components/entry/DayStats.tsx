@@ -86,7 +86,7 @@ export function DayStats({
             type="button"
             onClick={tile.onClick}
             title={tile.caption}
-            className="surface squish shrink-0 snap-start w-[6.5rem] rounded-sm px-3 py-2.5 text-left hover:bg-gray-50"
+            className="surface squish shrink-0 snap-start w-[6.5rem] rounded-md px-3 py-2.5 text-left hover:bg-gray-50"
           >
             <tile.Icon size={16} strokeWidth={2} className="block text-[#71717D]" />
             <span className="block mt-1.5 text-[17px] font-semibold leading-none text-[#241F2E] tabular-nums">

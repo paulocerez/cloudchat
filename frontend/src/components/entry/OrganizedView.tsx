@@ -34,7 +34,7 @@ export function OrganizedView({ entry }: { entry: JournalEntry }) {
         <Section id={sectionId('messages')} icon={MessageSquare} title="Messages" count={textMessages.length}>
           <div className="space-y-2">
             {textMessages.map((m) => (
-              <div key={m.id} className="rounded-sm bg-gray-100 text-gray-700 px-4 py-2.5">
+              <div key={m.id} className="rounded-md bg-gray-100 text-gray-700 px-4 py-2.5">
                 <p className="text-[15px] leading-relaxed">{stripSpotifyLinks(m.content)}</p>
                 <p className="text-xs mt-1 text-gray-400">{format(new Date(m.timestamp), 'HH:mm')}</p>
               </div>
@@ -51,7 +51,7 @@ export function OrganizedView({ entry }: { entry: JournalEntry }) {
                 key={img.id}
                 image={img}
                 date={entry.date}
-                className="aspect-square rounded-sm bg-gray-100"
+                className="aspect-square rounded-md bg-gray-100"
               />
             ))}
           </div>
@@ -67,7 +67,7 @@ export function OrganizedView({ entry }: { entry: JournalEntry }) {
                 controls
                 preload="metadata"
                 src={video.url}
-                className="w-full rounded-sm bg-black"
+                className="w-full rounded-md bg-black"
               />
             ))}
           </div>
@@ -94,7 +94,7 @@ export function OrganizedView({ entry }: { entry: JournalEntry }) {
                 title="Spotify player"
                 loading="lazy"
                 allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                className={`w-full rounded-sm border-0 ${link.kind === 'track' || link.kind === 'episode' ? 'h-[152px]' : 'h-[352px]'}`}
+                className={`w-full rounded-md border-0 ${link.kind === 'track' || link.kind === 'episode' ? 'h-[152px]' : 'h-[352px]'}`}
               />
             ))}
           </div>
