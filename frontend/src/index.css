@@ -37,7 +37,6 @@
 
   --color-warm: var(--warm);
   --color-warm-line: var(--warm-line);
-  --color-warm-ink: var(--warm-ink);
   --color-accent: var(--accent);
   --color-danger: var(--danger);
   --color-danger-wash: var(--danger-wash);
@@ -79,7 +78,6 @@
 
   --warm: #fffaf0;
   --warm-line: rgb(214 158 46 / 0.35);
-  --warm-ink: #b45309;
   --accent: #f5a524;
   --danger: #e11d48;
   --danger-wash: rgb(244 63 94 / 0.1);
@@ -130,7 +128,6 @@
 
   --warm: #241c10;
   --warm-line: rgb(245 165 36 / 0.3);
-  --warm-ink: #f0b44a;
   --danger: #fb7185;
   --danger-wash: rgb(251 113 133 / 0.14);
 

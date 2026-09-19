@@ -14,6 +14,7 @@ import { Button } from '~/components/ui/Button';
 import { PageHeader } from '~/components/ui/PageHeader';
 import { PullToRefresh } from '~/components/PullToRefresh';
 import { ThemeToggle } from '~/components/ThemeToggle';
+import { useTheme } from '~/lib/theme';
 import { mediaUrl } from '~/components/entry/shared';
 import type { JournalEntry, TextMessage, VoiceMemo, JournalImage, JournalVideo, TimePeriod } from '@cloudchat/shared';
 import { rootRoute } from './__root';
@@ -294,6 +295,7 @@ function StreakBadge({ entries }: { entries: JournalEntry[] }) {
 }
 
 function EntryCard({ entry }: { entry: JournalEntry }) {
+  const { resolved } = useTheme();
   const messageCount = entry.messages.filter((m: TextMessage) => m.fromUser).length;
   const memoCount = entry.voiceMemos.length;
   const imageCount = entry.images.length;
@@ -305,7 +307,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
 
   const mapUrl =
     entry.locations && entry.locations.length > 0
-      ? staticMapUrl(entry.locations, 160, 90)
+      ? staticMapUrl(entry.locations, 160, 90, resolved)
       : null;
 
   return (

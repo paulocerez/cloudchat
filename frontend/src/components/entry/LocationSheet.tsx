@@ -5,6 +5,7 @@ import { MapPin, Plus, X } from 'lucide-react';
 import type { JournalEntry } from '@cloudchat/shared';
 import { api } from '~/lib/api';
 import { staticMapUrl } from '~/lib/mapbox';
+import { useTheme } from '~/lib/theme';
 import { Sheet, SheetHeader } from '~/components/ui/Sheet';
 import { Button } from '~/components/ui/Button';
 
@@ -21,7 +22,8 @@ export function LocationSheet({
   const [name, setName] = useState('');
   const locations = entry.locations ?? [];
   const scanned = Boolean(entry.locationsScannedAt);
-  const mapUrl = staticMapUrl(locations);
+  const { resolved } = useTheme();
+  const mapUrl = staticMapUrl(locations, 600, 240, resolved);
 
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ['entry', entry.date] });
