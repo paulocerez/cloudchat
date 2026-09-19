@@ -13,6 +13,7 @@ import { PeriodDialog } from '~/components/PeriodDialog';
 import { Button } from '~/components/ui/Button';
 import { PageHeader } from '~/components/ui/PageHeader';
 import { PullToRefresh } from '~/components/PullToRefresh';
+import { ThemeToggle } from '~/components/ThemeToggle';
 import { mediaUrl } from '~/components/entry/shared';
 import type { JournalEntry, TextMessage, VoiceMemo, JournalImage, JournalVideo, TimePeriod } from '@cloudchat/shared';
 import { rootRoute } from './__root';
@@ -42,7 +43,9 @@ function Timeline() {
   if (isLoading || isError || !entries || entries.length === 0)
     return (
       <div className="animate-fade-up">
-        <PageHeader title="Timeline" />
+        {/* The toggle rides along even here — it's the only way to reach it on
+            a phone, and a first run has no entries to hang a header off. */}
+        <PageHeader title="Timeline" actions={<ThemeToggle className="lg:hidden" />} />
         {isLoading ? <LoadingState /> : isError ? <ErrorState /> : <EmptyState />}
       </div>
     );
@@ -76,6 +79,9 @@ function Timeline() {
             >
               <CalendarRange size={18} strokeWidth={2} />
             </Button>
+            {/* Desktop reaches the theme from the top bar; below lg there is no
+                top bar, so it lives here instead. */}
+            <ThemeToggle className="lg:hidden" />
           </>
         }
       />
