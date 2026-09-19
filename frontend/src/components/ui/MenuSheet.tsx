@@ -159,7 +159,7 @@ function AnchoredMenu({
       <div
         role="menu"
         style={pos}
-        className="fixed z-[90] min-w-[11rem] rounded-2xl bg-white/95 backdrop-blur-xl p-1 shadow-2xl ring-1 ring-white/70 animate-fade-up"
+        className="fixed z-[90] min-w-[11rem] rounded-2xl bg-white p-1 shadow-2xl ring-1 ring-gray-900/[0.08] animate-fade-up"
       >
         {children}
       </div>

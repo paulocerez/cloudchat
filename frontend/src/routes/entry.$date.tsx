@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { createRoute, Link } from '@tanstack/react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { WandSparkles } from 'lucide-react';
@@ -45,19 +45,10 @@ function EntryPage() {
     queryFn: () => api.entries.get(date),
   });
 
-  // A highlighted day warms the whole page, not just a star in the corner.
-  useEffect(() => {
-    if (entry?.highlight) document.body.dataset.highlight = 'true';
-    else delete document.body.dataset.highlight;
-    return () => {
-      delete document.body.dataset.highlight;
-    };
-  }, [entry?.highlight]);
-
   if (isLoading)
     return (
-      <div className="flex items-center justify-center py-16 gap-2 text-[#8B7FA6] animate-fade-up">
-        <span className="w-4 h-4 rounded-full border-2 border-[#D9D0E8] border-t-[#8B7FA6] animate-spin-slow" />
+      <div className="flex items-center justify-center py-16 gap-2 text-[#71717D] animate-fade-up">
+        <span className="w-4 h-4 rounded-full border-2 border-[#E2E2E8] border-t-[#71717D] animate-spin-slow" />
         <span className="text-sm">Loading…</span>
       </div>
     );
@@ -65,7 +56,7 @@ function EntryPage() {
   if (isError || !entry)
     return (
       <div className="text-center py-8 animate-fade-up">
-        <p className="text-[#5A5270] text-sm">Entry not found</p>
+        <p className="text-[#55555F] text-sm">Entry not found</p>
         <Link to="/" className="text-[#241F2E] underline text-sm mt-2 block">
           ← Back to timeline
         </Link>
@@ -89,7 +80,7 @@ function EntryPage() {
           <div className="mt-4">
             <UploadStatus progress={media.progress} error={media.error} />
             {entry.summary ? (
-              <p className="text-[16px] text-[#5A5270] leading-[1.55]">{entry.summary}</p>
+              <p className="text-[16px] text-[#55555F] leading-[1.55]">{entry.summary}</p>
             ) : (
               <GenerateSummaryRow date={entry.date} />
             )}
@@ -151,7 +142,7 @@ function GenerateSummaryRow({ date }: { date: string }) {
       type="button"
       onClick={() => mutate()}
       disabled={isPending}
-      className="inline-flex items-center gap-1.5 h-9 -ml-1 px-2 rounded-full text-sm text-[#8B7FA6] hover:text-[#241F2E] hover:bg-gray-900/[0.04] active:scale-[0.97] transition-all disabled:opacity-50"
+      className="inline-flex items-center gap-1.5 h-9 -ml-1 px-2 rounded-full text-sm text-[#71717D] hover:text-[#241F2E] hover:bg-gray-900/[0.04] active:scale-[0.97] transition-all disabled:opacity-50"
     >
       <WandSparkles size={15} strokeWidth={2} />
       {isPending ? 'Generating summary…' : isError ? 'Retry summary' : 'Generate summary'}

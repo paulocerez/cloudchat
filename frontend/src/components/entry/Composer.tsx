@@ -33,7 +33,7 @@ export function Composer({
   const canSend = content.trim().length > 0 && !isPending;
 
   return (
-    <div className="fixed bottom-0 right-0 left-0 lg:left-56 z-40 bg-white/55 backdrop-blur-2xl backdrop-saturate-150 glass-surface">
+    <div className="fixed bottom-0 inset-x-0 z-40 border-t border-gray-900/[0.07] bg-white/90 backdrop-blur-xl">
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -54,7 +54,7 @@ export function Composer({
           placeholder="Add a note…"
           enterKeyHint="send"
           // 16px keeps iOS Safari from zooming the viewport on focus.
-          className="flex-1 min-w-0 h-10 text-base sm:text-sm text-[#241F2E] rounded-full surface-solid px-4 placeholder:text-[#9990AD] focus:outline-none focus:ring-2 focus:ring-[#241F2E]/70 transition-shadow"
+          className="flex-1 min-w-0 h-10 text-base sm:text-sm text-[#241F2E] rounded-full surface-solid px-4 placeholder:text-[#94949E] focus:outline-none focus:ring-2 focus:ring-[#241F2E]/70 transition-shadow"
         />
 
         <Button

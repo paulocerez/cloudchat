@@ -84,7 +84,7 @@ function Peek({
       style={{ opacity }}
       className={`pointer-events-none absolute top-24 ${
         side === 'left' ? 'left-0' : 'right-0'
-      } z-0 text-[11px] font-semibold uppercase tracking-wide text-[#B6ADC9]`}
+      } z-0 text-[11px] font-semibold uppercase tracking-wide text-[#A6A6B0]`}
     >
       {label}
     </motion.span>

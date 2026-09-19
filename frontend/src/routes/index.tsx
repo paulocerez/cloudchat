@@ -60,7 +60,7 @@ function Timeline() {
               to="/entry/$date"
               params={{ date: formatDate(new Date(), 'yyyy-MM-dd') }}
               title="Go to today"
-              className="h-9 px-3 inline-flex items-center rounded-full surface-solid text-[13px] font-semibold text-[#241F2E] active:scale-[0.96] transition-transform"
+              className="h-9 px-3 inline-flex items-center rounded-full surface-solid text-[13px] font-semibold text-[#17171C] hover:bg-gray-50 active:scale-[0.96] transition-transform"
             >
               Today
             </Link>
@@ -230,7 +230,7 @@ function PeriodTimeline({
               {/* A sticky marker per month, so scrolling a long archive never
                   leaves you wondering which year you're in. */}
               {month !== prev && (
-                <p className="sticky top-14 lg:top-0 z-10 -mx-1 px-1 py-1.5 mt-5 first:mt-0 mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8B7FA6] backdrop-blur-sm">
+                <p className="sticky top-0 lg:top-14 z-10 -mx-1 px-1 py-1.5 mt-5 first:mt-0 mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#71717D] backdrop-blur-sm">
                   {month}
                 </p>
               )}
@@ -308,9 +308,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
       to="/entry/$date"
       params={{ date: entry.date }}
       className={`squish flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 py-3.5 px-4 rounded-[22px] group cursor-pointer ${
-        entry.highlight
-          ? 'surface-solid ring-[1.5px] ring-[#F0B75C] bg-gradient-to-br from-[#FFF4DF] to-[#FFFDF8]'
-          : 'surface hover:bg-white/85'
+        entry.highlight ? 'surface-warm' : 'surface hover:bg-gray-50/60'
       }`}
     >
       {/* Left column: date, summary, songs, images */}

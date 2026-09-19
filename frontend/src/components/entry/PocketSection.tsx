@@ -17,7 +17,7 @@ export function PocketSection({ entry }: { entry: JournalEntry }) {
   return (
     <section
       id={sectionId('pocket')}
-      className="mt-10 pt-6 border-t border-white/70 scroll-mt-32 animate-fade-up"
+      className="mt-10 pt-6 border-t border-gray-900/[0.07] scroll-mt-32 animate-fade-up"
     >
       {/* Matches the Section headers used elsewhere on the page. */}
       <div className="flex items-baseline gap-2 mb-3">
@@ -29,7 +29,7 @@ export function PocketSection({ entry }: { entry: JournalEntry }) {
       </div>
       {/* One hairline-separated list rather than 7 boxes — at a recording an
           hour, stacked cards turn the foot of the page into a wall. */}
-      <div className="rounded-[22px] surface divide-y divide-white/70 overflow-hidden">
+      <div className="rounded-[22px] surface divide-y divide-gray-900/[0.06] overflow-hidden">
         {recordings.map((memo) => (
           <PocketCard key={memo.id} memo={memo} date={entry.date} />
         ))}
@@ -55,7 +55,7 @@ function PocketCard({ memo, date }: { memo: VoiceMemo; date: string }) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="w-full flex items-start gap-3 px-4 py-3.5 text-left hover:bg-white/50 transition-colors duration-150"
+        className="w-full flex items-start gap-3 px-4 py-3.5 text-left hover:bg-gray-50 transition-colors duration-150"
       >
         <span className="shrink-0 w-11 pt-0.5 text-xs tabular-nums text-gray-400">{time}</span>
         <span className="flex-1 min-w-0">

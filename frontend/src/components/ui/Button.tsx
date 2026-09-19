@@ -9,12 +9,12 @@ export const button = cva(
   {
     variants: {
       variant: {
-        primary: 'bg-[#241F2E] text-white shadow-[0_6px_16px_-6px_rgba(36,31,46,0.5)] hover:bg-[#332B42]',
-        secondary: 'surface-solid text-gray-700 hover:bg-white',
+        primary: 'bg-[#17171C] text-white shadow-[0_6px_16px_-6px_rgba(23,23,28,0.45)] hover:bg-[#2C2C34]',
+        secondary: 'surface-solid text-[#3F3F49] hover:bg-gray-50',
         ghost: 'text-gray-500 hover:text-gray-900 hover:bg-gray-900/[0.05]',
         danger: 'text-rose-600 hover:bg-rose-500/10',
-        // Circular chrome button on the frosted surface.
-        icon: 'rounded-full surface-solid text-gray-600 hover:text-gray-900',
+        // Circular chrome button, on a hairline card.
+        icon: 'rounded-full surface-solid text-[#55555F] hover:text-[#17171C] hover:bg-gray-50',
         // Bare icon, no chip behind it.
         bare: 'rounded-full text-gray-400 hover:text-gray-900 hover:bg-gray-900/[0.05]',
       },

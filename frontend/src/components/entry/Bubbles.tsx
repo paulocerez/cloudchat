@@ -18,7 +18,7 @@ import { mediaUrl } from './shared';
 // every touch device, and long-press alone is undiscoverable — nothing on
 // screen tells you it's there.
 const HANDLE =
-  'shrink-0 h-7 w-7 flex items-center justify-center rounded-full text-[#C9C1D8] hover:text-[#241F2E] hover:bg-gray-900/[0.05] active:scale-90 transition-all';
+  'shrink-0 h-7 w-7 flex items-center justify-center rounded-full text-[#B8B8C2] hover:text-[#241F2E] hover:bg-gray-900/[0.05] active:scale-90 transition-all';
 
 export function MessageBubble({ msg, date }: { msg: TextMessage; date: string }) {
   const time = format(new Date(msg.timestamp), 'HH:mm');

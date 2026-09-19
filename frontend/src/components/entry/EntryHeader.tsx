@@ -53,7 +53,7 @@ export function EntryHeader({
     const el = titleRef.current;
     if (!el) return;
     const io = new IntersectionObserver(([e]) => setTitleHidden(!e.isIntersecting), {
-      rootMargin: '-40px 0px 0px 0px',
+      rootMargin: `-${window.matchMedia('(min-width: 1024px)').matches ? 96 : 40}px 0px 0px 0px`,
       threshold: 0,
     });
     io.observe(el);
@@ -69,7 +69,7 @@ export function EntryHeader({
 
   return (
     <>
-      <div className="sticky top-0 z-20 -mx-4 sm:-mx-6 md:-mx-8 -mt-8 px-4 sm:px-6 md:px-8 pt-8 pb-2">
+      <div className="sticky top-0 lg:top-14 z-20 -mx-4 sm:-mx-6 md:-mx-8 -mt-8 px-4 sm:px-6 md:px-8 pt-8 pb-2 bg-white/85 backdrop-blur-xl">
         <div className="flex items-center gap-2 h-10">
           <Button variant="icon" size="icon" onClick={goBack} aria-label="Back">
             <ChevronLeft size={19} strokeWidth={2.25} />
@@ -106,7 +106,7 @@ export function EntryHeader({
 
       <div ref={titleRef} className="pt-4 animate-fade-up">
         <div className="flex items-center gap-1">
-          <p className="text-[12px] font-semibold tracking-wide text-[#8B7FA6]">
+          <p className="text-[12px] font-semibold tracking-wide text-[#71717D]">
             {eyebrowFor(entry.date)}
           </p>
           {/* Arrows make the swipe discoverable, and give a pointer a way in. */}
@@ -115,7 +115,7 @@ export function EntryHeader({
               to="/entry/$date"
               params={{ date: shiftDate(entry.date, -1) }}
               aria-label="Previous day"
-              className="h-8 w-8 flex items-center justify-center rounded-full text-[#B6ADC9] hover:text-[#241F2E] hover:bg-gray-900/[0.05] active:scale-90 transition-all"
+              className="h-8 w-8 flex items-center justify-center rounded-full text-[#A6A6B0] hover:text-[#241F2E] hover:bg-gray-900/[0.05] active:scale-90 transition-all"
             >
               <ChevronLeft size={17} strokeWidth={2.25} />
             </Link>
@@ -124,12 +124,12 @@ export function EntryHeader({
                 to="/entry/$date"
                 params={{ date: shiftDate(entry.date, 1) }}
                 aria-label="Next day"
-                className="h-8 w-8 flex items-center justify-center rounded-full text-[#B6ADC9] hover:text-[#241F2E] hover:bg-gray-900/[0.05] active:scale-90 transition-all"
+                className="h-8 w-8 flex items-center justify-center rounded-full text-[#A6A6B0] hover:text-[#241F2E] hover:bg-gray-900/[0.05] active:scale-90 transition-all"
               >
                 <ChevronRight size={17} strokeWidth={2.25} />
               </Link>
             ) : (
-              <span className="h-8 w-8 flex items-center justify-center text-[#E0DAEA]">
+              <span className="h-8 w-8 flex items-center justify-center text-[#E6E6EC]">
                 <ChevronRight size={17} strokeWidth={2.25} />
               </span>
             )}

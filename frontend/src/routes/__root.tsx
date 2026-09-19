@@ -1,8 +1,6 @@
 import { createRootRoute, Outlet, redirect, useRouterState } from '@tanstack/react-router';
 import { isAuthenticated } from '~/lib/auth';
-import { PageTitleProvider } from '~/lib/pageTitle';
 import Nav from '~/components/Nav';
-import { Sidebar } from '~/components/Sidebar';
 import { BottomTabs } from '~/components/BottomTabs';
 
 export const rootRoute = createRootRoute({
@@ -25,25 +23,21 @@ function RootLayout() {
   const showTabs = !isLogin && !isDetail;
 
   return (
-    <PageTitleProvider>
-      {/* The rail is fixed, so the page is inset to clear it from `lg` up. */}
-      <div className={`min-h-screen text-gray-900 ${isLogin ? '' : 'lg:pl-56'}`}>
-        <Nav />
-        <main
-          className={`max-w-2xl mx-auto px-4 sm:px-6 md:px-8 py-8 ${
-            // The entry page reserves its own room for the composer it pins.
-            isEntry
-              ? ''
-              : showTabs
-                ? 'pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-16'
-                : 'pb-16'
-          }`}
-        >
-          <Outlet />
-        </main>
-        {showTabs && <BottomTabs />}
-      </div>
-      {!isLogin && <Sidebar />}
-    </PageTitleProvider>
+    <div className="min-h-screen text-[#17171C]">
+      <Nav />
+      <main
+        className={`max-w-2xl mx-auto px-4 sm:px-6 md:px-8 py-8 ${
+          // The entry page reserves its own room for the composer it pins.
+          isEntry
+            ? ''
+            : showTabs
+              ? 'pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-16'
+              : 'pb-16'
+        }`}
+      >
+        <Outlet />
+      </main>
+      {showTabs && <BottomTabs />}
+    </div>
   );
 }

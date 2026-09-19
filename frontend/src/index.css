@@ -5,28 +5,10 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── Surface ────────────────────────────────────────────────────
-   A journal isn't a dashboard, so the page sits on a soft wash
-   rather than flat white, and cards float on it as frosted glass.
-   The wash is fixed so it doesn't scroll away under long entries. */
 body {
-  background-color: #fdf9f6;
-  background-image:
-    radial-gradient(90rem 50rem at 8% -12%, #ffe9d6 0%, transparent 55%),
-    radial-gradient(70rem 45rem at 95% 8%, #f6e6ff 0%, transparent 55%),
-    radial-gradient(80rem 55rem at 50% 105%, #e6eeff 0%, transparent 60%);
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-  /* iOS rubber-band overscroll stays on the wash */
+  background-color: #fff;
+  /* iOS rubber-band overscroll stays white */
   overscroll-behavior-y: none;
-}
-
-/* A day marked as a highlight warms the whole page. */
-body[data-highlight='true'] {
-  background-image:
-    radial-gradient(90rem 50rem at 8% -12%, #ffe1b5 0%, transparent 55%),
-    radial-gradient(70rem 45rem at 95% 8%, #ffe9d6 0%, transparent 55%),
-    radial-gradient(80rem 55rem at 50% 105%, #fff3dc 0%, transparent 60%);
 }
 
 /* ── Touch ──────────────────────────────────────────────────── */
@@ -182,23 +164,30 @@ label,
   transform-origin: center;
 }
 
-/* ── Frosted card ───────────────────────────────────────────────
-   The one surface treatment. Translucent so the wash tints it, with
-   a light top edge so it reads as physical rather than printed. */
+/* ── Card ───────────────────────────────────────────────────────
+   On a white page a card can't be white-on-wash, so definition comes
+   from a hairline plus a soft drop — enough to lift it off the page
+   without turning the list into a stack of boxes. */
 .surface {
-  background-color: rgb(255 255 255 / 0.72);
-  backdrop-filter: blur(20px) saturate(140%);
+  background-color: #fff;
   box-shadow:
-    0 1px 0 0 rgb(255 255 255 / 0.9) inset,
-    0 6px 20px -6px rgb(80 60 120 / 0.1),
-    0 1px 2px 0 rgb(80 60 120 / 0.05);
+    0 0 0 1px rgb(23 23 28 / 0.06),
+    0 1px 2px 0 rgb(23 23 28 / 0.04),
+    0 8px 24px -14px rgb(23 23 28 / 0.14);
 }
+/* The quieter variant: for blocks sitting inside another card, and for
+   anything dense enough that a shadow would fight the text. */
 .surface-solid {
-  background-color: rgb(255 255 255 / 0.92);
+  background-color: #fff;
+  box-shadow: 0 0 0 1px rgb(23 23 28 / 0.07);
+}
+/* A tinted card, for the day you marked. */
+.surface-warm {
+  background-color: #fffaf0;
   box-shadow:
-    0 1px 0 0 rgb(255 255 255 / 0.9) inset,
-    0 6px 20px -6px rgb(80 60 120 / 0.1),
-    0 1px 2px 0 rgb(80 60 120 / 0.05);
+    0 0 0 1px rgb(214 158 46 / 0.35),
+    0 1px 2px 0 rgb(23 23 28 / 0.04),
+    0 8px 24px -14px rgb(180 120 20 / 0.2);
 }
 
 /* Press feedback for anything card-shaped. */
