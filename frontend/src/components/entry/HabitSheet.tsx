@@ -101,7 +101,6 @@ export function HabitSheet({
                   >
                     {done && <Check size={15} strokeWidth={3} />}
                   </span>
-                  <span className="text-lg leading-none">{h.emoji ?? '✅'}</span>
                   <span
                     className={`text-[15px] font-medium ${done ? 'text-gray-900' : 'text-gray-600'}`}
                   >

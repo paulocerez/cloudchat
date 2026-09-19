@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight, Star, CalendarRange, X } from 'lucide-react';
+import { Bookmark, ChevronLeft, ChevronRight, Star, CalendarRange, X } from 'lucide-react';
 import {
   startOfMonth,
   endOfMonth,
@@ -171,11 +171,15 @@ function CalendarPage() {
               {highlighted && !isRangeStart && (
                 <Star size={11} className="absolute top-1 right-1 fill-amber-400 text-amber-400" />
               )}
-              {/* Emoji sits on the first day of a period */}
+              {/* A bookmark marks the period's first day */}
               {dayPeriods.some((p) => p.startDate === key) && (
-                <span className="absolute top-0.5 left-1 text-[11px] leading-none select-none">
-                  {dayPeriods.find((p) => p.startDate === key)?.emoji ?? '📌'}
-                </span>
+                <Bookmark
+                  size={9}
+                  strokeWidth={2.5}
+                  className={`absolute top-1 left-1 fill-current ${
+                    tone(dayPeriods.find((p) => p.startDate === key)!.color).text
+                  }`}
+                />
               )}
               <span>{format(day, 'd')}</span>
               {/* Period bands stacked at the bottom of the cell */}
@@ -235,7 +239,7 @@ function CalendarPage() {
                 className="flex items-center gap-2.5 px-2 py-1.5 -mx-2 rounded-lg text-sm text-left hover:bg-gray-50 transition-colors"
               >
                 <span className={`w-1 self-stretch min-h-4 rounded-full ${tone(p.color).line}`} />
-                <span className="text-base leading-none">{p.emoji ?? '📌'}</span>
+                <Bookmark size={14} strokeWidth={2.25} className={`shrink-0 fill-current ${tone(p.color).text}`} />
                 <span className="font-medium text-gray-800 truncate">{p.name}</span>
                 <span className="ml-auto shrink-0 text-xs text-gray-400">
                   {format(new Date(p.startDate), 'MMM d')} – {format(new Date(p.endDate), 'MMM d')}

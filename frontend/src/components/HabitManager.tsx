@@ -3,9 +3,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2, Plus, ChevronLeft } from 'lucide-react';
 import type { Habit, PeriodColor } from '@cloudchat/shared';
 import { api } from '~/lib/api';
-import { HABIT_EMOJIS, tone } from '~/lib/periods';
+import { tone } from '~/lib/periods';
 import { Modal, ModalHeader } from '~/components/Modal';
-import { ColorPicker, EmojiPicker } from '~/components/Pickers';
+import { ColorPicker } from '~/components/Pickers';
 
 // Create / edit / delete a single habit.
 function HabitForm({
@@ -20,7 +20,6 @@ function HabitForm({
   const qc = useQueryClient();
   const editing = Boolean(habit);
   const [name, setName] = useState(habit?.name ?? '');
-  const [emoji, setEmoji] = useState(habit?.emoji ?? '🏃');
   const [color, setColor] = useState<PeriodColor>(habit?.color ?? 'green');
   const [weeklyTarget, setWeeklyTarget] = useState(habit?.weeklyTarget ?? 3);
 
@@ -31,7 +30,7 @@ function HabitForm({
 
   const save = useMutation({
     mutationFn: () => {
-      const body = { name: name.trim(), emoji, color, weeklyTarget };
+      const body = { name: name.trim(), color, weeklyTarget };
       return habit ? api.habits.update(habit.id, body) : api.habits.create(body);
     },
     onSuccess: () => {
@@ -66,8 +65,8 @@ function HabitForm({
         <div>
           <label className="block text-xs font-medium text-gray-500 mb-1.5">Name</label>
           <div className="flex items-center gap-2">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-100/80 text-lg leading-none select-none">
-              {emoji}
+            <span className={`h-9 w-9 shrink-0 rounded-xl ${tone(color).soft}`}>
+              <span className={`block m-[0.6875rem] h-[0.875rem] w-[0.875rem] rounded-full ${tone(color).swatch}`} />
             </span>
             <input
               autoFocus
@@ -105,10 +104,6 @@ function HabitForm({
           <ColorPicker value={color} onChange={setColor} />
         </div>
 
-        <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1.5">Emoji</label>
-          <EmojiPicker value={emoji} onChange={setEmoji} emojis={HABIT_EMOJIS} />
-        </div>
       </div>
 
       <div className="flex items-center justify-between gap-2 mt-6">
@@ -170,7 +165,6 @@ export function HabitManager({ open, onClose }: { open: boolean; onClose: () => 
                   className="flex items-center gap-2.5 px-2 py-2 -mx-2 rounded-lg text-left hover:bg-gray-50 transition-colors"
                 >
                   <span className={`w-1 self-stretch min-h-5 rounded-full ${tone(h.color).line}`} />
-                  <span className="text-base leading-none">{h.emoji ?? '✅'}</span>
                   <span className="font-medium text-gray-800 text-sm truncate">{h.name}</span>
                   <span className="ml-auto shrink-0 text-xs text-gray-400">
                     {h.weeklyTarget}× / week

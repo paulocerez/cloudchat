@@ -3,9 +3,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Trash2 } from 'lucide-react';
 import type { PeriodColor, TimePeriod } from '@cloudchat/shared';
 import { api } from '~/lib/api';
-import { PERIOD_EMOJIS } from '~/lib/periods';
+import { tone } from '~/lib/periods';
 import { Modal, ModalHeader } from '~/components/Modal';
-import { ColorPicker, EmojiPicker } from '~/components/Pickers';
+import { ColorPicker } from '~/components/Pickers';
 
 interface PeriodDialogProps {
   open: boolean;
@@ -24,13 +24,12 @@ export function PeriodDialog({ open, onClose, period, defaultRange }: PeriodDial
   const [startDate, setStartDate] = useState(period?.startDate ?? defaultRange?.startDate ?? '');
   const [endDate, setEndDate] = useState(period?.endDate ?? defaultRange?.endDate ?? '');
   const [color, setColor] = useState<PeriodColor>(period?.color ?? 'amber');
-  const [emoji, setEmoji] = useState<string>(period?.emoji ?? '🌴');
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ['periods'] });
 
   const save = useMutation({
     mutationFn: () => {
-      const body = { name: name.trim(), startDate, endDate, color, emoji };
+      const body = { name: name.trim(), startDate, endDate, color };
       return period ? api.periods.update(period.id, body) : api.periods.create(body);
     },
     onSuccess: () => {
@@ -59,8 +58,9 @@ export function PeriodDialog({ open, onClose, period, defaultRange }: PeriodDial
         <div>
           <label className="block text-xs font-medium text-gray-500 mb-1.5">Name</label>
           <div className="flex items-center gap-2">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gray-100/80 text-lg leading-none select-none">
-              {emoji}
+            {/* The period's colour is its identity now that emoji are gone. */}
+            <span className={`h-9 w-9 shrink-0 rounded-xl ${tone(color).soft}`}>
+              <span className={`block m-[0.6875rem] h-[0.875rem] w-[0.875rem] rounded-full ${tone(color).swatch}`} />
             </span>
             <input
               autoFocus
@@ -105,11 +105,6 @@ export function PeriodDialog({ open, onClose, period, defaultRange }: PeriodDial
           <ColorPicker value={color} onChange={setColor} />
         </div>
 
-        {/* Emoji */}
-        <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1.5">Emoji</label>
-          <EmojiPicker value={emoji} onChange={setEmoji} emojis={PERIOD_EMOJIS} />
-        </div>
       </div>
 
       {/* Actions */}

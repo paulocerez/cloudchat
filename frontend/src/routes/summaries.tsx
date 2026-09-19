@@ -1,4 +1,5 @@
 import { createRoute, Link } from '@tanstack/react-router';
+import { Check } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '~/lib/api';
 import {
@@ -125,7 +126,7 @@ function EarlierWeeks() {
             Generating…
           </span>
         ) : isSuccess ? (
-          <span className="animate-pop">✓ Done</span>
+          <span className="inline-flex items-center gap-1 animate-pop"><Check size={14} strokeWidth={3} /> Done</span>
         ) : isError ? (
           'Retry'
         ) : (
@@ -174,7 +175,7 @@ function GenerateCard({
             Generating…
           </span>
         ) : done ? (
-          <span className="text-xs text-gray-600 animate-pop">✓ Done</span>
+          <span className="inline-flex items-center gap-1 text-xs text-gray-600 animate-pop"><Check size={13} strokeWidth={3} /> Done</span>
         ) : (
           <span className="text-xs text-gray-400 transition-transform duration-150 group-hover:translate-x-0.5 inline-block">
             Generate →

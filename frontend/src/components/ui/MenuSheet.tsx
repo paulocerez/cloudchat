@@ -6,7 +6,6 @@ import { cn } from '~/lib/utils';
 
 export interface MenuItem {
   icon?: React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }>;
-  glyph?: React.ReactNode;
   label: string;
   onSelect: () => void;
   danger?: boolean;
@@ -103,12 +102,7 @@ export function MenuSheet({
 }
 
 function Glyph({ item, size }: { item: MenuItem; size: number }) {
-  if (item.icon) return <item.icon size={size} strokeWidth={2} />;
-  return (
-    <span className="text-center leading-none" style={{ width: size, fontSize: size }}>
-      {item.glyph}
-    </span>
-  );
+  return item.icon ? <item.icon size={size} strokeWidth={2} /> : null;
 }
 
 // Right-aligned under its trigger, repositioned on scroll and resize so it

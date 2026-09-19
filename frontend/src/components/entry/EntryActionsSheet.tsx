@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Film, ImagePlus, MapPin, Pencil, WandSparkles } from 'lucide-react';
+import { Film, ImagePlus, MapPin, Pencil, Sprout, WandSparkles } from 'lucide-react';
 import type { JournalEntry } from '@cloudchat/shared';
 import { api } from '~/lib/api';
 import { Sheet } from '~/components/ui/Sheet';
@@ -84,7 +84,7 @@ export function EntryActionsSheet({
           Add a place
         </Button>
         <Button size="row" variant="ghost" className="text-[#241F2E]" onClick={run(onTrackHabits)}>
-          <span className="text-[17px] leading-none w-[17px] text-center">🌱</span>
+          <Sprout size={17} strokeWidth={2} />
           Track habits
         </Button>
       </div>

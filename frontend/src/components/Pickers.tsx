@@ -33,35 +33,3 @@ export function ColorPicker({
     </div>
   );
 }
-
-// Uniform emoji grid that fills the row evenly at any count.
-export function EmojiPicker({
-  value,
-  onChange,
-  emojis,
-}: {
-  value: string;
-  onChange: (e: string) => void;
-  emojis: string[];
-}) {
-  return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(2.25rem,1fr))] gap-1.5">
-      {emojis.map((e) => {
-        const selected = value === e;
-        return (
-          <button
-            key={e}
-            type="button"
-            aria-pressed={selected}
-            onClick={() => onChange(e)}
-            className={`aspect-square rounded-xl text-lg leading-none flex items-center justify-center transition-all active:scale-90 ${
-              selected ? 'bg-gray-900 shadow-sm scale-105' : 'bg-gray-100/70 hover:bg-gray-200'
-            }`}
-          >
-            {e}
-          </button>
-        );
-      })}
-    </div>
-  );
-}

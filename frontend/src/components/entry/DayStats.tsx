@@ -1,3 +1,4 @@
+import { ListChecks, MapPin, Mic, Sprout } from 'lucide-react';
 import type { JournalEntry } from '@cloudchat/shared';
 import { useHabits } from './HabitSheet';
 import { pocketMemos, sectionId } from './shared';
@@ -36,7 +37,7 @@ export function DayStats({
   const tiles = [
     {
       key: 'places',
-      glyph: '📍',
+      Icon: MapPin,
       value: String(places.length),
       label: places.length === 1 ? 'place' : 'places',
       caption: places.length > 0 ? places.map((p) => p.name).join(', ') : undefined,
@@ -44,28 +45,28 @@ export function DayStats({
     },
     todos.length > 0 && {
       key: 'todos',
-      glyph: '✅',
+      Icon: ListChecks,
       value: `${todosDone}/${todos.length}`,
       label: 'todos',
       onClick: onOpenTodos,
     },
     pocket.length > 0 && {
       key: 'pocket',
-      glyph: '🎙',
+      Icon: Mic,
       value: String(pocket.length),
       label: pocket.length === 1 ? 'recording' : 'recordings',
       onClick: jumpToPocket,
     },
     habits.length > 0 && {
       key: 'habits',
-      glyph: '🌱',
+      Icon: Sprout,
       value: `${habitsDone.length}/${habits.length}`,
       label: 'habits',
       onClick: onOpenHabits,
     },
   ].filter(Boolean) as {
     key: string;
-    glyph: string;
+    Icon: typeof MapPin;
     value: string;
     label: string;
     caption?: string;
@@ -87,7 +88,7 @@ export function DayStats({
             title={tile.caption}
             className="surface squish shrink-0 snap-start w-[6.5rem] rounded-2xl px-3 py-2.5 text-left hover:bg-gray-50"
           >
-            <span className="block text-[15px] leading-none">{tile.glyph}</span>
+            <tile.Icon size={16} strokeWidth={2} className="block text-[#71717D]" />
             <span className="block mt-1.5 text-[17px] font-semibold leading-none text-[#241F2E] tabular-nums">
               {tile.value}
             </span>

@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { MessageCircle, Mic, Image as ImageIcon, Music, MapPin, Flame, CalendarRange, Plus, Film, Play } from 'lucide-react';
+import { MessageCircle, Mic, Image as ImageIcon, Music, MapPin, Flame, Bookmark, CalendarRange, Plus, Film, Play } from 'lucide-react';
 import { subDays, format as formatDate } from 'date-fns';
 import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
@@ -206,9 +206,11 @@ function PeriodTimeline({
               className="pointer-events-auto absolute flex flex-col items-center group/period focus:outline-none"
               style={{ top: b.top, height: b.height, left }}
             >
-              <span className="text-sm leading-none mb-1 transition-transform group-hover/period:scale-125">
-                {b.period.emoji ?? '📌'}
-              </span>
+              <Bookmark
+                size={13}
+                strokeWidth={2.25}
+                className={`mb-1 shrink-0 fill-current ${t.text} transition-transform group-hover/period:scale-125`}
+              />
               <span className={`w-1.5 flex-1 rounded-full ${t.line} transition-all group-hover/period:w-2`} />
               <span
                 className={`absolute top-7 left-2.5 [writing-mode:vertical-rl] text-[10px] font-semibold uppercase tracking-wide ${t.text} whitespace-nowrap overflow-hidden`}
