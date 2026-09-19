@@ -59,7 +59,7 @@ export function VoicePlayer({ src, time }: { src: string; time: string }) {
         type="button"
         onClick={toggle}
         aria-label={playing ? 'Pause' : 'Play'}
-        className="shrink-0 w-10 h-10 rounded-sm bg-gray-900 text-white flex items-center justify-center hover:bg-gray-800 active:scale-95 transition-all"
+        className="shrink-0 w-10 h-10 rounded-md bg-gray-900 text-white flex items-center justify-center hover:bg-gray-800 active:scale-95 transition-all"
       >
         {playing ? (
           <Pause size={16} strokeWidth={2.5} className="fill-current" />
@@ -88,13 +88,13 @@ export function VoicePlayer({ src, time }: { src: string; time: string }) {
             return (
               <span
                 key={i}
-                className={`flex-1 rounded-sm transition-colors ${played ? 'bg-gray-900' : 'bg-gray-300'}`}
+                className={`flex-1 rounded-md transition-colors ${played ? 'bg-gray-900' : 'bg-gray-300'}`}
                 style={{ height: `${Math.round(v * 100)}%` }}
               />
             );
           })}
           <span
-            className="absolute top-1/2 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-sm bg-gray-900 shadow-sm ring-2 ring-gray-50"
+            className="absolute top-1/2 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-md bg-gray-900 shadow-sm ring-2 ring-gray-50"
             style={{ left: `${fraction * 100}%` }}
           />
         </div>
@@ -106,7 +106,7 @@ export function VoicePlayer({ src, time }: { src: string; time: string }) {
         </div>
       </div>
 
-      <span className="shrink-0 w-7 h-7 rounded-sm bg-violet-100 text-violet-500 flex items-center justify-center self-start">
+      <span className="shrink-0 w-7 h-7 rounded-md bg-violet-100 text-violet-500 flex items-center justify-center self-start">
         <Mic size={13} strokeWidth={2.5} />
       </span>
 

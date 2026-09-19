@@ -68,8 +68,8 @@ function SummariesPage() {
           <div className="divide-y divide-gray-100">
             {[1, 2].map((i) => (
               <div key={i} className="py-4 animate-pulse">
-                <div className="h-2.5 bg-gray-100 rounded-sm w-20 mb-2" />
-                <div className="h-4 bg-gray-100 rounded-sm w-2/3" />
+                <div className="h-2.5 bg-gray-100 rounded-md w-20 mb-2" />
+                <div className="h-4 bg-gray-100 rounded-md w-2/3" />
               </div>
             ))}
           </div>
@@ -99,7 +99,7 @@ function EarlierWeeks() {
   });
 
   return (
-    <div className="mt-3 flex items-center gap-2 rounded-sm bg-white border border-gray-200 p-3">
+    <div className="mt-3 flex items-center gap-2 rounded-md bg-white border border-gray-200 p-3">
       <span className="text-xs text-gray-400 shrink-0">Earlier week</span>
       <select
         value={sel}
@@ -118,11 +118,11 @@ function EarlierWeeks() {
       <button
         onClick={() => mutate()}
         disabled={isPending || isSuccess}
-        className="shrink-0 text-xs font-medium rounded-sm px-3 py-1.5 bg-gray-900 text-white transition-all duration-150 hover:bg-gray-700 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-900"
+        className="shrink-0 text-xs font-medium rounded-md px-3 py-1.5 bg-gray-900 text-white transition-all duration-150 hover:bg-gray-700 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-900"
       >
         {isPending ? (
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm border-2 border-white/40 border-t-white animate-spin-slow" />
+            <span className="w-3 h-3 rounded-md border-2 border-white/40 border-t-white animate-spin-slow" />
             Generating…
           </span>
         ) : isSuccess ? (
@@ -164,14 +164,14 @@ function GenerateCard({
     <button
       onClick={() => mutate()}
       disabled={isPending || done}
-      className="group text-left rounded-sm bg-white border border-gray-200 p-4 transition-all duration-200 hover:border-gray-400 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:hover:border-gray-200"
+      className="group text-left rounded-md bg-white border border-gray-200 p-4 transition-all duration-200 hover:border-gray-400 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:hover:border-gray-200"
     >
       <p className="text-xs text-gray-400 mb-0.5">{sublabel}</p>
       <p className="text-sm text-gray-900 font-medium leading-tight">{label}</p>
       <div className="mt-2 h-4 flex items-center">
         {isPending ? (
           <span className="flex items-center gap-1.5 text-xs text-gray-400">
-            <span className="w-3 h-3 rounded-sm border-2 border-gray-300 border-t-gray-600 animate-spin-slow" />
+            <span className="w-3 h-3 rounded-md border-2 border-gray-300 border-t-gray-600 animate-spin-slow" />
             Generating…
           </span>
         ) : done ? (
@@ -200,9 +200,9 @@ function SummaryCard({ summary }: { summary: AISummary }) {
         year: String(summary.year),
         index: String(summary.periodIndex),
       }}
-      className="flex items-start justify-between gap-4 py-4 -mx-3 px-3 rounded-sm transition-all duration-200 hover:bg-gray-50 group"
+      className="flex items-start justify-between gap-4 py-4 -mx-3 px-3 rounded-md transition-all duration-200 hover:bg-gray-50 group"
     >
-      <span className="mt-1 w-0.5 h-12 rounded-sm bg-gray-200 shrink-0 transition-colors duration-200 group-hover:bg-gray-400" />
+      <span className="mt-1 w-0.5 h-12 rounded-md bg-gray-200 shrink-0 transition-colors duration-200 group-hover:bg-gray-400" />
       <div className="flex-1 min-w-0">
         <p className="text-xs text-gray-400 capitalize mb-0.5">{summary.period}</p>
         <p className="text-sm font-medium text-gray-900 mb-1">{label}</p>

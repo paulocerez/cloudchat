@@ -29,7 +29,7 @@ export function PocketSection({ entry }: { entry: JournalEntry }) {
       </div>
       {/* One hairline-separated list rather than 7 boxes — at a recording an
           hour, stacked cards turn the foot of the page into a wall. */}
-      <div className="rounded-sm surface divide-y divide-gray-900/[0.06] overflow-hidden">
+      <div className="rounded-md surface divide-y divide-gray-900/[0.06] overflow-hidden">
         {recordings.map((memo) => (
           <PocketCard key={memo.id} memo={memo} date={entry.date} />
         ))}
@@ -81,7 +81,7 @@ function PocketCard({ memo, date }: { memo: VoiceMemo; date: string }) {
           {items.map((item) => (
             <li key={item.id} className="flex items-start gap-2 text-sm">
               <span
-                className={`mt-[3px] shrink-0 w-3.5 h-3.5 rounded-sm border flex items-center justify-center ${
+                className={`mt-[3px] shrink-0 w-3.5 h-3.5 rounded-md border flex items-center justify-center ${
                   item.isCompleted ? 'bg-gray-900 border-gray-900' : 'border-gray-300'
                 }`}
               >
@@ -134,7 +134,7 @@ function PocketCard({ memo, date }: { memo: VoiceMemo; date: string }) {
               {memo.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="text-xs px-2 py-0.5 rounded-sm bg-gray-100 text-gray-500"
+                  className="text-xs px-2 py-0.5 rounded-md bg-gray-100 text-gray-500"
                 >
                   {tag}
                 </span>
