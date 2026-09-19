@@ -69,14 +69,14 @@ export function EntryHeader({
 
   return (
     <>
-      <div className="sticky top-0 lg:top-14 z-20 -mx-4 sm:-mx-6 md:-mx-8 -mt-8 px-4 sm:px-6 md:px-8 pt-8 pb-2 bg-white/85 backdrop-blur-xl">
+      <div className="sticky top-0 lg:top-14 z-20 -mx-4 sm:-mx-6 md:-mx-8 -mt-8 px-4 sm:px-6 md:px-8 pt-8 pb-2 chrome-blur bg-page/85 backdrop-blur-xl">
         <div className="flex items-center gap-2 h-10">
           <Button variant="icon" size="icon" onClick={goBack} aria-label="Back">
             <ChevronLeft size={19} strokeWidth={2.25} />
           </Button>
 
           <span
-            className={`flex-1 min-w-0 truncate text-center text-sm font-semibold text-[#241F2E] tracking-[-0.01em] transition-opacity duration-200 ${
+            className={`flex-1 min-w-0 truncate text-center text-sm font-semibold text-ink tracking-[-0.01em] transition-opacity duration-200 ${
               titleHidden ? 'opacity-100' : 'opacity-0'
             }`}
             aria-hidden={!titleHidden}
@@ -95,7 +95,7 @@ export function EntryHeader({
             <Star
               size={17}
               strokeWidth={2.25}
-              className={entry.highlight ? 'fill-[#F5A524] text-[#F5A524]' : ''}
+              className={entry.highlight ? 'fill-accent text-accent' : ''}
             />
           </Button>
           <Button variant="icon" size="icon" onClick={onActions} aria-label="More actions">
@@ -106,7 +106,7 @@ export function EntryHeader({
 
       <div ref={titleRef} className="pt-4 animate-fade-up">
         <div className="flex items-center gap-1">
-          <p className="text-[12px] font-semibold tracking-wide text-[#71717D]">
+          <p className="text-[12px] font-semibold tracking-wide text-muted">
             {eyebrowFor(entry.date)}
           </p>
           {/* Arrows make the swipe discoverable, and give a pointer a way in. */}
@@ -115,7 +115,7 @@ export function EntryHeader({
               to="/entry/$date"
               params={{ date: shiftDate(entry.date, -1) }}
               aria-label="Previous day"
-              className="h-8 w-8 flex items-center justify-center rounded-full text-[#A6A6B0] hover:text-[#241F2E] hover:bg-gray-900/[0.05] active:scale-90 transition-all"
+              className="h-8 w-8 flex items-center justify-center rounded-full text-faint hover:text-ink hover:bg-hover active:scale-90 transition-all"
             >
               <ChevronLeft size={17} strokeWidth={2.25} />
             </Link>
@@ -124,18 +124,18 @@ export function EntryHeader({
                 to="/entry/$date"
                 params={{ date: shiftDate(entry.date, 1) }}
                 aria-label="Next day"
-                className="h-8 w-8 flex items-center justify-center rounded-full text-[#A6A6B0] hover:text-[#241F2E] hover:bg-gray-900/[0.05] active:scale-90 transition-all"
+                className="h-8 w-8 flex items-center justify-center rounded-full text-faint hover:text-ink hover:bg-hover active:scale-90 transition-all"
               >
                 <ChevronRight size={17} strokeWidth={2.25} />
               </Link>
             ) : (
-              <span className="h-8 w-8 flex items-center justify-center text-[#E6E6EC]">
+              <span className="h-8 w-8 flex items-center justify-center text-disabled">
                 <ChevronRight size={17} strokeWidth={2.25} />
               </span>
             )}
           </span>
         </div>
-        <h1 className="mt-1.5 text-[30px] font-semibold text-[#241F2E] leading-[1.12] tracking-[-0.025em] [font-optical-sizing:auto] text-balance">
+        <h1 className="mt-1.5 text-[30px] font-semibold text-ink leading-[1.12] tracking-[-0.025em] [font-optical-sizing:auto] text-balance">
           {entry.title || formatEntryDate(entry.date)}
         </h1>
       </div>
