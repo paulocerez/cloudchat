@@ -6,6 +6,7 @@ import { api } from '~/lib/api';
 import { tone } from '~/lib/periods';
 import { DEFAULT_ICON, iconFor } from '~/lib/icons';
 import { Modal, ModalHeader } from '~/components/Modal';
+import { useDelayedFocus } from '~/components/ui/Sheet';
 import { ColorPicker, IconPicker } from '~/components/Pickers';
 
 interface PeriodDialogProps {
@@ -28,6 +29,9 @@ export function PeriodDialog({ open, onClose, period, defaultRange }: PeriodDial
   const [icon, setIcon] = useState(period?.icon ?? DEFAULT_ICON);
 
   const Icon = iconFor(icon);
+
+  // Focus once the sheet has finished rising, not while it's still moving.
+  const nameRef = useDelayedFocus<HTMLInputElement>();
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ['periods'] });
 
@@ -69,7 +73,7 @@ export function PeriodDialog({ open, onClose, period, defaultRange }: PeriodDial
               <Icon size={17} strokeWidth={2} />
             </span>
             <input
-              autoFocus
+              ref={nameRef}
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Summer in Italy"

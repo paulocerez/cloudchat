@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import {
@@ -21,6 +21,10 @@ const DISMISS_THRESHOLD = 110;
 
 // `sm` in Tailwind. Below it we're on a phone and overlays belong on the
 // bottom edge; above it the centered dialog still reads better.
+// Sheet itself no longer branches on this — the bottom-vs-centered layout is a
+// pure CSS decision now, so it can never render the wrong shape while a piece
+// of React state catches up. MenuSheet still needs it to choose between a
+// sheet and an anchored dropdown, which really are different components.
 export function useIsCompact(): boolean {
   const [compact, setCompact] = useState(
     () => typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches
@@ -48,6 +52,26 @@ function useScrollLock(active: boolean) {
   }, [active]);
 }
 
+// How much of the layout viewport the software keyboard is covering. A sheet
+// pinned to `bottom-0` sits at the bottom of the *layout* viewport, which on a
+// phone is behind the keyboard; padding the container by this lifts it clear.
+function useKeyboardInset(active: boolean): number {
+  const [inset, setInset] = useState(0);
+  useEffect(() => {
+    const vv = typeof window !== 'undefined' ? window.visualViewport : null;
+    if (!active || !vv) return;
+    const measure = () => setInset(Math.max(0, window.innerHeight - vv.height - vv.offsetTop));
+    measure();
+    vv.addEventListener('resize', measure);
+    vv.addEventListener('scroll', measure);
+    return () => {
+      vv.removeEventListener('resize', measure);
+      vv.removeEventListener('scroll', measure);
+    };
+  }, [active]);
+  return active ? inset : 0;
+}
+
 export function useEscape(active: boolean, onEscape: () => void) {
   useEffect(() => {
     if (!active) return;
@@ -57,6 +81,18 @@ export function useEscape(active: boolean, onEscape: () => void) {
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [active, onEscape]);
+}
+
+// Focusing on mount would open the keyboard while the sheet is still sliding
+// up, which fights the entrance and lands the field somewhere unexpected.
+// Wait for the animation to settle first. 450ms ≈ `sheet-up`'s 0.42s.
+export function useDelayedFocus<T extends HTMLElement>(delay = 450) {
+  const ref = useRef<T>(null);
+  useEffect(() => {
+    const t = setTimeout(() => ref.current?.focus(), delay);
+    return () => clearTimeout(t);
+  }, [delay]);
+  return ref;
 }
 
 export type SheetVariant = 'auto' | 'bottom' | 'center';
@@ -80,21 +116,19 @@ export function Sheet({
   className?: string;
   variant?: SheetVariant;
 }) {
-  const compact = useIsCompact();
   const reduce = useReducedMotion();
   const dragControls = useDragControls();
   const y = useMotionValue(0);
 
   useScrollLock(open);
   useEscape(open, onClose);
+  const keyboardInset = useKeyboardInset(open);
 
   useEffect(() => {
     if (open) y.set(0);
   }, [open, y]);
 
   if (!open) return null;
-
-  const asBottom = variant === 'bottom' || (variant === 'auto' && compact);
 
   const onDragEnd = (_: unknown, info: PanInfo) => {
     const projected = info.offset.y + project(info.velocity.y);
@@ -113,35 +147,38 @@ export function Sheet({
     />
   );
 
-  if (!asBottom) {
-    return createPortal(
-      <div className="fixed inset-0 z-[90] flex items-center justify-center p-4">
-        {scrim}
-        <div
-          role="dialog"
-          aria-modal="true"
-          className={cn(
-            'relative z-10 w-full max-h-[85vh] overflow-y-auto rounded-md bg-white shadow-2xl ring-1 ring-gray-900/[0.08] p-5 animate-materialize',
-            className
-          )}
-        >
-          {children}
-        </div>
-      </div>,
-      document.body
-    );
-  }
+  // One DOM tree for both shapes; the breakpoint does the deciding. `variant`
+  // only ever pins it to one side of that breakpoint.
+  const centered = variant === 'center';
+  const bottom = variant === 'bottom';
 
   return createPortal(
-    <div className="fixed inset-0 z-[90]">
+    <div
+      className={cn(
+        'fixed inset-0 z-[90] flex justify-center',
+        centered && 'items-center p-4',
+        bottom && 'items-end',
+        variant === 'auto' && 'items-end sm:items-center sm:p-4'
+      )}
+      style={keyboardInset ? { paddingBottom: keyboardInset } : undefined}
+    >
       {scrim}
-      {/* The wrapper does the entrance slide so the inner motion transform
-          stays free for the drag. */}
-      <div className="absolute inset-x-0 bottom-0 z-10 animate-sheet-up">
+      {/* The wrapper owns the entrance animation so the inner motion transform
+          stays free for the drag; the panel owns the height cap, so the
+          grabber counts against it instead of stacking on top of it. */}
+      <div
+        className={cn(
+          'relative z-10 w-full',
+          centered ? 'sheet-enter-center' : '',
+          bottom ? 'sheet-enter-bottom' : '',
+          variant === 'auto' && 'sheet-enter',
+          className
+        )}
+      >
         <motion.div
           role="dialog"
           aria-modal="true"
-          drag={reduce ? false : 'y'}
+          drag={reduce || centered ? false : 'y'}
           dragControls={dragControls}
           dragListener={false}
           dragConstraints={{ top: 0, bottom: 0 }}
@@ -149,15 +186,30 @@ export function Sheet({
           dragMomentum={false}
           onDragEnd={onDragEnd}
           style={{ y }}
-          className="mx-auto w-full max-w-lg rounded-t-md bg-white shadow-2xl ring-1 ring-gray-900/[0.08]"
+          className={cn(
+            'flex flex-col bg-white shadow-2xl ring-1 ring-gray-900/[0.08]',
+            centered ? 'max-h-[85dvh] rounded-md' : '',
+            bottom ? 'max-h-[88dvh] rounded-t-md' : '',
+            variant === 'auto' && 'max-h-[88dvh] sm:max-h-[85dvh] rounded-t-md sm:rounded-md'
+          )}
         >
           <div
             onPointerDown={(e) => dragControls.start(e)}
-            className="flex justify-center py-3 cursor-grab active:cursor-grabbing touch-none"
+            className={cn(
+              'flex shrink-0 justify-center py-3 cursor-grab active:cursor-grabbing touch-none',
+              centered && 'hidden',
+              variant === 'auto' && 'sm:hidden'
+            )}
           >
             <span className="h-1 w-10 rounded-md bg-[#D6D6DE]" />
           </div>
-          <div className="max-h-[80vh] overflow-y-auto overscroll-contain px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+          <div
+            className={cn(
+              'min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]',
+              centered ? 'pt-5 pb-5' : '',
+              variant === 'auto' && 'sm:pt-5 sm:pb-5'
+            )}
+          >
             {children}
           </div>
         </motion.div>

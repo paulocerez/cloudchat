@@ -217,6 +217,26 @@ label,
   animation: sheet-up 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* The sheet's entrance has to match the shape the breakpoint gave it, and the
+   breakpoint is CSS — so the choice lives here rather than in a JS branch that
+   can render the wrong one for a frame. */
+.sheet-enter-bottom {
+  animation: sheet-up 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.sheet-enter-center {
+  animation: materialize 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transform-origin: center;
+}
+.sheet-enter {
+  animation: sheet-up 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@media (min-width: 640px) {
+  .sheet-enter {
+    animation: materialize 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    transform-origin: center;
+  }
+}
+
 /* ── Accessibility: gentle, non-vestibular fallbacks ────────── */
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-up,
@@ -227,6 +247,9 @@ label,
   }
   .animate-materialize,
   .animate-sheet-up,
+  .sheet-enter,
+  .sheet-enter-bottom,
+  .sheet-enter-center,
   .animate-pop,
   .animate-logo,
   .stagger > * {
