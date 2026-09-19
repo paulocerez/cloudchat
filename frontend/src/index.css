@@ -15,6 +15,7 @@
   --color-raised: var(--raised);
   --color-raised-hover: var(--raised-hover);
   --color-sunken: var(--sunken);
+  --color-sunken-hover: var(--sunken-hover);
   --color-field: var(--field);
   --color-hover: var(--hover);
   --color-active: var(--active);
@@ -55,6 +56,7 @@
   --raised: #ffffff;
   --raised-hover: #f0f0f3;
   --sunken: #f1f1f4;
+  --sunken-hover: #e6e6ec;
   --field: #ffffff;
   --hover: rgb(23 23 28 / 0.05);
   --active: rgb(23 23 28 / 0.07);
@@ -105,6 +107,7 @@
   --raised: #2a2a33;
   --raised-hover: #34343f;
   --sunken: #1c1c22;
+  --sunken-hover: #26262e;
   --field: #1c1c23;
   --hover: rgb(255 255 255 / 0.07);
   --active: rgb(255 255 255 / 0.1);

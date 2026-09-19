@@ -39,16 +39,16 @@ function LoginPage() {
     <div className="fixed inset-0 flex items-center justify-center overflow-hidden">
       <div className="relative w-full max-w-sm px-4 sm:px-6 animate-fade-up">
 
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm px-8 py-10">
+        <div className="bg-surface border border-line rounded-2xl shadow-sm px-8 py-10">
           <div className="mb-8 flex flex-col items-center gap-4">
             <div className="animate-logo">
               <Logo size="lg" />
             </div>
             <div className="text-center animate-fade-up" style={{ animationDelay: '0.1s' }}>
-              <h1 className="text-xl font-semibold text-gray-900 tracking-tight">
+              <h1 className="text-xl font-semibold text-ink tracking-tight">
                 Paulo's Journal
               </h1>
-              <p className="text-gray-400 text-sm mt-0.5">Enter your password to continue</p>
+              <p className="text-faint text-sm mt-0.5">Enter your password to continue</p>
             </div>
           </div>
 
@@ -68,23 +68,23 @@ function LoginPage() {
                 }}
                 placeholder="Master password"
                 autoFocus
-                className={`w-full px-4 py-2.5 rounded-lg bg-white border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent text-sm transition-all duration-200 ${
+                className={`w-full px-4 py-2.5 rounded-lg bg-field border text-ink placeholder:text-placeholder focus:outline-none focus:ring-2 focus:border-transparent text-sm transition-all duration-200 ${
                   error
-                    ? 'border-red-300 focus:ring-red-200'
-                    : 'border-gray-300 focus:ring-gray-900'
+                    ? 'border-danger/60 focus:ring-danger/30'
+                    : 'border-line-strong focus:ring-focus'
                 }`}
               />
             </div>
 
             {error && (
-              <p className="text-red-400 text-xs text-center animate-fade-up">
+              <p className="text-danger text-xs text-center animate-fade-up">
                 Incorrect password — try again
               </p>
             )}
 
             <button
               type="submit"
-              className="btn-shimmer w-full py-2.5 rounded-lg bg-gray-900 text-white font-medium text-sm transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+              className="btn-shimmer w-full py-2.5 rounded-lg bg-ink text-on-ink font-medium text-sm transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
             >
               Unlock
             </button>

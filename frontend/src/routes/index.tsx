@@ -64,7 +64,7 @@ function Timeline() {
               to="/entry/$date"
               params={{ date: formatDate(new Date(), 'yyyy-MM-dd') }}
               title="Go to today"
-              className="h-9 px-3 inline-flex items-center rounded-full surface-solid text-[13px] font-semibold text-[#17171C] hover:bg-gray-50 active:scale-[0.96] transition-transform"
+              className="h-9 px-3 inline-flex items-center rounded-full surface-solid text-[13px] font-semibold text-ink hover:bg-surface-hover active:scale-[0.96] transition-transform"
             >
               Today
             </Link>
@@ -239,7 +239,7 @@ function PeriodTimeline({
               {/* A sticky marker per month, so scrolling a long archive never
                   leaves you wondering which year you're in. */}
               {month !== prev && (
-                <p className="sticky top-0 lg:top-14 z-10 -mx-1 px-1 py-1.5 mt-5 first:mt-0 mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#71717D] backdrop-blur-sm">
+                <p className="sticky top-0 lg:top-14 z-10 -mx-1 px-1 py-1.5 mt-5 first:mt-0 mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted backdrop-blur-sm">
                   {month}
                 </p>
               )}
@@ -317,26 +317,26 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
       to="/entry/$date"
       params={{ date: entry.date }}
       className={`squish flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 py-3.5 px-4 rounded-[22px] group cursor-pointer ${
-        entry.highlight ? 'surface-warm' : 'surface hover:bg-gray-50/60'
+        entry.highlight ? 'surface-warm' : 'surface hover:bg-surface-hover'
       }`}
     >
       {/* Left column: date, summary, songs, images */}
       <div className="contents sm:flex sm:flex-col sm:flex-1 sm:min-w-0 sm:gap-2">
         {/* Date */}
-        <p className="order-1 sm:order-none text-xs text-gray-400 font-medium tracking-wide uppercase">
+        <p className="order-1 sm:order-none text-xs text-faint font-medium tracking-wide uppercase">
           {formatEntryDate(entry.date)}
         </p>
 
         {/* Summary */}
         <div className="order-3 sm:order-none min-w-0">
           {preview ? (
-            <p className="text-gray-700 text-sm line-clamp-2 leading-relaxed">{preview}</p>
+            <p className="text-strong text-sm line-clamp-2 leading-relaxed">{preview}</p>
           ) : hasTranscript ? (
-            <p className="text-gray-500 text-sm italic line-clamp-2 leading-relaxed">
+            <p className="text-muted text-sm italic line-clamp-2 leading-relaxed">
               {entry.voiceMemos.find((v: VoiceMemo) => v.transcription)?.transcription}
             </p>
           ) : spotifyLinks.length === 0 ? (
-            <p className="text-gray-400 text-sm italic">No content yet</p>
+            <p className="text-faint text-sm italic">No content yet</p>
           ) : null}
         </div>
 
@@ -365,14 +365,14 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
                 src={img.url ?? mediaUrl(`/api/media/${img.messageId}/${img.mediaId}`)}
                 alt=""
                 loading="lazy"
-                className="w-10 h-10 rounded-md object-cover bg-gray-100"
+                className="w-10 h-10 rounded-md object-cover bg-sunken"
               />
             ))}
             {videos.map((vid: JournalVideo) =>
               vid.url ? (
                 <div
                   key={vid.id}
-                  className="relative w-10 h-10 rounded-md overflow-hidden bg-gray-900"
+                  className="relative w-10 h-10 rounded-md overflow-hidden bg-black"
                 >
                   <video
                     src={`${vid.url}#t=0.1`}
@@ -397,44 +397,44 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
         <div className="order-2 sm:order-none flex items-center gap-2 sm:gap-3">
           <div className="flex flex-wrap items-center gap-1.5">
             {messageCount > 0 && (
-              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-blue-50 text-blue-600 font-medium">
+              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-blue-50 dark:bg-blue-400/12 text-blue-600 dark:text-blue-300 font-medium">
                 <MessageCircle size={13} strokeWidth={2.5} />
                 {messageCount}
               </span>
             )}
             {memoCount > 0 && (
-              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-violet-50 text-violet-600 font-medium">
+              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-violet-50 dark:bg-violet-400/12 text-violet-600 dark:text-violet-300 font-medium">
                 <Mic size={13} strokeWidth={2.5} />
                 {memoCount}
               </span>
             )}
             {imageCount > 0 && (
-              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-amber-50 text-amber-600 font-medium">
+              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-amber-50 dark:bg-amber-400/12 text-amber-600 dark:text-amber-300 font-medium">
                 <ImageIcon size={13} strokeWidth={2.5} />
                 {imageCount}
               </span>
             )}
             {videos.length > 0 && (
-              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-slate-100 text-slate-600 font-medium">
+              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-slate-100 dark:bg-slate-400/15 text-slate-600 dark:text-slate-300 font-medium">
                 <Film size={13} strokeWidth={2.5} />
                 {videos.length}
               </span>
             )}
             {spotifyLinks.length > 0 && (
-              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-green-50 text-green-600 font-medium">
+              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-green-50 dark:bg-green-400/12 text-green-600 dark:text-green-300 font-medium">
                 <Music size={13} strokeWidth={2.5} />
                 {spotifyLinks.length}
               </span>
             )}
             {entry.locations && entry.locations.length > 0 && (
-              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-rose-50 text-rose-600 font-medium">
+              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-rose-50 dark:bg-rose-400/12 text-rose-600 dark:text-rose-300 font-medium">
                 <MapPin size={13} strokeWidth={2.5} />
                 {entry.locations.length}
               </span>
             )}
           </div>
           {/* Arrow slides right on hover (desktop only) */}
-          <span className="hidden sm:inline-block transition-transform duration-200 group-hover:translate-x-1 text-gray-300 group-hover:text-gray-600">
+          <span className="hidden sm:inline-block transition-transform duration-200 group-hover:translate-x-1 text-faintest group-hover:text-secondary">
             →
           </span>
         </div>
@@ -447,10 +447,10 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
                 src={mapUrl}
                 alt="Map preview"
                 loading="lazy"
-                className="w-40 h-[90px] object-cover rounded-lg border border-gray-200 bg-gray-100"
+                className="w-40 h-[90px] object-cover rounded-lg border border-line bg-sunken"
               />
             )}
-            <span className="flex items-center gap-1 text-rose-500 font-medium sm:text-right max-w-full sm:max-w-[10rem] truncate">
+            <span className="flex items-center gap-1 text-danger font-medium sm:text-right max-w-full sm:max-w-[10rem] truncate">
               <MapPin size={12} strokeWidth={2.5} className="shrink-0" />
               <span className="truncate">
                 {entry.locations.map((l) => l.name).join(', ')}
@@ -466,13 +466,13 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
 
 function LoadingState() {
   return (
-    <div className="divide-y divide-gray-100">
+    <div className="divide-y divide-line">
       {[1, 2, 3].map((i) => (
         <div key={i} className="flex gap-4 py-4 animate-pulse">
-          <div className="w-0.5 h-12 bg-gray-100 rounded-full shrink-0 mt-1" />
+          <div className="w-0.5 h-12 bg-sunken rounded-full shrink-0 mt-1" />
           <div className="flex-1">
-            <div className="h-2.5 bg-gray-100 rounded w-28 mb-2" />
-            <div className="h-4 bg-gray-100 rounded w-3/4" />
+            <div className="h-2.5 bg-sunken rounded w-28 mb-2" />
+            <div className="h-4 bg-sunken rounded w-3/4" />
           </div>
         </div>
       ))}
@@ -483,7 +483,7 @@ function LoadingState() {
 function ErrorState() {
   return (
     <div className="text-center py-16 animate-fade-up">
-      <p className="text-gray-500 text-sm">Failed to load entries. Is the backend running?</p>
+      <p className="text-muted text-sm">Failed to load entries. Is the backend running?</p>
     </div>
   );
 }
@@ -492,13 +492,13 @@ function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-24 animate-fade-up select-none">
       <div className="relative mb-6">
-        <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center">
-          <MessageCircle size={28} strokeWidth={1.5} className="text-gray-400" />
+        <div className="w-16 h-16 rounded-2xl bg-sunken flex items-center justify-center">
+          <MessageCircle size={28} strokeWidth={1.5} className="text-faint" />
         </div>
-        <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-400 border-2 border-white" />
+        <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-400 border-2 border-page" />
       </div>
-      <p className="text-gray-900 font-semibold text-base mb-1.5">Nothing here yet</p>
-      <p className="text-gray-400 text-sm max-w-[220px] text-center leading-relaxed">
+      <p className="text-ink font-semibold text-base mb-1.5">Nothing here yet</p>
+      <p className="text-faint text-sm max-w-[220px] text-center leading-relaxed">
         Send yourself a WhatsApp message and it'll show up here
       </p>
     </div>

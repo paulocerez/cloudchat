@@ -28,7 +28,7 @@ function SummaryPage() {
     <div className="animate-fade-up">
       <Link
         to="/summaries"
-        className="inline-flex items-center gap-1 text-gray-400 hover:text-gray-900 text-sm mb-6 transition-all duration-150 hover:-translate-x-0.5"
+        className="inline-flex items-center gap-1 text-faint hover:text-ink text-sm mb-6 transition-all duration-150 hover:-translate-x-0.5"
       >
         ← Summaries
       </Link>
@@ -40,14 +40,14 @@ function SummaryPage() {
           {[100, 75, 90, 60].map((w, i) => (
             <div
               key={i}
-              className="h-4 bg-gray-100 rounded animate-pulse"
+              className="h-4 bg-sunken rounded animate-pulse"
               style={{ width: `${w}%`, animationDelay: `${i * 0.08}s` }}
             />
           ))}
         </div>
       )}
 
-      {isError && <p className="text-gray-400 text-sm">Failed to load summary.</p>}
+      {isError && <p className="text-faint text-sm">Failed to load summary.</p>}
 
       {summary && (
         <div className="space-y-8 stagger">
@@ -67,7 +67,7 @@ function SummaryPage() {
 
           <div className="space-y-4">
             {summary.summary.split('\n\n').map((para: string, i: number) => (
-              <p key={i} className="text-gray-700 leading-relaxed text-sm">
+              <p key={i} className="text-strong leading-relaxed text-sm">
                 {para}
               </p>
             ))}
@@ -75,7 +75,7 @@ function SummaryPage() {
 
           {summary.entryDates.length > 0 && (
             <div>
-              <p className="text-xs text-gray-400 font-medium uppercase tracking-wide mb-3">
+              <p className="text-xs text-faint font-medium uppercase tracking-wide mb-3">
                 Entries
               </p>
               <div className="flex flex-wrap gap-2">
@@ -84,7 +84,7 @@ function SummaryPage() {
                     key={date}
                     to="/entry/$date"
                     params={{ date }}
-                    className="text-xs border border-gray-200 hover:border-gray-900 hover:text-gray-900 rounded-lg px-3 py-1.5 text-gray-500 transition-all duration-150 hover:-translate-y-0.5"
+                    className="text-xs border border-line hover:border-ink hover:text-ink rounded-lg px-3 py-1.5 text-muted transition-all duration-150 hover:-translate-y-0.5"
                   >
                     {date}
                   </Link>
@@ -93,7 +93,7 @@ function SummaryPage() {
             </div>
           )}
 
-          <p className="text-xs text-gray-300">
+          <p className="text-xs text-faintest">
             Generated {new Date(summary.generatedAt).toLocaleDateString()}
           </p>
         </div>
