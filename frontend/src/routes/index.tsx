@@ -1,13 +1,14 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { MessageCircle, Mic, Image as ImageIcon, Music, MapPin, Flame, Bookmark, CalendarRange, Plus, Film, Play } from 'lucide-react';
+import { MessageCircle, Mic, Image as ImageIcon, Music, MapPin, Flame, CalendarRange, Plus, Film, Play } from 'lucide-react';
 import { subDays, format as formatDate } from 'date-fns';
 import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
 import { extractSpotifyLinks, stripSpotifyLinks } from '~/lib/spotify';
 import { staticMapUrl } from '~/lib/mapbox';
 import { tone, coversDate } from '~/lib/periods';
+import { iconFor } from '~/lib/icons';
 import { SpotifyChip } from '~/components/SpotifyChip';
 import { PeriodDialog } from '~/components/PeriodDialog';
 import { Button } from '~/components/ui/Button';
@@ -196,6 +197,7 @@ function PeriodTimeline({
       <div className="pointer-events-none absolute inset-0">
         {bands.map((b) => {
           const t = tone(b.period.color);
+          const Icon = iconFor(b.period.icon);
           const left = 8 + b.lane * LANE_WIDTH;
           return (
             <button
@@ -206,10 +208,10 @@ function PeriodTimeline({
               className="pointer-events-auto absolute flex flex-col items-center group/period focus:outline-none"
               style={{ top: b.top, height: b.height, left }}
             >
-              <Bookmark
-                size={13}
+              <Icon
+                size={14}
                 strokeWidth={2.25}
-                className={`mb-1 shrink-0 fill-current ${t.text} transition-transform group-hover/period:scale-125`}
+                className={`mb-1 shrink-0 ${t.text} transition-transform group-hover/period:scale-125`}
               />
               <span className={`w-1.5 flex-1 rounded-sm ${t.line} transition-all group-hover/period:w-2`} />
               <span

@@ -5,6 +5,8 @@ import type { PeriodColor } from './period';
 export interface Habit {
   id: string;
   name: string;
+  // Name of a lucide icon from the curated set (see frontend/src/lib/icons.ts).
+  icon?: string;
   emoji?: string;
   color: PeriodColor;
   weeklyTarget: number; // 1–7 days per week

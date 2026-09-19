@@ -4,8 +4,9 @@ import { Trash2, Plus, ChevronLeft } from 'lucide-react';
 import type { Habit, PeriodColor } from '@cloudchat/shared';
 import { api } from '~/lib/api';
 import { tone } from '~/lib/periods';
+import { DEFAULT_ICON, iconFor } from '~/lib/icons';
 import { Modal, ModalHeader } from '~/components/Modal';
-import { ColorPicker } from '~/components/Pickers';
+import { ColorPicker, IconPicker } from '~/components/Pickers';
 
 // Create / edit / delete a single habit.
 function HabitForm({
@@ -22,6 +23,9 @@ function HabitForm({
   const [name, setName] = useState(habit?.name ?? '');
   const [color, setColor] = useState<PeriodColor>(habit?.color ?? 'green');
   const [weeklyTarget, setWeeklyTarget] = useState(habit?.weeklyTarget ?? 3);
+  const [icon, setIcon] = useState(habit?.icon ?? DEFAULT_ICON);
+
+  const Icon = iconFor(icon);
 
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ['habits'] });
@@ -30,7 +34,7 @@ function HabitForm({
 
   const save = useMutation({
     mutationFn: () => {
-      const body = { name: name.trim(), color, weeklyTarget };
+      const body = { name: name.trim(), color, weeklyTarget, icon };
       return habit ? api.habits.update(habit.id, body) : api.habits.create(body);
     },
     onSuccess: () => {
@@ -65,8 +69,10 @@ function HabitForm({
         <div>
           <label className="block text-xs font-medium text-gray-500 mb-1.5">Name</label>
           <div className="flex items-center gap-2">
-            <span className={`h-9 w-9 shrink-0 rounded-sm ${tone(color).soft}`}>
-              <span className={`block m-[0.6875rem] h-[0.875rem] w-[0.875rem] rounded-sm ${tone(color).swatch}`} />
+            <span
+              className={`h-9 w-9 shrink-0 rounded-sm flex items-center justify-center ${tone(color).soft} ${tone(color).text}`}
+            >
+              <Icon size={17} strokeWidth={2} />
             </span>
             <input
               autoFocus
@@ -97,6 +103,11 @@ function HabitForm({
             ))}
             <span className="ml-1 text-xs text-gray-400">× / week</span>
           </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-gray-500 mb-1.5">Icon</label>
+          <IconPicker value={icon} onChange={setIcon} color={color} />
         </div>
 
         <div>
@@ -157,20 +168,24 @@ export function HabitManager({ open, onClose }: { open: boolean; onClose: () => 
                   No habits yet. Add one to start tracking.
                 </p>
               )}
-              {list.map((h) => (
-                <button
-                  key={h.id}
-                  type="button"
-                  onClick={() => setMode({ view: 'form', habit: h })}
-                  className="flex items-center gap-2.5 px-2 py-2 -mx-2 rounded-sm text-left hover:bg-gray-50 transition-colors"
-                >
-                  <span className={`w-1 self-stretch min-h-5 rounded-sm ${tone(h.color).line}`} />
-                  <span className="font-medium text-gray-800 text-sm truncate">{h.name}</span>
-                  <span className="ml-auto shrink-0 text-xs text-gray-400">
-                    {h.weeklyTarget}× / week
-                  </span>
-                </button>
-              ))}
+              {list.map((h) => {
+                const Icon = iconFor(h.icon);
+                return (
+                  <button
+                    key={h.id}
+                    type="button"
+                    onClick={() => setMode({ view: 'form', habit: h })}
+                    className="flex items-center gap-2.5 px-2 py-2 -mx-2 rounded-sm text-left hover:bg-gray-50 transition-colors"
+                  >
+                    <span className={`w-1 self-stretch min-h-5 rounded-sm ${tone(h.color).line}`} />
+                    <Icon size={14} strokeWidth={2.25} className={`shrink-0 ${tone(h.color).text}`} />
+                    <span className="font-medium text-gray-800 text-sm truncate">{h.name}</span>
+                    <span className="ml-auto shrink-0 text-xs text-gray-400">
+                      {h.weeklyTarget}× / week
+                    </span>
+                  </button>
+                );
+              })}
             </div>
 
           <button

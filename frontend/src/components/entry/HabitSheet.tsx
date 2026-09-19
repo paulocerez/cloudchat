@@ -4,6 +4,7 @@ import { endOfWeek, format, startOfWeek } from 'date-fns';
 import { Check, Plus, SlidersHorizontal } from 'lucide-react';
 import { api } from '~/lib/api';
 import { tone } from '~/lib/periods';
+import { iconFor } from '~/lib/icons';
 import { HabitManager } from '~/components/HabitManager';
 import { Sheet, SheetHeader } from '~/components/ui/Sheet';
 import { Button } from '~/components/ui/Button';
@@ -86,6 +87,7 @@ export function HabitSheet({
               const count = weeklyCount(h.id);
               const met = count >= h.weeklyTarget;
               const t = tone(h.color);
+              const Icon = iconFor(h.icon);
               return (
                 <button
                   key={h.id}
@@ -99,7 +101,12 @@ export function HabitSheet({
                       done ? `${t.line} text-white` : 'bg-white border border-gray-300'
                     }`}
                   >
-                    {done && <Check size={15} strokeWidth={3} />}
+                    {done ? (
+                      <Check size={15} strokeWidth={3} />
+                    ) : (
+                      // The habit's icon keeps unchecked rows identifiable.
+                      <Icon size={13} strokeWidth={2} className="text-gray-300" />
+                    )}
                   </span>
                   <span
                     className={`text-[15px] font-medium ${done ? 'text-gray-900' : 'text-gray-600'}`}

@@ -5,6 +5,7 @@ type PeriodInput = {
   startDate: string;
   endDate: string;
   color: PeriodColor;
+  icon?: string;
   emoji?: string;
 };
 
@@ -12,6 +13,7 @@ type HabitInput = {
   name: string;
   color: PeriodColor;
   weeklyTarget: number;
+  icon?: string;
   emoji?: string;
 };
 

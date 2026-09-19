@@ -4,8 +4,9 @@ import { Trash2 } from 'lucide-react';
 import type { PeriodColor, TimePeriod } from '@cloudchat/shared';
 import { api } from '~/lib/api';
 import { tone } from '~/lib/periods';
+import { DEFAULT_ICON, iconFor } from '~/lib/icons';
 import { Modal, ModalHeader } from '~/components/Modal';
-import { ColorPicker } from '~/components/Pickers';
+import { ColorPicker, IconPicker } from '~/components/Pickers';
 
 interface PeriodDialogProps {
   open: boolean;
@@ -24,12 +25,15 @@ export function PeriodDialog({ open, onClose, period, defaultRange }: PeriodDial
   const [startDate, setStartDate] = useState(period?.startDate ?? defaultRange?.startDate ?? '');
   const [endDate, setEndDate] = useState(period?.endDate ?? defaultRange?.endDate ?? '');
   const [color, setColor] = useState<PeriodColor>(period?.color ?? 'amber');
+  const [icon, setIcon] = useState(period?.icon ?? DEFAULT_ICON);
+
+  const Icon = iconFor(icon);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ['periods'] });
 
   const save = useMutation({
     mutationFn: () => {
-      const body = { name: name.trim(), startDate, endDate, color };
+      const body = { name: name.trim(), startDate, endDate, color, icon };
       return period ? api.periods.update(period.id, body) : api.periods.create(body);
     },
     onSuccess: () => {
@@ -58,9 +62,11 @@ export function PeriodDialog({ open, onClose, period, defaultRange }: PeriodDial
         <div>
           <label className="block text-xs font-medium text-gray-500 mb-1.5">Name</label>
           <div className="flex items-center gap-2">
-            {/* The period's colour is its identity now that emoji are gone. */}
-            <span className={`h-9 w-9 shrink-0 rounded-sm ${tone(color).soft}`}>
-              <span className={`block m-[0.6875rem] h-[0.875rem] w-[0.875rem] rounded-sm ${tone(color).swatch}`} />
+            {/* Live preview of the icon + colour this period will carry. */}
+            <span
+              className={`h-9 w-9 shrink-0 rounded-sm flex items-center justify-center ${tone(color).soft} ${tone(color).text}`}
+            >
+              <Icon size={17} strokeWidth={2} />
             </span>
             <input
               autoFocus
@@ -98,6 +104,12 @@ export function PeriodDialog({ open, onClose, period, defaultRange }: PeriodDial
         {rangeInvalid && (
           <p className="text-xs text-rose-500 -mt-2">End date must be after the start date.</p>
         )}
+
+        {/* Icon */}
+        <div>
+          <label className="block text-xs font-medium text-gray-500 mb-1.5">Icon</label>
+          <IconPicker value={icon} onChange={setIcon} color={color} />
+        </div>
 
         {/* Color */}
         <div>

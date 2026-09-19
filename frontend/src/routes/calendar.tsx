@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { Bookmark, ChevronLeft, ChevronRight, Star, CalendarRange, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Star, CalendarRange, X } from 'lucide-react';
 import {
   startOfMonth,
   endOfMonth,
@@ -15,6 +15,7 @@ import {
 } from 'date-fns';
 import { api } from '~/lib/api';
 import { tone, coversDate } from '~/lib/periods';
+import { iconFor } from '~/lib/icons';
 import { PeriodDialog } from '~/components/PeriodDialog';
 import { Button } from '~/components/ui/Button';
 import { PageHeader } from '~/components/ui/PageHeader';
@@ -148,6 +149,9 @@ function CalendarPage() {
           const inMonth = isSameMonth(day, month);
           const highlighted = Boolean(entry?.highlight);
           const dayPeriods = activePeriods.filter((p) => coversDate(p, key));
+          // A period's icon marks the day it begins.
+          const starting = dayPeriods.find((p) => p.startDate === key);
+          const StartIcon = starting ? iconFor(starting.icon) : null;
           const isRangeStart = rangeStart === key;
 
           const base =
@@ -171,14 +175,11 @@ function CalendarPage() {
               {highlighted && !isRangeStart && (
                 <Star size={11} className="absolute top-1 right-1 fill-amber-400 text-amber-400" />
               )}
-              {/* A bookmark marks the period's first day */}
-              {dayPeriods.some((p) => p.startDate === key) && (
-                <Bookmark
-                  size={9}
+              {StartIcon && (
+                <StartIcon
+                  size={10}
                   strokeWidth={2.5}
-                  className={`absolute top-1 left-1 fill-current ${
-                    tone(dayPeriods.find((p) => p.startDate === key)!.color).text
-                  }`}
+                  className={`absolute top-1 left-1 ${tone(starting!.color).text}`}
                 />
               )}
               <span>{format(day, 'd')}</span>
@@ -231,21 +232,24 @@ function CalendarPage() {
         <div className="mt-6">
           <h2 className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Periods</h2>
           <div className="flex flex-col gap-1">
-            {activePeriods.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => setEditing(p)}
-                className="flex items-center gap-2.5 px-2 py-1.5 -mx-2 rounded-sm text-sm text-left hover:bg-gray-50 transition-colors"
-              >
-                <span className={`w-1 self-stretch min-h-4 rounded-sm ${tone(p.color).line}`} />
-                <Bookmark size={14} strokeWidth={2.25} className={`shrink-0 fill-current ${tone(p.color).text}`} />
-                <span className="font-medium text-gray-800 truncate">{p.name}</span>
-                <span className="ml-auto shrink-0 text-xs text-gray-400">
-                  {format(new Date(p.startDate), 'MMM d')} – {format(new Date(p.endDate), 'MMM d')}
-                </span>
-              </button>
-            ))}
+            {activePeriods.map((p) => {
+              const Icon = iconFor(p.icon);
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setEditing(p)}
+                  className="flex items-center gap-2.5 px-2 py-1.5 -mx-2 rounded-sm text-sm text-left hover:bg-gray-50 transition-colors"
+                >
+                  <span className={`w-1 self-stretch min-h-4 rounded-sm ${tone(p.color).line}`} />
+                  <Icon size={14} strokeWidth={2.25} className={`shrink-0 ${tone(p.color).text}`} />
+                  <span className="font-medium text-gray-800 truncate">{p.name}</span>
+                  <span className="ml-auto shrink-0 text-xs text-gray-400">
+                    {format(new Date(p.startDate), 'MMM d')} – {format(new Date(p.endDate), 'MMM d')}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

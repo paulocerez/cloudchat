@@ -15,7 +15,7 @@ const COLORS: PeriodColor[] = [
 ];
 
 function validate(body: Record<string, unknown>, partial: boolean) {
-  const { name, color, weeklyTarget, emoji } = body;
+  const { name, color, weeklyTarget, icon, emoji } = body;
   if (!partial || name !== undefined) {
     if (typeof name !== 'string' || !name.trim()) return 'name (string) required';
   }
@@ -32,6 +32,9 @@ function validate(body: Record<string, unknown>, partial: boolean) {
     )
       return 'weeklyTarget must be an integer between 1 and 7';
   }
+  // The icon name is resolved client-side against a curated set with a
+  // fallback, so an unknown name is harmless — just check the shape.
+  if (icon !== undefined && typeof icon !== 'string') return 'icon must be a string';
   if (emoji !== undefined && typeof emoji !== 'string') return 'emoji must be a string';
   return null;
 }
@@ -46,11 +49,12 @@ router.post('/', async (req: Request, res: Response) => {
     res.status(400).json({ error });
     return;
   }
-  const { name, color, weeklyTarget, emoji } = req.body;
+  const { name, color, weeklyTarget, icon, emoji } = req.body;
   const habit = await createHabit({
     name: name.trim(),
     color,
     weeklyTarget,
+    icon: typeof icon === 'string' && icon.trim() ? icon.trim() : undefined,
     emoji: typeof emoji === 'string' && emoji.trim() ? emoji.trim() : undefined,
   });
   res.status(201).json(habit);
@@ -62,11 +66,12 @@ router.put('/:id', async (req: Request, res: Response) => {
     res.status(400).json({ error });
     return;
   }
-  const { name, color, weeklyTarget, emoji } = req.body;
+  const { name, color, weeklyTarget, icon, emoji } = req.body;
   const patch: Record<string, unknown> = {};
   if (name !== undefined) patch.name = name.trim();
   if (color !== undefined) patch.color = color;
   if (weeklyTarget !== undefined) patch.weeklyTarget = weeklyTarget;
+  if (icon !== undefined) patch.icon = icon.trim();
   if (emoji !== undefined) patch.emoji = emoji.trim();
   const habit = await updateHabit(req.params.id, patch);
   if (!habit) {

@@ -708,7 +708,7 @@ export async function getAllPeriods(): Promise<TimePeriod[]> {
 }
 
 export async function createPeriod(
-  data: Pick<TimePeriod, 'name' | 'startDate' | 'endDate' | 'color' | 'emoji'>
+  data: Pick<TimePeriod, 'name' | 'startDate' | 'endDate' | 'color' | 'icon' | 'emoji'>
 ): Promise<TimePeriod> {
   const now = new Date().toISOString();
   const period: TimePeriod = {
@@ -717,6 +717,7 @@ export async function createPeriod(
     startDate: data.startDate,
     endDate: data.endDate,
     color: data.color,
+    ...(data.icon ? { icon: data.icon } : {}),
     ...(data.emoji ? { emoji: data.emoji } : {}),
     createdAt: now,
     updatedAt: now,
@@ -727,7 +728,7 @@ export async function createPeriod(
 
 export async function updatePeriod(
   id: string,
-  data: Partial<Pick<TimePeriod, 'name' | 'startDate' | 'endDate' | 'color' | 'emoji'>>
+  data: Partial<Pick<TimePeriod, 'name' | 'startDate' | 'endDate' | 'color' | 'icon' | 'emoji'>>
 ): Promise<TimePeriod | null> {
   const ref = db.collection('periods').doc(id);
   const snap = await ref.get();
@@ -737,6 +738,7 @@ export async function updatePeriod(
   if (data.startDate !== undefined) patch.startDate = data.startDate;
   if (data.endDate !== undefined) patch.endDate = data.endDate;
   if (data.color !== undefined) patch.color = data.color;
+  if (data.icon !== undefined) patch.icon = data.icon;
   if (data.emoji !== undefined) patch.emoji = data.emoji;
   await ref.update(patch);
   return (await ref.get()).data() as TimePeriod;
@@ -757,7 +759,7 @@ export async function getAllHabits(): Promise<Habit[]> {
 }
 
 export async function createHabit(
-  data: Pick<Habit, 'name' | 'color' | 'weeklyTarget' | 'emoji'>
+  data: Pick<Habit, 'name' | 'color' | 'weeklyTarget' | 'icon' | 'emoji'>
 ): Promise<Habit> {
   const now = new Date().toISOString();
   const habit: Habit = {
@@ -765,6 +767,7 @@ export async function createHabit(
     name: data.name,
     color: data.color,
     weeklyTarget: data.weeklyTarget,
+    ...(data.icon ? { icon: data.icon } : {}),
     ...(data.emoji ? { emoji: data.emoji } : {}),
     createdAt: now,
     updatedAt: now,
@@ -775,7 +778,7 @@ export async function createHabit(
 
 export async function updateHabit(
   id: string,
-  data: Partial<Pick<Habit, 'name' | 'color' | 'weeklyTarget' | 'emoji'>>
+  data: Partial<Pick<Habit, 'name' | 'color' | 'weeklyTarget' | 'icon' | 'emoji'>>
 ): Promise<Habit | null> {
   const ref = db.collection('habits').doc(id);
   const snap = await ref.get();
@@ -784,6 +787,7 @@ export async function updateHabit(
   if (data.name !== undefined) patch.name = data.name;
   if (data.color !== undefined) patch.color = data.color;
   if (data.weeklyTarget !== undefined) patch.weeklyTarget = data.weeklyTarget;
+  if (data.icon !== undefined) patch.icon = data.icon;
   if (data.emoji !== undefined) patch.emoji = data.emoji;
   await ref.update(patch);
   return (await ref.get()).data() as Habit;
