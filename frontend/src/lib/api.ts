@@ -1,4 +1,4 @@
-import type { JournalEntry, AISummary, AppConfig, TimePeriod, PeriodColor, Habit } from '@cloudchat/shared';
+import type { JournalEntry, AISummary, TimePeriod, PeriodColor, Habit } from '@cloudchat/shared';
 
 type PeriodInput = {
   name: string;
@@ -100,11 +100,6 @@ export const api = {
   chat: {
     ask: (question: string, history: { role: 'user' | 'assistant'; content: string }[]) =>
       post<{ answer: string }>('/chat', { question, history }),
-  },
-  config: {
-    get: () => get<AppConfig>('/config'),
-    update: (body: Partial<Omit<AppConfig, '_sources'>>) => put<{ ok: boolean }>('/config', body),
-    clearKey: (key: string) => del(`/config/${key}`),
   },
   periods: {
     list: () => get<TimePeriod[]>('/periods'),
