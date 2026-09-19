@@ -17,19 +17,19 @@ export function PocketSection({ entry }: { entry: JournalEntry }) {
   return (
     <section
       id={sectionId('pocket')}
-      className="mt-10 pt-6 border-t border-gray-900/[0.07] scroll-mt-32 animate-fade-up"
+      className="mt-10 pt-6 border-t border-line scroll-mt-32 animate-fade-up"
     >
       {/* Matches the Section headers used elsewhere on the page. */}
       <div className="flex items-baseline gap-2 mb-3">
-        <h2 className="text-xs font-medium tracking-wide uppercase text-gray-400">Pocket</h2>
-        <span className="text-xs text-gray-300">
+        <h2 className="text-xs font-medium tracking-wide uppercase text-faint">Pocket</h2>
+        <span className="text-xs text-faintest">
           {recordings.length} recording{recordings.length === 1 ? '' : 's'}
           {tasks > 0 && ` · ${tasks} action item${tasks === 1 ? '' : 's'}`}
         </span>
       </div>
       {/* One hairline-separated list rather than 7 boxes — at a recording an
           hour, stacked cards turn the foot of the page into a wall. */}
-      <div className="rounded-[22px] surface divide-y divide-gray-900/[0.06] overflow-hidden">
+      <div className="rounded-[22px] surface divide-y divide-line overflow-hidden">
         {recordings.map((memo) => (
           <PocketCard key={memo.id} memo={memo} date={entry.date} />
         ))}
@@ -55,14 +55,14 @@ function PocketCard({ memo, date }: { memo: VoiceMemo; date: string }) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="w-full flex items-start gap-3 px-4 py-3.5 text-left hover:bg-gray-50 transition-colors duration-150"
+        className="w-full flex items-start gap-3 px-4 py-3.5 text-left hover:bg-surface-hover transition-colors duration-150"
       >
-        <span className="shrink-0 w-11 pt-0.5 text-xs tabular-nums text-gray-400">{time}</span>
+        <span className="shrink-0 w-11 pt-0.5 text-xs tabular-nums text-faint">{time}</span>
         <span className="flex-1 min-w-0">
-          <span className="block text-[15px] font-semibold text-[#241F2E] leading-snug">
+          <span className="block text-[15px] font-semibold text-ink leading-snug">
             {memo.title || 'Recording'}
           </span>
-          <span className="block text-xs text-gray-400 mt-0.5">
+          <span className="block text-xs text-faint mt-0.5">
             {duration}
             {items.length > 0 && ` · ${items.length} action item${items.length === 1 ? '' : 's'}`}
           </span>
@@ -70,7 +70,7 @@ function PocketCard({ memo, date }: { memo: VoiceMemo; date: string }) {
         <ChevronDown
           size={15}
           strokeWidth={2}
-          className={`shrink-0 mt-0.5 text-gray-300 group-hover:text-gray-500 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          className={`shrink-0 mt-0.5 text-faintest group-hover:text-muted transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
         />
       </button>
 
@@ -82,25 +82,25 @@ function PocketCard({ memo, date }: { memo: VoiceMemo; date: string }) {
             <li key={item.id} className="flex items-start gap-2 text-sm">
               <span
                 className={`mt-[3px] shrink-0 w-3.5 h-3.5 rounded-[4px] border flex items-center justify-center ${
-                  item.isCompleted ? 'bg-gray-900 border-gray-900' : 'border-gray-300'
+                  item.isCompleted ? 'bg-ink border-ink' : 'border-line-strong'
                 }`}
               >
-                {item.isCompleted && <Check size={9} strokeWidth={3.5} className="text-white" />}
+                {item.isCompleted && <Check size={9} strokeWidth={3.5} className="text-on-ink" />}
               </span>
               <span className="min-w-0">
-                <span className={item.isCompleted ? 'text-gray-400 line-through' : 'text-gray-700'}>
+                <span className={item.isCompleted ? 'text-faint line-through' : 'text-strong'}>
                   {item.title}
                 </span>
                 {item.priority === 'high' && !item.isCompleted && (
-                  <span className="text-[11px] text-amber-600 ml-1.5 align-[1px]">high</span>
+                  <span className="text-[11px] text-amber-600 dark:text-amber-300 ml-1.5 align-[1px]">high</span>
                 )}
                 {item.dueDate && (
-                  <span className="text-[11px] text-gray-400 ml-1.5 align-[1px]">
+                  <span className="text-[11px] text-faint ml-1.5 align-[1px]">
                     due {item.dueDate}
                   </span>
                 )}
                 {open && item.context && (
-                  <span className="block text-xs text-gray-400 leading-relaxed mt-0.5">
+                  <span className="block text-xs text-faint leading-relaxed mt-0.5">
                     {item.context}
                   </span>
                 )}
@@ -121,8 +121,8 @@ function PocketCard({ memo, date }: { memo: VoiceMemo; date: string }) {
           {memo.bulletPoints && memo.bulletPoints.length > 0 && (
             <ul className="space-y-1.5">
               {memo.bulletPoints.map((point, i) => (
-                <li key={i} className="flex gap-2 text-sm text-gray-700 leading-relaxed">
-                  <span className="text-gray-300 select-none">•</span>
+                <li key={i} className="flex gap-2 text-sm text-strong leading-relaxed">
+                  <span className="text-faintest select-none">•</span>
                   <span>{point}</span>
                 </li>
               ))}
@@ -134,7 +134,7 @@ function PocketCard({ memo, date }: { memo: VoiceMemo; date: string }) {
               {memo.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500"
+                  className="text-xs px-2 py-0.5 rounded-full bg-sunken text-muted"
                 >
                   {tag}
                 </span>
@@ -147,12 +147,12 @@ function PocketCard({ memo, date }: { memo: VoiceMemo; date: string }) {
               <button
                 type="button"
                 onClick={() => setShowTranscript((v) => !v)}
-                className="text-xs text-gray-400 hover:text-gray-700 transition-colors py-2"
+                className="text-xs text-faint hover:text-strong transition-colors py-2"
               >
                 {showTranscript ? 'Hide transcript' : 'Show transcript'}
               </button>
             )}
-            {memo.language && <span className="text-xs text-gray-300">{memo.language}</span>}
+            {memo.language && <span className="text-xs text-faintest">{memo.language}</span>}
             <span className="ml-auto">
               <MoveToDayButton
                 date={date}
@@ -164,7 +164,7 @@ function PocketCard({ memo, date }: { memo: VoiceMemo; date: string }) {
           </div>
 
           {showTranscript && memo.transcription && (
-            <p className="text-sm text-gray-500 leading-relaxed whitespace-pre-wrap max-h-96 overflow-y-auto pr-1">
+            <p className="text-sm text-muted leading-relaxed whitespace-pre-wrap max-h-96 overflow-y-auto pr-1">
               {memo.transcription}
             </p>
           )}

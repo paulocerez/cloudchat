@@ -47,7 +47,7 @@ export function EntryActionsSheet({
   return (
     <Sheet open={open} onClose={onClose} className="max-w-sm">
       <div className="flex flex-col">
-        <Button size="row" variant="ghost" className="text-[#241F2E]" onClick={run(onEdit)}>
+        <Button size="row" variant="ghost" className="text-ink" onClick={run(onEdit)}>
           <Pencil size={17} strokeWidth={2} />
           Edit title &amp; summary
         </Button>
@@ -55,7 +55,7 @@ export function EntryActionsSheet({
         <Button
           size="row"
           variant="ghost"
-          className="text-[#241F2E]"
+          className="text-ink"
           disabled={generate.isPending}
           onClick={() => generate.mutate()}
         >
@@ -69,21 +69,21 @@ export function EntryActionsSheet({
                 : 'Generate summary'}
         </Button>
 
-        <div className="my-1.5 h-px bg-gray-900/[0.06]" />
+        <div className="my-1.5 h-px bg-line" />
 
-        <Button size="row" variant="ghost" className="text-[#241F2E]" onClick={run(onAddPhoto)}>
+        <Button size="row" variant="ghost" className="text-ink" onClick={run(onAddPhoto)}>
           <ImagePlus size={17} strokeWidth={2} />
           Add a photo
         </Button>
-        <Button size="row" variant="ghost" className="text-[#241F2E]" onClick={run(onUploadVideo)}>
+        <Button size="row" variant="ghost" className="text-ink" onClick={run(onUploadVideo)}>
           <Film size={17} strokeWidth={2} />
           Add a video
         </Button>
-        <Button size="row" variant="ghost" className="text-[#241F2E]" onClick={run(onEditPlaces)}>
+        <Button size="row" variant="ghost" className="text-ink" onClick={run(onEditPlaces)}>
           <MapPin size={17} strokeWidth={2} />
           Add a place
         </Button>
-        <Button size="row" variant="ghost" className="text-[#241F2E]" onClick={run(onTrackHabits)}>
+        <Button size="row" variant="ghost" className="text-ink" onClick={run(onTrackHabits)}>
           <Sprout size={17} strokeWidth={2} />
           Track habits
         </Button>

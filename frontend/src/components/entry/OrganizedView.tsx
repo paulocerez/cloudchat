@@ -34,9 +34,9 @@ export function OrganizedView({ entry }: { entry: JournalEntry }) {
         <Section id={sectionId('messages')} icon={MessageSquare} title="Messages" count={textMessages.length}>
           <div className="space-y-2">
             {textMessages.map((m) => (
-              <div key={m.id} className="rounded-xl bg-gray-100 text-gray-700 px-4 py-2.5">
+              <div key={m.id} className="rounded-xl bg-sunken text-strong px-4 py-2.5">
                 <p className="text-[15px] leading-relaxed">{stripSpotifyLinks(m.content)}</p>
-                <p className="text-xs mt-1 text-gray-400">{format(new Date(m.timestamp), 'HH:mm')}</p>
+                <p className="text-xs mt-1 text-faint">{format(new Date(m.timestamp), 'HH:mm')}</p>
               </div>
             ))}
           </div>
@@ -51,7 +51,7 @@ export function OrganizedView({ entry }: { entry: JournalEntry }) {
                 key={img.id}
                 image={img}
                 date={entry.date}
-                className="aspect-square rounded-xl bg-gray-100"
+                className="aspect-square rounded-xl bg-sunken"
               />
             ))}
           </div>
@@ -120,9 +120,9 @@ function Section({
   return (
     <section id={id} className="scroll-mt-32">
       <div className="flex items-center gap-2 mb-3">
-        <Icon size={15} strokeWidth={2} className="text-gray-400" />
-        <h2 className="text-xs font-medium tracking-wide uppercase text-gray-400">{title}</h2>
-        <span className="text-xs text-gray-300">{count}</span>
+        <Icon size={15} strokeWidth={2} className="text-faint" />
+        <h2 className="text-xs font-medium tracking-wide uppercase text-faint">{title}</h2>
+        <span className="text-xs text-faintest">{count}</span>
       </div>
       {children}
     </section>

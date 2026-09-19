@@ -157,7 +157,7 @@ function CalendarPage() {
             : isRangeStart
               ? 'bg-ink text-on-ink font-medium'
               : highlighted
-                ? 'bg-amber-50 text-amber-800 ring-2 ring-amber-300 ring-offset-1 ring-offset-white font-medium'
+                ? 'bg-amber-50 dark:bg-amber-400/15 text-amber-800 dark:text-amber-200 ring-2 ring-amber-300 dark:ring-amber-400/50 ring-offset-1 ring-offset-page font-medium'
                 : entry
                   ? 'bg-sunken text-strong hover:bg-sunken-hover'
                   : 'text-faint hover:bg-hover';
@@ -223,7 +223,7 @@ function CalendarPage() {
           <span className="w-3 h-3 rounded bg-sunken border border-line" /> has entry
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-amber-50 ring-1 ring-amber-300" /> highlighted
+          <span className="w-3 h-3 rounded bg-amber-50 dark:bg-amber-400/15 ring-1 ring-amber-300 dark:ring-amber-400/50" /> highlighted
         </span>
       </div>
 

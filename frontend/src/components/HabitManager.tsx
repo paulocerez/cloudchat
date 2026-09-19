@@ -53,17 +53,17 @@ function HabitForm({
         <button
           type="button"
           onClick={onBack}
-          className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+          className="p-1 rounded text-faint hover:text-strong hover:bg-hover transition-colors"
           aria-label="Back"
         >
           <ChevronLeft size={16} strokeWidth={2.5} />
         </button>
-        <h2 className="text-sm font-semibold text-gray-900">{editing ? 'Edit habit' : 'New habit'}</h2>
+        <h2 className="text-sm font-semibold text-ink">{editing ? 'Edit habit' : 'New habit'}</h2>
       </div>
 
       <div className="space-y-4">
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1.5">Name</label>
+          <label className="block text-xs font-medium text-muted mb-1.5">Name</label>
           <div className="flex items-center gap-2">
             <span className={`h-9 w-9 shrink-0 rounded-xl ${tone(color).soft}`}>
               <span className={`block m-[0.6875rem] h-[0.875rem] w-[0.875rem] rounded-full ${tone(color).swatch}`} />
@@ -73,13 +73,13 @@ function HabitForm({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Morning run"
-              className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300"
+              className="flex-1 px-3 py-2 rounded-lg border border-line text-sm text-ink placeholder:text-placeholder focus:outline-none focus:ring-2 focus:ring-focus/20 focus:border-line-strong"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1.5">Weekly target</label>
+          <label className="block text-xs font-medium text-muted mb-1.5">Weekly target</label>
           <div className="flex items-center gap-1.5">
             {[1, 2, 3, 4, 5, 6, 7].map((n) => (
               <button
@@ -88,19 +88,19 @@ function HabitForm({
                 onClick={() => setWeeklyTarget(n)}
                 className={`w-8 h-8 rounded-lg text-sm font-medium transition-all active:scale-90 ${
                   weeklyTarget === n
-                    ? 'bg-gray-900 text-white'
-                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                    ? 'bg-ink text-on-ink'
+                    : 'bg-sunken text-muted hover:bg-sunken-hover'
                 }`}
               >
                 {n}
               </button>
             ))}
-            <span className="ml-1 text-xs text-gray-400">× / week</span>
+            <span className="ml-1 text-xs text-faint">× / week</span>
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1.5">Color</label>
+          <label className="block text-xs font-medium text-muted mb-1.5">Color</label>
           <ColorPicker value={color} onChange={setColor} />
         </div>
 
@@ -112,7 +112,7 @@ function HabitForm({
             type="button"
             onClick={() => remove.mutate()}
             disabled={remove.isPending}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-rose-600 hover:bg-rose-50 active:scale-[0.97] transition-all disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-danger hover:bg-danger-wash active:scale-[0.97] transition-all disabled:opacity-50"
           >
             <Trash2 size={15} strokeWidth={2} /> Delete
           </button>
@@ -123,7 +123,7 @@ function HabitForm({
           type="button"
           onClick={() => save.mutate()}
           disabled={!name.trim() || save.isPending}
-          className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-900 text-white hover:bg-gray-800 active:scale-[0.97] transition-all disabled:opacity-40"
+          className="px-4 py-2 rounded-lg text-sm font-medium bg-ink text-on-ink hover:bg-ink-hover active:scale-[0.97] transition-all disabled:opacity-40"
         >
           {save.isPending ? 'Saving…' : editing ? 'Save' : 'Add habit'}
         </button>
@@ -153,7 +153,7 @@ export function HabitManager({ open, onClose }: { open: boolean; onClose: () => 
 
           <div className="flex flex-col gap-1 mb-3">
               {list.length === 0 && (
-                <p className="text-sm text-gray-400 py-6 text-center">
+                <p className="text-sm text-faint py-6 text-center">
                   No habits yet. Add one to start tracking.
                 </p>
               )}
@@ -162,11 +162,11 @@ export function HabitManager({ open, onClose }: { open: boolean; onClose: () => 
                   key={h.id}
                   type="button"
                   onClick={() => setMode({ view: 'form', habit: h })}
-                  className="flex items-center gap-2.5 px-2 py-2 -mx-2 rounded-lg text-left hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-2.5 px-2 py-2 -mx-2 rounded-lg text-left hover:bg-hover transition-colors"
                 >
                   <span className={`w-1 self-stretch min-h-5 rounded-full ${tone(h.color).line}`} />
-                  <span className="font-medium text-gray-800 text-sm truncate">{h.name}</span>
-                  <span className="ml-auto shrink-0 text-xs text-gray-400">
+                  <span className="font-medium text-ink text-sm truncate">{h.name}</span>
+                  <span className="ml-auto shrink-0 text-xs text-faint">
                     {h.weeklyTarget}× / week
                   </span>
                 </button>
@@ -176,7 +176,7 @@ export function HabitManager({ open, onClose }: { open: boolean; onClose: () => 
           <button
             type="button"
             onClick={() => setMode({ view: 'form' })}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-gray-900 text-white hover:bg-gray-800 active:scale-[0.97] transition-all"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-ink text-on-ink hover:bg-ink-hover active:scale-[0.97] transition-all"
           >
             <Plus size={15} strokeWidth={2.5} /> New habit
           </button>

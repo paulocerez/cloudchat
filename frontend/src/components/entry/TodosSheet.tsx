@@ -31,14 +31,14 @@ export function TodosSheet({
       <SheetHeader title={total > 0 ? `Todos · ${done}/${total} done` : 'Todos'} onClose={onClose} />
 
       {groups.length === 0 ? (
-        <p className="py-6 text-center text-sm text-gray-400">
+        <p className="py-6 text-center text-sm text-faint">
           No action items for this day
         </p>
       ) : (
         <div className="space-y-5">
           {groups.map(({ memo, items }) => (
             <section key={memo.id}>
-              <p className="text-xs font-medium uppercase tracking-wide text-gray-400 mb-2">
+              <p className="text-xs font-medium uppercase tracking-wide text-faint mb-2">
                 {format(new Date(memo.timestamp), 'HH:mm')} · {memo.title || 'Recording'}
               </p>
               <ul className="space-y-2">
@@ -46,24 +46,24 @@ export function TodosSheet({
                   <li key={item.id} className="flex items-start gap-2.5 text-sm">
                     <span
                       className={`mt-[3px] shrink-0 w-4 h-4 rounded-[5px] border flex items-center justify-center ${
-                        item.isCompleted ? 'bg-gray-900 border-gray-900' : 'border-gray-300'
+                        item.isCompleted ? 'bg-ink border-ink' : 'border-line-strong'
                       }`}
                     >
                       {item.isCompleted && (
-                        <Check size={10} strokeWidth={3.5} className="text-white" />
+                        <Check size={10} strokeWidth={3.5} className="text-on-ink" />
                       )}
                     </span>
                     <span className="min-w-0">
                       <span
-                        className={item.isCompleted ? 'text-gray-400 line-through' : 'text-gray-700'}
+                        className={item.isCompleted ? 'text-faint line-through' : 'text-strong'}
                       >
                         {item.title}
                       </span>
                       {item.priority === 'high' && !item.isCompleted && (
-                        <span className="text-[11px] text-amber-600 ml-1.5 align-[1px]">high</span>
+                        <span className="text-[11px] text-amber-600 dark:text-amber-300 ml-1.5 align-[1px]">high</span>
                       )}
                       {item.dueDate && (
-                        <span className="text-[11px] text-gray-400 ml-1.5 align-[1px]">
+                        <span className="text-[11px] text-faint ml-1.5 align-[1px]">
                           due {item.dueDate}
                         </span>
                       )}

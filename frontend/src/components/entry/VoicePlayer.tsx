@@ -59,7 +59,7 @@ export function VoicePlayer({ src, time }: { src: string; time: string }) {
         type="button"
         onClick={toggle}
         aria-label={playing ? 'Pause' : 'Play'}
-        className="shrink-0 w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center hover:bg-gray-800 active:scale-95 transition-all"
+        className="shrink-0 w-10 h-10 rounded-full bg-ink text-on-ink flex items-center justify-center hover:bg-ink-hover active:scale-95 transition-all"
       >
         {playing ? (
           <Pause size={16} strokeWidth={2.5} className="fill-current" />
@@ -88,25 +88,25 @@ export function VoicePlayer({ src, time }: { src: string; time: string }) {
             return (
               <span
                 key={i}
-                className={`flex-1 rounded-full transition-colors ${played ? 'bg-gray-900' : 'bg-gray-300'}`}
+                className={`flex-1 rounded-full transition-colors ${played ? 'bg-ink' : 'bg-line-strong'}`}
                 style={{ height: `${Math.round(v * 100)}%` }}
               />
             );
           })}
           <span
-            className="absolute top-1/2 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gray-900 shadow-sm ring-2 ring-gray-50"
+            className="absolute top-1/2 w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink shadow-sm ring-2 ring-surface"
             style={{ left: `${fraction * 100}%` }}
           />
         </div>
         <div className="mt-1 flex items-center justify-between">
-          <span className="text-[11px] font-medium text-gray-400 tabular-nums">
+          <span className="text-[11px] font-medium text-faint tabular-nums">
             {fmtDuration(playing || current > 0 ? current : duration)}
           </span>
-          <span className="text-[11px] text-gray-300">{time}</span>
+          <span className="text-[11px] text-faintest">{time}</span>
         </div>
       </div>
 
-      <span className="shrink-0 w-7 h-7 rounded-full bg-violet-100 text-violet-500 flex items-center justify-center self-start">
+      <span className="shrink-0 w-7 h-7 rounded-full bg-violet-100 dark:bg-violet-400/15 text-violet-500 dark:text-violet-300 flex items-center justify-center self-start">
         <Mic size={13} strokeWidth={2.5} />
       </span>
 

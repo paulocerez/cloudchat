@@ -285,7 +285,7 @@ function StreakBadge({ entries }: { entries: JournalEntry[] }) {
   return (
     <span
       title={`${streak} day streak`}
-      className="shrink-0 inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg bg-orange-50 text-orange-600 text-xs font-medium tabular-nums"
+      className="shrink-0 inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg bg-orange-50 dark:bg-orange-400/12 text-orange-600 dark:text-orange-300 text-xs font-medium tabular-nums"
     >
       <Flame size={15} strokeWidth={2.5} className="fill-orange-400 text-orange-500" />
       {streak}
