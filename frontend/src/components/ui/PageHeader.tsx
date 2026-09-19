@@ -55,20 +55,20 @@ export function PageHeader({
       <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
         <div className="min-w-0">
           {eyebrow && (
-            <p className="text-xs font-medium tracking-wide uppercase text-gray-400 mb-1">
+            <p className="text-xs font-semibold tracking-wide uppercase text-[#8B7FA6] mb-1">
               {eyebrow}
             </p>
           )}
           <h1
             ref={ref}
-            className="text-[26px] font-bold text-gray-900 tracking-[-0.03em] leading-[1.15] [font-optical-sizing:auto] text-balance"
+            className="text-[30px] font-semibold text-[#241F2E] tracking-[-0.028em] leading-[1.15] [font-optical-sizing:auto] text-balance"
           >
             {title}
           </h1>
         </div>
         {actions && <div className="shrink-0 ml-auto flex items-center gap-1">{actions}</div>}
       </div>
-      {subtitle && <p className="text-sm text-gray-400 mt-1.5">{subtitle}</p>}
+      {subtitle && <p className="text-sm text-[#8B7FA6] mt-1.5">{subtitle}</p>}
     </header>
   );
 }

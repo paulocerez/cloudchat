@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { createRoute, Link } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { MessageCircle, Mic, Image as ImageIcon, Music, MapPin, Flame, CalendarRange, Plus, Film, Play } from 'lucide-react';
 import { subDays, format as formatDate } from 'date-fns';
 import { api } from '~/lib/api';
@@ -12,6 +12,7 @@ import { SpotifyChip } from '~/components/SpotifyChip';
 import { PeriodDialog } from '~/components/PeriodDialog';
 import { Button } from '~/components/ui/Button';
 import { PageHeader } from '~/components/ui/PageHeader';
+import { PullToRefresh } from '~/components/PullToRefresh';
 import type { JournalEntry, TextMessage, VoiceMemo, JournalImage, JournalVideo, TimePeriod } from '@cloudchat/shared';
 import { rootRoute } from './__root';
 
@@ -22,6 +23,7 @@ export const indexRoute = createRoute({
 });
 
 function Timeline() {
+  const qc = useQueryClient();
   const { data: entries, isLoading, isError } = useQuery({
     queryKey: ['entries'],
     queryFn: api.entries.list,
@@ -54,6 +56,14 @@ function Timeline() {
         actions={
           <>
             <StreakBadge entries={entries} />
+            <Link
+              to="/entry/$date"
+              params={{ date: formatDate(new Date(), 'yyyy-MM-dd') }}
+              title="Go to today"
+              className="h-9 px-3 inline-flex items-center rounded-full surface-solid text-[13px] font-semibold text-[#241F2E] active:scale-[0.96] transition-transform"
+            >
+              Today
+            </Link>
             {/* An explicit button, not a second "…" — the nav already owns that
                 glyph, and two of them in one corner reads as a mistake. */}
             <Button
@@ -69,7 +79,9 @@ function Timeline() {
         }
       />
 
-      <PeriodTimeline entries={entries} periods={activePeriods} onEditPeriod={setEditing} />
+      <PullToRefresh onRefresh={() => qc.invalidateQueries({ queryKey: ['entries'] })}>
+        <PeriodTimeline entries={entries} periods={activePeriods} onEditPeriod={setEditing} />
+      </PullToRefresh>
 
       {addOpen && <PeriodDialog open onClose={() => setAddOpen(false)} />}
       {editing && (
@@ -209,9 +221,23 @@ function PeriodTimeline({
       </div>
 
       <div className="stagger" ref={listRef}>
-        {entries.map((entry) => (
-          <EntryCard key={entry.id} entry={entry} />
-        ))}
+        {entries.map((entry, i) => {
+          const month = formatDate(new Date(entry.date + 'T00:00:00'), 'MMMM yyyy');
+          const prev =
+            i > 0 ? formatDate(new Date(entries[i - 1].date + 'T00:00:00'), 'MMMM yyyy') : null;
+          return (
+            <div key={entry.id}>
+              {/* A sticky marker per month, so scrolling a long archive never
+                  leaves you wondering which year you're in. */}
+              {month !== prev && (
+                <p className="sticky top-14 lg:top-0 z-10 -mx-1 px-1 py-1.5 mt-5 first:mt-0 mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8B7FA6] backdrop-blur-sm">
+                  {month}
+                </p>
+              )}
+              <EntryCard entry={entry} />
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -276,13 +302,15 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
   return (
     <div
       data-entry-date={entry.date}
-      className={entry.highlight ? 'my-2 p-1 rounded-xl ring-2 ring-amber-300 bg-amber-50/40' : undefined}
+      className="mb-2.5"
     >
     <Link
       to="/entry/$date"
       params={{ date: entry.date }}
-      className={`flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 py-4 px-3 rounded-lg transition-all duration-200 group cursor-pointer active:scale-[0.99] ${
-        entry.highlight ? 'hover:bg-amber-100/60' : '-mx-3 hover:bg-gray-50'
+      className={`squish flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 py-3.5 px-4 rounded-[22px] group cursor-pointer ${
+        entry.highlight
+          ? 'surface-solid ring-[1.5px] ring-[#F0B75C] bg-gradient-to-br from-[#FFF4DF] to-[#FFFDF8]'
+          : 'surface hover:bg-white/85'
       }`}
     >
       {/* Left column: date, summary, songs, images */}

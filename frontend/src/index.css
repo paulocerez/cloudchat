@@ -5,11 +5,28 @@
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── Global grid background ─────────────────────────────────── */
+/* ── Surface ────────────────────────────────────────────────────
+   A journal isn't a dashboard, so the page sits on a soft wash
+   rather than flat white, and cards float on it as frosted glass.
+   The wash is fixed so it doesn't scroll away under long entries. */
 body {
-  background-color: #fff;
-  /* iOS rubber-band overscroll stays white */
-  overscroll-behavior: none;
+  background-color: #fdf9f6;
+  background-image:
+    radial-gradient(90rem 50rem at 8% -12%, #ffe9d6 0%, transparent 55%),
+    radial-gradient(70rem 45rem at 95% 8%, #f6e6ff 0%, transparent 55%),
+    radial-gradient(80rem 55rem at 50% 105%, #e6eeff 0%, transparent 60%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  /* iOS rubber-band overscroll stays on the wash */
+  overscroll-behavior-y: none;
+}
+
+/* A day marked as a highlight warms the whole page. */
+body[data-highlight='true'] {
+  background-image:
+    radial-gradient(90rem 50rem at 8% -12%, #ffe1b5 0%, transparent 55%),
+    radial-gradient(70rem 45rem at 95% 8%, #ffe9d6 0%, transparent 55%),
+    radial-gradient(80rem 55rem at 50% 105%, #fff3dc 0%, transparent 60%);
 }
 
 /* ── Touch ──────────────────────────────────────────────────── */
@@ -165,6 +182,43 @@ label,
   transform-origin: center;
 }
 
+/* ── Frosted card ───────────────────────────────────────────────
+   The one surface treatment. Translucent so the wash tints it, with
+   a light top edge so it reads as physical rather than printed. */
+.surface {
+  background-color: rgb(255 255 255 / 0.72);
+  backdrop-filter: blur(20px) saturate(140%);
+  box-shadow:
+    0 1px 0 0 rgb(255 255 255 / 0.9) inset,
+    0 6px 20px -6px rgb(80 60 120 / 0.1),
+    0 1px 2px 0 rgb(80 60 120 / 0.05);
+}
+.surface-solid {
+  background-color: rgb(255 255 255 / 0.92);
+  box-shadow:
+    0 1px 0 0 rgb(255 255 255 / 0.9) inset,
+    0 6px 20px -6px rgb(80 60 120 / 0.1),
+    0 1px 2px 0 rgb(80 60 120 / 0.05);
+}
+
+/* Press feedback for anything card-shaped. */
+.squish {
+  transition:
+    transform 0.16s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.16s ease;
+}
+.squish:active {
+  transform: scale(0.985);
+}
+
+/* ── Pull to refresh ────────────────────────────────────────── */
+@keyframes ptr-spin {
+  to { transform: rotate(360deg); }
+}
+.ptr-spin {
+  animation: ptr-spin 0.8s linear infinite;
+}
+
 /* ── Bottom sheet: rises from the edge it's anchored to ─────── */
 @keyframes sheet-up {
   from { transform: translateY(100%); }
@@ -179,6 +233,9 @@ label,
   .animate-fade-up,
   .animate-slide-right,
   .animate-slide-left,
+  .squish:active {
+    transform: none !important;
+  }
   .animate-materialize,
   .animate-sheet-up,
   .animate-pop,
@@ -195,6 +252,7 @@ label,
 }
 
 @media (prefers-reduced-transparency: reduce) {
+  .surface,
   .glass-surface {
     background: #fff !important;
     backdrop-filter: none !important;

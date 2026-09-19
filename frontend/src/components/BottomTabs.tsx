@@ -10,7 +10,7 @@ export function BottomTabs() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
-    <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-gray-900/[0.06] bg-white/80 backdrop-blur-xl backdrop-saturate-150 glass-surface">
+    <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/55 backdrop-blur-2xl backdrop-saturate-150 glass-surface">
       <div className="max-w-2xl mx-auto grid grid-cols-3 pb-[env(safe-area-inset-bottom)]">
         {TABS.map(({ to, label, Icon }) => {
           const active = isTabActive(to, pathname);
@@ -20,7 +20,7 @@ export function BottomTabs() {
               to={to}
               aria-current={active ? 'page' : undefined}
               className={`flex flex-col items-center justify-center gap-1 h-14 transition-colors duration-150 active:scale-[0.97] ${
-                active ? 'text-gray-900' : 'text-gray-400'
+                active ? 'text-[#241F2E]' : 'text-[#B6ADC9]'
               }`}
             >
               {/* Stroke weight carries the active state, the way the top bar

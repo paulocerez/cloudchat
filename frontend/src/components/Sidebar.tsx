@@ -25,7 +25,7 @@ export function Sidebar() {
     'flex items-center gap-2 h-8 px-2 rounded-md text-[13px] font-medium transition-colors duration-100';
 
   return (
-    <aside className="hidden lg:flex fixed inset-y-0 left-0 z-30 w-56 flex-col gap-1 border-r border-gray-900/[0.07] bg-gray-50/70 px-3 py-3">
+    <aside className="hidden lg:flex fixed inset-y-0 left-0 z-30 w-56 flex-col gap-1 border-r border-white/60 bg-white/35 backdrop-blur-2xl px-3 py-3">
       {/* Workspace row — the mark doubles as the app menu, the way Linear's
           workspace switcher does. */}
       <button
@@ -33,12 +33,12 @@ export function Sidebar() {
         type="button"
         onClick={() => setMenuOpen((v) => !v)}
         aria-expanded={menuOpen}
-        className="flex items-center gap-2 h-9 px-2 -mx-0.5 rounded-md hover:bg-gray-900/[0.05] active:scale-[0.99] transition-all"
+        className="flex items-center gap-2 h-9 px-2 -mx-0.5 rounded-md hover:bg-white/60 active:scale-[0.99] transition-all"
       >
         <span className="font-bold text-red-600 italic tracking-tight leading-none text-base">
           cc
         </span>
-        <span className="text-[13px] font-semibold text-gray-900 tracking-[-0.01em]">
+        <span className="text-[13px] font-semibold text-[#241F2E] tracking-[-0.01em]">
           Cloudchat
         </span>
         <ChevronDown size={14} strokeWidth={2} className="ml-auto text-gray-400" />
@@ -54,8 +54,8 @@ export function Sidebar() {
               aria-current={active ? 'page' : undefined}
               className={`${rowBase} ${
                 active
-                  ? 'bg-gray-900/[0.07] text-gray-900'
-                  : 'text-gray-500 hover:bg-gray-900/[0.04] hover:text-gray-800'
+                  ? 'surface-solid text-[#241F2E]'
+                  : 'text-[#7A6F93] hover:bg-white/60 hover:text-[#241F2E]'
               }`}
             >
               <Icon size={16} strokeWidth={active ? 2 : 1.75} className="shrink-0" />
@@ -70,8 +70,8 @@ export function Sidebar() {
         aria-current={pathname === '/settings' ? 'page' : undefined}
         className={`${rowBase} mt-auto ${
           pathname === '/settings'
-            ? 'bg-gray-900/[0.07] text-gray-900'
-            : 'text-gray-400 hover:bg-gray-900/[0.04] hover:text-gray-700'
+            ? 'surface-solid text-[#241F2E]'
+            : 'text-[#9990AD] hover:bg-white/60 hover:text-[#241F2E]'
         }`}
       >
         <Settings size={16} strokeWidth={1.75} className="shrink-0" />

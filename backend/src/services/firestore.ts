@@ -99,6 +99,60 @@ export async function registerVideo(
   return (await ref.get()).data() as JournalEntry;
 }
 
+// Photos taken on the phone go up the same way videos do — straight to
+// Storage via a signed URL, then registered. They don't arrive through
+// WhatsApp, so messageId/mediaId are synthesised.
+export async function createImageUploadUrl(
+  date: string,
+  contentType: string,
+  ext: string
+): Promise<{ uploadUrl: string; path: string }> {
+  const bucket = admin.storage().bucket();
+  const safeExt = ext.replace(/[^a-z0-9]/gi, '').toLowerCase() || 'jpg';
+  const path = `images/${date}/${uuidv4()}.${safeExt}`;
+  const [uploadUrl] = await bucket.file(path).getSignedUrl({
+    version: 'v4',
+    action: 'write',
+    expires: Date.now() + 15 * 60 * 1000,
+    contentType,
+  });
+  return { uploadUrl, path };
+}
+
+export async function registerImage(
+  date: string,
+  input: { path: string; contentType: string; caption?: string; timestamp?: string }
+): Promise<JournalEntry | null> {
+  const bucket = admin.storage().bucket();
+  const file = bucket.file(input.path);
+  const [exists] = await file.exists();
+  if (!exists) return null;
+
+  const token = uuidv4();
+  await file.setMetadata({ metadata: { firebaseStorageDownloadTokens: token } });
+  const url = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(
+    input.path
+  )}?alt=media&token=${token}`;
+
+  await getOrCreateEntry(date);
+  const id = uuidv4();
+  const image: JournalImage = {
+    id,
+    messageId: `upload:${id}`,
+    mediaId: id,
+    url,
+    timestamp: input.timestamp ?? `${date}T${new Date().toTimeString().slice(0, 8)}`,
+  };
+  if (input.caption) image.caption = input.caption;
+
+  const ref = db.collection('entries').doc(date);
+  await ref.update({
+    images: admin.firestore.FieldValue.arrayUnion(image),
+    updatedAt: new Date().toISOString(),
+  });
+  return (await ref.get()).data() as JournalEntry;
+}
+
 function todayDate(): string {
   return new Date().toISOString().split('T')[0];
 }

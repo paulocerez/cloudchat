@@ -1,10 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
-import { useRouter } from '@tanstack/react-router';
-import { format, isToday, isYesterday } from 'date-fns';
-import { ChevronLeft, MoreHorizontal, Pencil } from 'lucide-react';
+import { Link, useRouter } from '@tanstack/react-router';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { addDays, format, isFuture, isToday, isYesterday } from 'date-fns';
+import { ChevronLeft, ChevronRight, MoreHorizontal, Star } from 'lucide-react';
 import type { JournalEntry } from '@cloudchat/shared';
+import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
 import { Button } from '~/components/ui/Button';
+
+export function shiftDate(date: string, days: number): string {
+  return format(addDays(new Date(date + 'T00:00:00'), days), 'yyyy-MM-dd');
+}
+
+export function canGoForward(date: string): boolean {
+  return !isFuture(new Date(shiftDate(date, 1) + 'T00:00:00'));
+}
 
 function eyebrowFor(date: string): string {
   const d = new Date(date + 'T00:00:00');
@@ -15,28 +25,33 @@ function eyebrowFor(date: string): string {
 }
 
 /**
- * Sticky chrome: back, edit, overflow. Icon-only, because four labelled text
- * buttons wrapped to two rows at 390px. The date fades into the centre once
- * the title below has scrolled away, so you always know which day you're in.
+ * Sticky chrome: back, highlight, overflow — plus day-to-day arrows beside the
+ * title. Highlight is the one action worth a permanent button; it's a mood, you
+ * set it while reading. Everything else lives behind the "…".
  */
 export function EntryHeader({
   entry,
-  onEdit,
   onActions,
 }: {
   entry: JournalEntry;
-  onEdit: () => void;
   onActions: () => void;
 }) {
   const router = useRouter();
+  const qc = useQueryClient();
   const titleRef = useRef<HTMLDivElement>(null);
   const [titleHidden, setTitleHidden] = useState(false);
+
+  const highlight = useMutation({
+    mutationFn: () => api.entries.setHighlight(entry.date, !entry.highlight),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['entry', entry.date] });
+      qc.invalidateQueries({ queryKey: ['entries'] });
+    },
+  });
 
   useEffect(() => {
     const el = titleRef.current;
     if (!el) return;
-    // Detail screens hide the top bar at every width, so this 40px bar is the
-    // only thing above the scroll port.
     const io = new IntersectionObserver(([e]) => setTitleHidden(!e.isIntersecting), {
       rootMargin: '-40px 0px 0px 0px',
       threshold: 0,
@@ -50,21 +65,18 @@ export function EntryHeader({
     else router.navigate({ to: '/' });
   };
 
+  const forward = canGoForward(entry.date);
+
   return (
     <>
-      {/* The global top bar steps aside on detail screens, and the desktop rail
-          is a column beside us, so this owns the top edge at every width.
-          The scroll-edge fade is a sibling gradient rather than a mask-image on
-          this element: masking a backdrop-filter makes Chromium composite
-          garbage into the bar. */}
-      <div className="sticky top-0 z-20 relative -mx-4 sm:-mx-6 md:-mx-8 -mt-8 px-4 sm:px-6 md:px-8 pt-8 pb-2 bg-white/70 backdrop-blur-xl backdrop-saturate-150 glass-surface">
+      <div className="sticky top-0 z-20 -mx-4 sm:-mx-6 md:-mx-8 -mt-8 px-4 sm:px-6 md:px-8 pt-8 pb-2">
         <div className="flex items-center gap-2 h-10">
           <Button variant="icon" size="icon" onClick={goBack} aria-label="Back">
             <ChevronLeft size={19} strokeWidth={2.25} />
           </Button>
 
           <span
-            className={`flex-1 min-w-0 truncate text-center text-sm font-semibold text-gray-900 tracking-[-0.01em] transition-opacity duration-200 ${
+            className={`flex-1 min-w-0 truncate text-center text-sm font-semibold text-[#241F2E] tracking-[-0.01em] transition-opacity duration-200 ${
               titleHidden ? 'opacity-100' : 'opacity-0'
             }`}
             aria-hidden={!titleHidden}
@@ -72,25 +84,58 @@ export function EntryHeader({
             {entry.title || format(new Date(entry.date + 'T00:00:00'), 'EEE d MMM')}
           </span>
 
-          <Button variant="icon" size="icon" onClick={onEdit} aria-label="Edit day">
-            <Pencil size={16} strokeWidth={2.25} />
+          <Button
+            variant="icon"
+            size="icon"
+            onClick={() => highlight.mutate()}
+            disabled={highlight.isPending}
+            aria-pressed={entry.highlight}
+            aria-label={entry.highlight ? 'Remove highlight' : 'Highlight this day'}
+          >
+            <Star
+              size={17}
+              strokeWidth={2.25}
+              className={entry.highlight ? 'fill-[#F5A524] text-[#F5A524]' : ''}
+            />
           </Button>
           <Button variant="icon" size="icon" onClick={onActions} aria-label="More actions">
             <MoreHorizontal size={18} strokeWidth={2.25} />
           </Button>
         </div>
-        {/* Content dissolves into the glass instead of hitting a hard edge. */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-full h-4 bg-gradient-to-b from-white/70 to-transparent"
-        />
       </div>
 
       <div ref={titleRef} className="pt-4 animate-fade-up">
-        <p className="text-xs font-medium tracking-wide uppercase text-gray-400 mb-1">
-          {eyebrowFor(entry.date)}
-        </p>
-        <h1 className="text-[26px] font-bold text-gray-900 tracking-[-0.03em] leading-[1.15] [font-optical-sizing:auto] text-balance">
+        <div className="flex items-center gap-1">
+          <p className="text-[12px] font-semibold tracking-wide text-[#8B7FA6]">
+            {eyebrowFor(entry.date)}
+          </p>
+          {/* Arrows make the swipe discoverable, and give a pointer a way in. */}
+          <span className="ml-auto flex items-center gap-0.5 -mr-1.5">
+            <Link
+              to="/entry/$date"
+              params={{ date: shiftDate(entry.date, -1) }}
+              aria-label="Previous day"
+              className="h-8 w-8 flex items-center justify-center rounded-full text-[#B6ADC9] hover:text-[#241F2E] hover:bg-gray-900/[0.05] active:scale-90 transition-all"
+            >
+              <ChevronLeft size={17} strokeWidth={2.25} />
+            </Link>
+            {forward ? (
+              <Link
+                to="/entry/$date"
+                params={{ date: shiftDate(entry.date, 1) }}
+                aria-label="Next day"
+                className="h-8 w-8 flex items-center justify-center rounded-full text-[#B6ADC9] hover:text-[#241F2E] hover:bg-gray-900/[0.05] active:scale-90 transition-all"
+              >
+                <ChevronRight size={17} strokeWidth={2.25} />
+              </Link>
+            ) : (
+              <span className="h-8 w-8 flex items-center justify-center text-[#E0DAEA]">
+                <ChevronRight size={17} strokeWidth={2.25} />
+              </span>
+            )}
+          </span>
+        </div>
+        <h1 className="mt-1.5 text-[30px] font-semibold text-[#241F2E] leading-[1.12] tracking-[-0.025em] [font-optical-sizing:auto] text-balance">
           {entry.title || formatEntryDate(entry.date)}
         </h1>
       </div>

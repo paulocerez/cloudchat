@@ -28,7 +28,7 @@ export default function Nav() {
   if (isDetail) return null;
 
   return (
-    <header className="lg:hidden sticky top-0 z-30 bg-white/70 backdrop-blur-xl backdrop-saturate-150 border-b border-gray-900/[0.06] glass-surface">
+    <header className="lg:hidden sticky top-0 z-30 bg-white/45 backdrop-blur-2xl backdrop-saturate-150 glass-surface">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 flex items-center gap-2 h-14">
         <Link to="/" className="shrink-0 transition-opacity hover:opacity-70" aria-label="Timeline">
           <Logo size="md" variant="plain" />
@@ -36,7 +36,7 @@ export default function Nav() {
 
         <span
           aria-hidden={!compact}
-          className={`flex-1 min-w-0 truncate text-center text-sm font-semibold text-gray-900 tracking-[-0.01em] transition-opacity duration-200 ${
+          className={`flex-1 min-w-0 truncate text-center text-sm font-semibold text-[#241F2E] tracking-[-0.01em] transition-opacity duration-200 ${
             compact ? 'opacity-100' : 'opacity-0'
           }`}
         >

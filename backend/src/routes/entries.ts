@@ -18,6 +18,8 @@ import {
   moveImage,
   moveTextMessage,
   createVideoUploadUrl,
+  createImageUploadUrl,
+  registerImage,
   registerVideo,
 } from '../services/firestore';
 import { geocodePlaces } from '../services/mapbox';
@@ -230,6 +232,43 @@ router.post('/:date/videos', async (req: Request, res: Response) => {
   const entry = await registerVideo(req.params.date, { path, contentType, size, caption });
   if (!entry) {
     res.status(422).json({ error: 'Uploaded video not found in storage' });
+    return;
+  }
+  res.json(entry);
+});
+
+// Same two-step upload as videos, for photos taken on the phone.
+router.post('/:date/images/upload-url', async (req: Request, res: Response) => {
+  const { contentType, ext } = req.body;
+  if (typeof contentType !== 'string' || !contentType.startsWith('image/')) {
+    res.status(400).json({ error: 'contentType (image/*) required' });
+    return;
+  }
+  if (typeof ext !== 'string' || !ext) {
+    res.status(400).json({ error: 'ext (string) required' });
+    return;
+  }
+  const result = await createImageUploadUrl(req.params.date, contentType, ext);
+  res.json(result);
+});
+
+router.post('/:date/images', async (req: Request, res: Response) => {
+  const { path, contentType, caption } = req.body;
+  if (typeof path !== 'string' || !path) {
+    res.status(400).json({ error: 'path (string) required' });
+    return;
+  }
+  if (typeof contentType !== 'string' || !contentType.startsWith('image/')) {
+    res.status(400).json({ error: 'contentType (image/*) required' });
+    return;
+  }
+  if (caption !== undefined && typeof caption !== 'string') {
+    res.status(400).json({ error: 'caption must be a string' });
+    return;
+  }
+  const entry = await registerImage(req.params.date, { path, contentType, caption });
+  if (!entry) {
+    res.status(422).json({ error: 'Uploaded image not found in storage' });
     return;
   }
   res.json(entry);

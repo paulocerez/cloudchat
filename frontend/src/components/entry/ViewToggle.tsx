@@ -14,7 +14,7 @@ export function ViewToggle({
     { mode: 'organized', Icon: LayoutGrid, label: 'Organized view' },
   ];
   return (
-    <div className="inline-flex items-center gap-0.5 p-0.5 rounded-xl bg-gray-100">
+    <div className="inline-flex items-center gap-0.5 p-0.5 rounded-2xl bg-white/45 backdrop-blur-md">
       {opts.map(({ mode, Icon, label }) => (
         <button
           key={mode}
@@ -22,8 +22,8 @@ export function ViewToggle({
           onClick={() => onChange(mode)}
           aria-label={label}
           aria-pressed={view === mode}
-          className={`h-8 w-9 flex items-center justify-center rounded-lg transition-colors ${
-            view === mode ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400 hover:text-gray-600'
+          className={`h-9 w-10 flex items-center justify-center rounded-[14px] transition-all active:scale-95 ${
+            view === mode ? 'surface-solid text-[#241F2E]' : 'text-[#B6ADC9] hover:text-[#241F2E]'
           }`}
         >
           <Icon size={16} strokeWidth={2} />

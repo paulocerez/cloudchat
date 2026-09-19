@@ -1,44 +1,42 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Film, MapPin, Star, WandSparkles } from 'lucide-react';
+import { Film, ImagePlus, MapPin, Pencil, WandSparkles } from 'lucide-react';
 import type { JournalEntry } from '@cloudchat/shared';
 import { api } from '~/lib/api';
 import { Sheet } from '~/components/ui/Sheet';
 import { Button } from '~/components/ui/Button';
 
 /**
- * The overflow menu behind the header's "…" — and the same sheet the tray's
- * "+" opens. Everything that used to be a row of text buttons stealing the
- * first screenful now lives here.
+ * The overflow menu behind the header's "…". Everything that used to be a row
+ * of text buttons stealing the first screenful lives here; highlight stayed in
+ * the header, because it's the one you reach for while reading.
  */
 export function EntryActionsSheet({
   entry,
   open,
   onClose,
+  onEdit,
   onEditPlaces,
   onTrackHabits,
+  onAddPhoto,
   onUploadVideo,
 }: {
   entry: JournalEntry;
   open: boolean;
   onClose: () => void;
+  onEdit: () => void;
   onEditPlaces: () => void;
   onTrackHabits: () => void;
+  onAddPhoto: () => void;
   onUploadVideo: () => void;
 }) {
   const qc = useQueryClient();
-  const invalidate = () => {
-    qc.invalidateQueries({ queryKey: ['entry', entry.date] });
-    qc.invalidateQueries({ queryKey: ['entries'] });
-  };
 
   const generate = useMutation({
     mutationFn: () => api.summaries.generateDaily(entry.date),
-    onSuccess: invalidate,
-  });
-
-  const highlight = useMutation({
-    mutationFn: () => api.entries.setHighlight(entry.date, !entry.highlight),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['entry', entry.date] });
+      qc.invalidateQueries({ queryKey: ['entries'] });
+    },
   });
 
   const run = (fn: () => void) => () => {
@@ -49,10 +47,15 @@ export function EntryActionsSheet({
   return (
     <Sheet open={open} onClose={onClose} className="max-w-sm">
       <div className="flex flex-col">
+        <Button size="row" variant="ghost" className="text-[#241F2E]" onClick={run(onEdit)}>
+          <Pencil size={17} strokeWidth={2} />
+          Edit title &amp; summary
+        </Button>
+
         <Button
           size="row"
           variant="ghost"
-          className="text-gray-700"
+          className="text-[#241F2E]"
           disabled={generate.isPending}
           onClick={() => generate.mutate()}
         >
@@ -66,30 +69,23 @@ export function EntryActionsSheet({
                 : 'Generate summary'}
         </Button>
 
-        <Button
-          size="row"
-          variant="ghost"
-          className={entry.highlight ? 'text-amber-600' : 'text-gray-700'}
-          disabled={highlight.isPending}
-          onClick={() => highlight.mutate()}
-        >
-          <Star size={17} strokeWidth={2} className={entry.highlight ? 'fill-current' : ''} />
-          {entry.highlight ? 'Remove highlight' : 'Highlight this day'}
+        <div className="my-1.5 h-px bg-gray-900/[0.06]" />
+
+        <Button size="row" variant="ghost" className="text-[#241F2E]" onClick={run(onAddPhoto)}>
+          <ImagePlus size={17} strokeWidth={2} />
+          Add a photo
         </Button>
-
-        <div className="my-1.5 h-px bg-gray-100" />
-
-        <Button size="row" variant="ghost" className="text-gray-700" onClick={run(onEditPlaces)}>
+        <Button size="row" variant="ghost" className="text-[#241F2E]" onClick={run(onUploadVideo)}>
+          <Film size={17} strokeWidth={2} />
+          Add a video
+        </Button>
+        <Button size="row" variant="ghost" className="text-[#241F2E]" onClick={run(onEditPlaces)}>
           <MapPin size={17} strokeWidth={2} />
           Add a place
         </Button>
-        <Button size="row" variant="ghost" className="text-gray-700" onClick={run(onTrackHabits)}>
-          <span className="text-[17px] leading-none w-[17px] text-center">✅</span>
+        <Button size="row" variant="ghost" className="text-[#241F2E]" onClick={run(onTrackHabits)}>
+          <span className="text-[17px] leading-none w-[17px] text-center">🌱</span>
           Track habits
-        </Button>
-        <Button size="row" variant="ghost" className="text-gray-700" onClick={run(onUploadVideo)}>
-          <Film size={17} strokeWidth={2} />
-          Upload a video
         </Button>
       </div>
     </Sheet>

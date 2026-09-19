@@ -121,7 +121,7 @@ export function Sheet({
           role="dialog"
           aria-modal="true"
           className={cn(
-            'glass-surface relative z-10 w-full max-h-[85vh] overflow-y-auto rounded-2xl bg-white/85 backdrop-blur-xl shadow-2xl ring-1 ring-black/[0.06] p-5 animate-materialize',
+            'glass-surface relative z-10 w-full max-h-[85vh] overflow-y-auto rounded-[26px] bg-white/90 backdrop-blur-2xl shadow-2xl ring-1 ring-white/70 p-5 animate-materialize',
             className
           )}
         >
@@ -149,13 +149,13 @@ export function Sheet({
           dragMomentum={false}
           onDragEnd={onDragEnd}
           style={{ y }}
-          className="glass-surface mx-auto w-full max-w-lg rounded-t-2xl bg-white/90 backdrop-blur-xl shadow-2xl ring-1 ring-black/[0.06]"
+          className="glass-surface mx-auto w-full max-w-lg rounded-t-[26px] bg-white/90 backdrop-blur-2xl shadow-2xl ring-1 ring-white/70"
         >
           <div
             onPointerDown={(e) => dragControls.start(e)}
             className="flex justify-center py-3 cursor-grab active:cursor-grabbing touch-none"
           >
-            <span className="h-1 w-9 rounded-full bg-gray-300" />
+            <span className="h-1 w-10 rounded-full bg-[#CFC6E0]" />
           </div>
           <div className="max-h-[80vh] overflow-y-auto overscroll-contain px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
             {children}
@@ -171,7 +171,7 @@ export function Sheet({
 export function SheetHeader({ title, onClose }: { title: string; onClose: () => void }) {
   return (
     <div className="flex items-center justify-between mb-3">
-      <h2 className="text-sm font-semibold text-gray-900 tracking-[-0.01em]">{title}</h2>
+      <h2 className="text-[15px] font-semibold text-[#241F2E] tracking-[-0.01em]">{title}</h2>
       <button
         type="button"
         onClick={onClose}

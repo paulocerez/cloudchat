@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
-import { CalendarClock, Pencil } from 'lucide-react';
+import { CalendarClock, MoreHorizontal, Pencil } from 'lucide-react';
 import type { JournalImage, JournalVideo, TextMessage, VoiceMemo } from '@cloudchat/shared';
 import { api } from '~/lib/api';
 import { extractSpotifyLinks, spotifyEmbedUrl, stripSpotifyLinks } from '~/lib/spotify';
@@ -14,9 +14,11 @@ import { MoveToDaySheet, MoveToDayButton } from './MoveToDaySheet';
 import { VoicePlayer } from './VoicePlayer';
 import { mediaUrl } from './shared';
 
-// Hover-revealed controls stay, but only from `sm` up — on a phone there is no
-// hover, so the same actions live behind a long press instead.
-const HOVER_ONLY = 'hidden sm:block opacity-0 group-hover:opacity-100 transition-opacity';
+// An always-visible, very quiet handle. Hover-reveal hid these controls from
+// every touch device, and long-press alone is undiscoverable — nothing on
+// screen tells you it's there.
+const HANDLE =
+  'shrink-0 h-7 w-7 flex items-center justify-center rounded-full text-[#C9C1D8] hover:text-[#241F2E] hover:bg-gray-900/[0.05] active:scale-90 transition-all';
 
 export function MessageBubble({ msg, date }: { msg: TextMessage; date: string }) {
   const time = format(new Date(msg.timestamp), 'HH:mm');
@@ -26,28 +28,28 @@ export function MessageBubble({ msg, date }: { msg: TextMessage; date: string })
   const [moving, setMoving] = useState(false);
   const longPress = useLongPress(() => setActions(true));
 
-  const move = (
-    <div className={HOVER_ONLY}>
-      <MoveToDayButton
-        date={date}
-        title="Move message"
-        label="Move this message to"
-        move={(toDate) => api.entries.moveMessage(date, msg.id, toDate)}
-      />
-    </div>
+  const handle = (
+    <button
+      type="button"
+      onClick={() => setActions(true)}
+      aria-label="Message actions"
+      className={HANDLE}
+    >
+      <MoreHorizontal size={15} strokeWidth={2.25} />
+    </button>
   );
 
   return (
     <div
       className={`group flex items-end gap-1 ${msg.fromUser ? 'justify-end animate-slide-right' : 'justify-start animate-slide-left'}`}
     >
-      {msg.fromUser && move}
+      {msg.fromUser && handle}
       <div
         {...longPress}
-        className={`max-w-[80%] md:max-w-md rounded-2xl px-4 py-2.5 transition-transform duration-150 hover:scale-[1.01] ${
+        className={`max-w-[80%] md:max-w-md rounded-[22px] px-4 py-3 squish ${
           msg.fromUser
-            ? 'bg-gray-900 text-white rounded-br-sm shadow-sm'
-            : 'bg-gray-100 text-gray-700 rounded-bl-sm'
+            ? 'bg-[#241F2E] text-white rounded-br-lg shadow-[0_6px_18px_-6px_rgba(36,31,46,0.45)]'
+            : 'surface text-[#241F2E] rounded-bl-lg'
         }`}
       >
         {text && <p className="text-[15px] leading-relaxed">{text}</p>}
@@ -61,9 +63,9 @@ export function MessageBubble({ msg, date }: { msg: TextMessage; date: string })
             className={`w-full rounded-xl border-0 ${text ? 'mt-2' : ''} ${link.kind === 'track' || link.kind === 'episode' ? 'h-[152px]' : 'h-[352px]'}`}
           />
         ))}
-        <p className="text-xs mt-1 text-gray-400">{time}</p>
+        <p className="text-[11px] mt-1 opacity-50">{time}</p>
       </div>
-      {!msg.fromUser && move}
+      {!msg.fromUser && handle}
 
       <MenuSheet
         open={actions}
@@ -126,12 +128,12 @@ export function VoiceBubble({
       className={`group flex ${align === 'right' ? 'justify-end animate-slide-right' : 'justify-start animate-slide-left'}`}
     >
       <div
-        className={`max-w-[85%] md:max-w-md rounded-2xl ${align === 'right' ? 'rounded-br-sm' : 'rounded-bl-sm'} bg-gray-50 border border-gray-200 px-3 py-2.5 hover:border-gray-300 transition-colors duration-150`}
+        className={`max-w-[85%] md:max-w-md rounded-[22px] ${align === 'right' ? 'rounded-br-lg' : 'rounded-bl-lg'} surface px-3.5 py-3`}
       >
         <VoicePlayer src={src} time={time} />
         <div className="mt-2 flex items-start gap-1.5" {...longPress}>
           {memo.transcription ? (
-            <p className="text-[15px] text-gray-700 leading-relaxed italic flex-1">
+            <p className="text-[15px] text-[#241F2E] leading-relaxed italic flex-1">
               "{memo.transcription}"
             </p>
           ) : (
@@ -139,20 +141,12 @@ export function VoiceBubble({
           )}
           <button
             type="button"
-            onClick={openEditor}
-            aria-label="Edit transcription"
-            className={`${HOVER_ONLY} shrink-0 p-1 rounded text-gray-300 hover:text-gray-700 hover:bg-gray-100`}
+            onClick={() => setActions(true)}
+            aria-label="Voice memo actions"
+            className={HANDLE}
           >
-            <Pencil size={12} strokeWidth={2.5} />
+            <MoreHorizontal size={15} strokeWidth={2.25} />
           </button>
-          <div className={HOVER_ONLY}>
-            <MoveToDayButton
-              date={date}
-              title="Move voice memo"
-              label="Move this voice memo to"
-              move={(toDate) => api.entries.moveVoiceMemo(date, memo.id, toDate)}
-            />
-          </div>
         </div>
       </div>
 
@@ -232,21 +226,19 @@ export function ImageBubble({ image, date }: { image: JournalImage; date: string
   const time = format(new Date(image.timestamp), 'HH:mm');
   return (
     <div className="group flex justify-end animate-slide-right">
-      <div className="max-w-[80%] md:max-w-md rounded-2xl rounded-br-sm bg-gray-50 border border-gray-200 overflow-hidden hover:border-gray-300 transition-all duration-150 hover:shadow-sm">
+      <div className="max-w-[80%] md:max-w-md rounded-[22px] rounded-br-lg surface overflow-hidden squish">
         <AnnotatedImage image={image} date={date} />
         <div className="px-4 py-2 flex items-end justify-between gap-1">
           <div>
             {image.caption && <p className="text-xs text-gray-600">{image.caption}</p>}
             <p className="text-xs text-gray-400 mt-0.5">{time}</p>
           </div>
-          <div className={HOVER_ONLY}>
-            <MoveToDayButton
-              date={date}
-              title="Move image"
-              label="Move this image to"
-              move={(toDate) => api.entries.moveImage(date, image.id, toDate)}
-            />
-          </div>
+          <MoveToDayButton
+            date={date}
+            title="Move image"
+            label="Move this image to"
+            move={(toDate) => api.entries.moveImage(date, image.id, toDate)}
+          />
         </div>
       </div>
     </div>
@@ -257,7 +249,7 @@ export function VideoBubble({ video }: { video: JournalVideo }) {
   const time = format(new Date(video.timestamp), 'HH:mm');
   return (
     <div className="flex justify-end animate-slide-right">
-      <div className="max-w-[85%] md:max-w-md rounded-2xl rounded-br-sm bg-gray-50 border border-gray-200 overflow-hidden hover:border-gray-300 transition-all duration-150 hover:shadow-sm">
+      <div className="max-w-[85%] md:max-w-md rounded-[22px] rounded-br-lg surface overflow-hidden">
         <video controls preload="metadata" src={video.url} className="w-full bg-black max-h-96" />
         <div className="px-4 py-2">
           {video.caption && <p className="text-xs text-gray-600">{video.caption}</p>}

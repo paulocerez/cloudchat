@@ -1,13 +1,18 @@
 import { cn } from '~/lib/utils';
 
-// The white surface used for every raised block in the app.
+/**
+ * The one raised surface in the app: frosted, so the page's colour wash tints
+ * it, with a generous radius. `solid` for anything holding dense text, where
+ * the blur behind it costs more than it gives.
+ */
 export function Card({
   className,
+  solid = false,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+}: React.HTMLAttributes<HTMLDivElement> & { solid?: boolean }) {
   return (
     <div
-      className={cn('rounded-2xl bg-white ring-1 ring-gray-900/[0.06] shadow-sm', className)}
+      className={cn('rounded-[22px]', solid ? 'surface-solid' : 'surface', className)}
       {...props}
     />
   );

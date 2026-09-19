@@ -73,6 +73,13 @@ export const api = {
       date: string,
       body: { path: string; contentType: string; size?: number; caption?: string }
     ) => post<JournalEntry>(`/entries/${date}/videos`, body),
+    imageUploadUrl: (date: string, contentType: string, ext: string) =>
+      post<{ uploadUrl: string; path: string }>(`/entries/${date}/images/upload-url`, {
+        contentType,
+        ext,
+      }),
+    addImage: (date: string, body: { path: string; contentType: string; caption?: string }) =>
+      post<JournalEntry>(`/entries/${date}/images`, body),
     addLocation: (date: string, name: string) =>
       post<JournalEntry>(`/entries/${date}/locations`, { name }),
     toggleHabit: (date: string, habitId: string, done: boolean) =>
