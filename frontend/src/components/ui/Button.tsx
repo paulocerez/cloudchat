@@ -14,18 +14,18 @@ export const button = cva(
         ghost: 'text-gray-500 hover:text-gray-900 hover:bg-gray-900/[0.05]',
         danger: 'text-rose-600 hover:bg-rose-500/10',
         // Circular chrome button, on a hairline card.
-        icon: 'rounded-full surface-solid text-[#55555F] hover:text-[#17171C] hover:bg-gray-50',
+        icon: 'rounded-sm surface-solid text-[#55555F] hover:text-[#17171C] hover:bg-gray-50',
         // Bare icon, no chip behind it.
-        bare: 'rounded-full text-gray-400 hover:text-gray-900 hover:bg-gray-900/[0.05]',
+        bare: 'rounded-sm text-gray-400 hover:text-gray-900 hover:bg-gray-900/[0.05]',
       },
       size: {
-        sm: 'h-8 px-3 rounded-full text-xs',
-        md: 'h-10 px-4 rounded-full text-sm',
+        sm: 'h-8 px-3 rounded-sm text-xs',
+        md: 'h-10 px-4 rounded-sm text-sm',
         // Thumb-sized squares without inflating the glyph.
         icon: 'h-9 w-9 shrink-0',
         iconLg: 'h-10 w-10 shrink-0',
         // A full-width row inside a sheet.
-        row: 'h-12 w-full px-3 rounded-2xl text-[15px] justify-start gap-3',
+        row: 'h-12 w-full px-3 rounded-sm text-[15px] justify-start gap-3',
       },
     },
     defaultVariants: { variant: 'secondary', size: 'md' },

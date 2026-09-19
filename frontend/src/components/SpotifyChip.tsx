@@ -26,7 +26,7 @@ export function SpotifyChip({ link }: { link: SpotifyLink }) {
       target="_blank"
       rel="noopener noreferrer"
       onClick={(e) => e.stopPropagation()}
-      className="inline-flex items-center gap-1.5 max-w-full px-2 py-1 rounded-full bg-green-50 text-green-700 text-xs font-medium hover:bg-green-100 transition-colors"
+      className="inline-flex items-center gap-1.5 max-w-full px-2 py-1 rounded-sm bg-green-50 text-green-700 text-xs font-medium hover:bg-green-100 transition-colors"
     >
       <SpotifyGlyph />
       <span className="truncate">{label}</span>

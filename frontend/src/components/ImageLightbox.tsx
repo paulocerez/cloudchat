@@ -53,7 +53,7 @@ export function ImageLightbox({
         type="button"
         onClick={onClose}
         aria-label="Close"
-        className="absolute top-4 right-4 z-10 p-1.5 rounded-full bg-white/10 text-white hover:bg-white/20 active:scale-90 transition-all"
+        className="absolute top-4 right-4 z-10 p-1.5 rounded-sm bg-white/10 text-white hover:bg-white/20 active:scale-90 transition-all"
       >
         <X size={20} strokeWidth={2.5} />
       </button>
@@ -70,7 +70,7 @@ export function ImageLightbox({
             src={src}
             alt={alt}
             draggable={false}
-            className="max-w-full max-h-[85vh] object-contain rounded-lg select-none pointer-events-none"
+            className="max-w-full max-h-[85vh] object-contain rounded-sm select-none pointer-events-none"
           />
           {caption && (
             <figcaption className="mt-3 text-center text-sm text-white/80 max-w-2xl">

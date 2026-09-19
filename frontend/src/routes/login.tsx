@@ -39,7 +39,7 @@ function LoginPage() {
     <div className="fixed inset-0 flex items-center justify-center overflow-hidden">
       <div className="relative w-full max-w-sm px-4 sm:px-6 animate-fade-up">
 
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm px-8 py-10">
+        <div className="bg-white border border-gray-200 rounded-sm shadow-sm px-8 py-10">
           <div className="mb-8 flex flex-col items-center gap-4">
             <div className="animate-logo">
               <Logo size="lg" />
@@ -68,7 +68,7 @@ function LoginPage() {
                 }}
                 placeholder="Master password"
                 autoFocus
-                className={`w-full px-4 py-2.5 rounded-lg bg-white border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent text-sm transition-all duration-200 ${
+                className={`w-full px-4 py-2.5 rounded-sm bg-white border text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent text-sm transition-all duration-200 ${
                   error
                     ? 'border-red-300 focus:ring-red-200'
                     : 'border-gray-300 focus:ring-gray-900'
@@ -84,7 +84,7 @@ function LoginPage() {
 
             <button
               type="submit"
-              className="btn-shimmer w-full py-2.5 rounded-lg bg-gray-900 text-white font-medium text-sm transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+              className="btn-shimmer w-full py-2.5 rounded-sm bg-gray-900 text-white font-medium text-sm transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
             >
               Unlock
             </button>

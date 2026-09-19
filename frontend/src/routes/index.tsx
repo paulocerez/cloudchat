@@ -61,7 +61,7 @@ function Timeline() {
               to="/entry/$date"
               params={{ date: formatDate(new Date(), 'yyyy-MM-dd') }}
               title="Go to today"
-              className="h-9 px-3 inline-flex items-center rounded-full surface-solid text-[13px] font-semibold text-[#17171C] hover:bg-gray-50 active:scale-[0.96] transition-transform"
+              className="h-9 px-3 inline-flex items-center rounded-sm surface-solid text-[13px] font-semibold text-[#17171C] hover:bg-gray-50 active:scale-[0.96] transition-transform"
             >
               Today
             </Link>
@@ -211,7 +211,7 @@ function PeriodTimeline({
                 strokeWidth={2.25}
                 className={`mb-1 shrink-0 fill-current ${t.text} transition-transform group-hover/period:scale-125`}
               />
-              <span className={`w-1.5 flex-1 rounded-full ${t.line} transition-all group-hover/period:w-2`} />
+              <span className={`w-1.5 flex-1 rounded-sm ${t.line} transition-all group-hover/period:w-2`} />
               <span
                 className={`absolute top-7 left-2.5 [writing-mode:vertical-rl] text-[10px] font-semibold uppercase tracking-wide ${t.text} whitespace-nowrap overflow-hidden`}
                 style={{ maxHeight: Math.max(b.height - 32, 0) }}
@@ -279,7 +279,7 @@ function StreakBadge({ entries }: { entries: JournalEntry[] }) {
   return (
     <span
       title={`${streak} day streak`}
-      className="shrink-0 inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg bg-orange-50 text-orange-600 text-xs font-medium tabular-nums"
+      className="shrink-0 inline-flex items-center gap-1.5 h-9 px-2.5 rounded-sm bg-orange-50 text-orange-600 text-xs font-medium tabular-nums"
     >
       <Flame size={15} strokeWidth={2.5} className="fill-orange-400 text-orange-500" />
       {streak}
@@ -310,7 +310,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
     <Link
       to="/entry/$date"
       params={{ date: entry.date }}
-      className={`squish flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 py-3.5 px-4 rounded-[22px] group cursor-pointer ${
+      className={`squish flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 py-3.5 px-4 rounded-sm group cursor-pointer ${
         entry.highlight ? 'surface-warm' : 'surface hover:bg-gray-50/60'
       }`}
     >
@@ -359,14 +359,14 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
                 src={img.url ?? mediaUrl(`/api/media/${img.messageId}/${img.mediaId}`)}
                 alt=""
                 loading="lazy"
-                className="w-10 h-10 rounded-md object-cover bg-gray-100"
+                className="w-10 h-10 rounded-sm object-cover bg-gray-100"
               />
             ))}
             {videos.map((vid: JournalVideo) =>
               vid.url ? (
                 <div
                   key={vid.id}
-                  className="relative w-10 h-10 rounded-md overflow-hidden bg-gray-900"
+                  className="relative w-10 h-10 rounded-sm overflow-hidden bg-gray-900"
                 >
                   <video
                     src={`${vid.url}#t=0.1`}
@@ -391,37 +391,37 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
         <div className="order-2 sm:order-none flex items-center gap-2 sm:gap-3">
           <div className="flex flex-wrap items-center gap-1.5">
             {messageCount > 0 && (
-              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-blue-50 text-blue-600 font-medium">
+              <span className="flex items-center gap-1 px-1.5 py-1 rounded-sm bg-blue-50 text-blue-600 font-medium">
                 <MessageCircle size={13} strokeWidth={2.5} />
                 {messageCount}
               </span>
             )}
             {memoCount > 0 && (
-              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-violet-50 text-violet-600 font-medium">
+              <span className="flex items-center gap-1 px-1.5 py-1 rounded-sm bg-violet-50 text-violet-600 font-medium">
                 <Mic size={13} strokeWidth={2.5} />
                 {memoCount}
               </span>
             )}
             {imageCount > 0 && (
-              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-amber-50 text-amber-600 font-medium">
+              <span className="flex items-center gap-1 px-1.5 py-1 rounded-sm bg-amber-50 text-amber-600 font-medium">
                 <ImageIcon size={13} strokeWidth={2.5} />
                 {imageCount}
               </span>
             )}
             {videos.length > 0 && (
-              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-slate-100 text-slate-600 font-medium">
+              <span className="flex items-center gap-1 px-1.5 py-1 rounded-sm bg-slate-100 text-slate-600 font-medium">
                 <Film size={13} strokeWidth={2.5} />
                 {videos.length}
               </span>
             )}
             {spotifyLinks.length > 0 && (
-              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-green-50 text-green-600 font-medium">
+              <span className="flex items-center gap-1 px-1.5 py-1 rounded-sm bg-green-50 text-green-600 font-medium">
                 <Music size={13} strokeWidth={2.5} />
                 {spotifyLinks.length}
               </span>
             )}
             {entry.locations && entry.locations.length > 0 && (
-              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-rose-50 text-rose-600 font-medium">
+              <span className="flex items-center gap-1 px-1.5 py-1 rounded-sm bg-rose-50 text-rose-600 font-medium">
                 <MapPin size={13} strokeWidth={2.5} />
                 {entry.locations.length}
               </span>
@@ -441,7 +441,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
                 src={mapUrl}
                 alt="Map preview"
                 loading="lazy"
-                className="w-40 h-[90px] object-cover rounded-lg border border-gray-200 bg-gray-100"
+                className="w-40 h-[90px] object-cover rounded-sm border border-gray-200 bg-gray-100"
               />
             )}
             <span className="flex items-center gap-1 text-rose-500 font-medium sm:text-right max-w-full sm:max-w-[10rem] truncate">
@@ -463,10 +463,10 @@ function LoadingState() {
     <div className="divide-y divide-gray-100">
       {[1, 2, 3].map((i) => (
         <div key={i} className="flex gap-4 py-4 animate-pulse">
-          <div className="w-0.5 h-12 bg-gray-100 rounded-full shrink-0 mt-1" />
+          <div className="w-0.5 h-12 bg-gray-100 rounded-sm shrink-0 mt-1" />
           <div className="flex-1">
-            <div className="h-2.5 bg-gray-100 rounded w-28 mb-2" />
-            <div className="h-4 bg-gray-100 rounded w-3/4" />
+            <div className="h-2.5 bg-gray-100 rounded-sm w-28 mb-2" />
+            <div className="h-4 bg-gray-100 rounded-sm w-3/4" />
           </div>
         </div>
       ))}
@@ -486,10 +486,10 @@ function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-24 animate-fade-up select-none">
       <div className="relative mb-6">
-        <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center">
+        <div className="w-16 h-16 rounded-sm bg-gray-100 flex items-center justify-center">
           <MessageCircle size={28} strokeWidth={1.5} className="text-gray-400" />
         </div>
-        <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-400 border-2 border-white" />
+        <span className="absolute -top-1 -right-1 w-4 h-4 rounded-sm bg-green-400 border-2 border-white" />
       </div>
       <p className="text-gray-900 font-semibold text-base mb-1.5">Nothing here yet</p>
       <p className="text-gray-400 text-sm max-w-[220px] text-center leading-relaxed">

@@ -29,7 +29,7 @@ export function Pill({
   );
 
   const base = cn(
-    'inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg text-xs font-medium',
+    'inline-flex items-center gap-1.5 h-9 px-2.5 rounded-sm text-xs font-medium',
     'bg-white ring-1 ring-gray-900/[0.05] shadow-[0_1px_1.5px_rgba(0,0,0,0.03)]',
     active ? 'text-gray-900' : 'text-gray-600',
     className
@@ -61,7 +61,7 @@ export function Pill({
 export function PillTray({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn('flex flex-wrap items-center gap-1.5 rounded-xl bg-gray-100/80 p-1.5', className)}
+      className={cn('flex flex-wrap items-center gap-1.5 rounded-sm bg-gray-100/80 p-1.5', className)}
       {...props}
     />
   );

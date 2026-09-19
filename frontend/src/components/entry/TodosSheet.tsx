@@ -45,7 +45,7 @@ export function TodosSheet({
                 {items.map((item) => (
                   <li key={item.id} className="flex items-start gap-2.5 text-sm">
                     <span
-                      className={`mt-[3px] shrink-0 w-4 h-4 rounded-[5px] border flex items-center justify-center ${
+                      className={`mt-[3px] shrink-0 w-4 h-4 rounded-sm border flex items-center justify-center ${
                         item.isCompleted ? 'bg-gray-900 border-gray-900' : 'border-gray-300'
                       }`}
                     >

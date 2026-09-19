@@ -92,10 +92,10 @@ export function HabitSheet({
                   type="button"
                   disabled={toggle.isPending}
                   onClick={() => toggle.mutate({ habitId: h.id, done: !done })}
-                  className="flex items-center gap-3 h-12 px-2 -mx-2 rounded-xl text-left hover:bg-gray-50 active:scale-[0.99] transition-all disabled:opacity-60"
+                  className="flex items-center gap-3 h-12 px-2 -mx-2 rounded-sm text-left hover:bg-gray-50 active:scale-[0.99] transition-all disabled:opacity-60"
                 >
                   <span
-                    className={`w-6 h-6 shrink-0 rounded-md flex items-center justify-center transition-colors ${
+                    className={`w-6 h-6 shrink-0 rounded-sm flex items-center justify-center transition-colors ${
                       done ? `${t.line} text-white` : 'bg-white border border-gray-300'
                     }`}
                   >

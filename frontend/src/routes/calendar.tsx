@@ -115,7 +115,7 @@ function CalendarPage() {
       {/* Range picking is a mode, so it gets a banner you can't miss — and an
           exit that isn't hidden among the month controls. */}
       {selecting && (
-        <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-xl bg-gray-900 text-white animate-fade-up">
+        <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-sm bg-gray-900 text-white animate-fade-up">
           <CalendarRange size={15} strokeWidth={2.5} className="shrink-0" />
           <p className="text-xs flex-1 min-w-0">
             {rangeStart
@@ -125,7 +125,7 @@ function CalendarPage() {
           <button
             type="button"
             onClick={cancelSelect}
-            className="shrink-0 h-8 px-2.5 -mr-1.5 rounded-lg text-xs font-medium text-white/70 hover:text-white hover:bg-white/10 active:scale-[0.97] transition-all"
+            className="shrink-0 h-8 px-2.5 -mr-1.5 rounded-sm text-xs font-medium text-white/70 hover:text-white hover:bg-white/10 active:scale-[0.97] transition-all"
           >
             <X size={14} strokeWidth={2.5} className="inline mr-1" />
             Cancel
@@ -151,7 +151,7 @@ function CalendarPage() {
           const isRangeStart = rangeStart === key;
 
           const base =
-            'relative h-11 rounded-lg flex items-center justify-center text-sm transition-all duration-150';
+            'relative h-11 rounded-sm flex items-center justify-center text-sm transition-all duration-150';
           const tint = !inMonth
             ? 'text-gray-300'
             : isRangeStart
@@ -166,7 +166,7 @@ function CalendarPage() {
           const content = (
             <>
               {isToday(day) && !highlighted && !isRangeStart && (
-                <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-blue-400" />
+                <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-sm bg-blue-400" />
               )}
               {highlighted && !isRangeStart && (
                 <Star size={11} className="absolute top-1 right-1 fill-amber-400 text-amber-400" />
@@ -186,7 +186,7 @@ function CalendarPage() {
               {dayPeriods.length > 0 && (
                 <span className="absolute bottom-1 left-1 right-1 flex flex-col gap-0.5">
                   {dayPeriods.slice(0, MAX_BARS).map((p) => (
-                    <span key={p.id} className={`h-1 rounded-full ${tone(p.color).line}`} />
+                    <span key={p.id} className={`h-1 rounded-sm ${tone(p.color).line}`} />
                   ))}
                 </span>
               )}
@@ -220,10 +220,10 @@ function CalendarPage() {
 
       <div className="flex flex-wrap items-center gap-4 mt-6 text-xs text-gray-400">
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-gray-100 border border-gray-200" /> has entry
+          <span className="w-3 h-3 rounded-sm bg-gray-100 border border-gray-200" /> has entry
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-amber-50 ring-1 ring-amber-300" /> highlighted
+          <span className="w-3 h-3 rounded-sm bg-amber-50 ring-1 ring-amber-300" /> highlighted
         </span>
       </div>
 
@@ -236,9 +236,9 @@ function CalendarPage() {
                 key={p.id}
                 type="button"
                 onClick={() => setEditing(p)}
-                className="flex items-center gap-2.5 px-2 py-1.5 -mx-2 rounded-lg text-sm text-left hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-2.5 px-2 py-1.5 -mx-2 rounded-sm text-sm text-left hover:bg-gray-50 transition-colors"
               >
-                <span className={`w-1 self-stretch min-h-4 rounded-full ${tone(p.color).line}`} />
+                <span className={`w-1 self-stretch min-h-4 rounded-sm ${tone(p.color).line}`} />
                 <Bookmark size={14} strokeWidth={2.25} className={`shrink-0 fill-current ${tone(p.color).text}`} />
                 <span className="font-medium text-gray-800 truncate">{p.name}</span>
                 <span className="ml-auto shrink-0 text-xs text-gray-400">
