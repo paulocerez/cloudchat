@@ -269,6 +269,36 @@ export async function addImage(date: string, image: JournalImage): Promise<void>
   });
 }
 
+// Images ingested before we kept our own copy have no `url`, so every view of
+// them goes back through WhatsApp and wakes the phone. The media proxy looks one
+// up, stores the bytes, then writes the url back — after that it reads Storage.
+// Only the `images` field is read, and the scan runs once per legacy image.
+export async function findImageWithoutUrl(
+  messageId: string,
+  mediaId: string
+): Promise<{ date: string; imageId: string } | null> {
+  const snap = await db.collection('entries').select('images').get();
+  for (const doc of snap.docs) {
+    const images = (doc.data().images ?? []) as JournalImage[];
+    const match = images.find(
+      (img) => img.messageId === messageId && img.mediaId === mediaId && !img.url
+    );
+    if (match) return { date: doc.id, imageId: match.id };
+  }
+  return null;
+}
+
+export async function setImageUrl(date: string, imageId: string, url: string): Promise<void> {
+  const ref = db.collection('entries').doc(date);
+  const snap = await ref.get();
+  if (!snap.exists) return;
+  const entry = snap.data() as JournalEntry;
+  await ref.update({
+    images: entry.images.map((img) => (img.id === imageId ? { ...img, url } : img)),
+    updatedAt: new Date().toISOString(),
+  });
+}
+
 export async function addVideo(date: string, video: JournalVideo): Promise<void> {
   const ref = db.collection('entries').doc(date);
   await ref.update({

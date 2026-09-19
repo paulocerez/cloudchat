@@ -13,6 +13,7 @@ import { PeriodDialog } from '~/components/PeriodDialog';
 import { Button } from '~/components/ui/Button';
 import { PageHeader } from '~/components/ui/PageHeader';
 import { PullToRefresh } from '~/components/PullToRefresh';
+import { mediaUrl } from '~/components/entry/shared';
 import type { JournalEntry, TextMessage, VoiceMemo, JournalImage, JournalVideo, TimePeriod } from '@cloudchat/shared';
 import { rootRoute } from './__root';
 
@@ -351,7 +352,9 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
             {entry.images.map((img: JournalImage) => (
               <img
                 key={img.id}
-                src={`${import.meta.env.VITE_API_URL ?? ''}/api/media/${img.messageId}/${img.mediaId}`}
+                // Prefer the copy we stored at ingest. The proxy pulls the
+                // original through WhatsApp, which wakes the linked device.
+                src={img.url ?? mediaUrl(`/api/media/${img.messageId}/${img.mediaId}`)}
                 alt=""
                 loading="lazy"
                 className="w-10 h-10 rounded-md object-cover bg-gray-100"
