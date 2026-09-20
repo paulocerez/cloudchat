@@ -304,19 +304,32 @@ router.put('/:date/summary', async (req: Request, res: Response) => {
   res.json(entry);
 });
 
-// Manually add a location by place name; geocoded server-side.
+// Add a location. The picker sends a suggestion the user chose, coordinates
+// and all; a free-text add sends just a name and we geocode it here.
 router.post('/:date/locations', async (req: Request, res: Response) => {
-  const { name } = req.body;
+  const { name, latitude, longitude } = req.body;
   if (typeof name !== 'string' || !name.trim()) {
     res.status(400).json({ error: 'name (string) required' });
     return;
   }
-  const [geocoded] = await geocodePlaces([name.trim()]);
-  if (!geocoded) {
+
+  const picked =
+    typeof latitude === 'number' &&
+    typeof longitude === 'number' &&
+    Number.isFinite(latitude) &&
+    Number.isFinite(longitude) &&
+    Math.abs(latitude) <= 90 &&
+    Math.abs(longitude) <= 180;
+
+  const location = picked
+    ? { name: name.trim(), latitude, longitude }
+    : (await geocodePlaces([name.trim()]))[0];
+
+  if (!location) {
     res.status(422).json({ error: `Could not geocode "${name.trim()}"` });
     return;
   }
-  const entry = await addEntryLocation(req.params.date, geocoded);
+  const entry = await addEntryLocation(req.params.date, location);
   res.json(entry);
 });
 
