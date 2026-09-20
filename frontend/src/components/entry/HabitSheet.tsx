@@ -59,7 +59,7 @@ export function HabitSheet({
     <>
       <Sheet open={open} onClose={onClose}>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-gray-900 tracking-[-0.01em]">Habits</h2>
+          <h2 className="text-sm font-semibold text-ink tracking-[-0.01em]">Habits</h2>
           <Button
             variant="bare"
             size="icon"
@@ -74,7 +74,7 @@ export function HabitSheet({
 
         {habits.length === 0 ? (
           <div className="py-6 text-center">
-            <p className="text-sm text-gray-400 mb-3">No habits yet</p>
+            <p className="text-sm text-faint mb-3">No habits yet</p>
             <Button variant="primary" onClick={() => setManagerOpen(true)}>
               <Plus size={15} strokeWidth={2.5} />
               Track a habit
@@ -94,28 +94,28 @@ export function HabitSheet({
                   type="button"
                   disabled={toggle.isPending}
                   onClick={() => toggle.mutate({ habitId: h.id, done: !done })}
-                  className="flex items-center gap-3 h-12 px-2 -mx-2 rounded-md text-left hover:bg-gray-50 active:scale-[0.99] transition-all disabled:opacity-60"
+                  className="flex items-center gap-3 h-12 px-2 -mx-2 rounded-md text-left hover:bg-hover active:scale-[0.99] transition-all disabled:opacity-60"
                 >
                   <span
                     className={`w-6 h-6 shrink-0 rounded-md flex items-center justify-center transition-colors ${
-                      done ? `${t.line} text-white` : 'bg-white border border-gray-300'
+                      done ? `${t.line} text-white` : 'bg-field border border-line-strong'
                     }`}
                   >
                     {done ? (
                       <Check size={15} strokeWidth={3} />
                     ) : (
                       // The habit's icon keeps unchecked rows identifiable.
-                      <Icon size={13} strokeWidth={2} className="text-gray-300" />
+                      <Icon size={13} strokeWidth={2} className="text-faintest" />
                     )}
                   </span>
                   <span
-                    className={`text-[15px] font-medium ${done ? 'text-gray-900' : 'text-gray-600'}`}
+                    className={`text-[15px] font-medium ${done ? 'text-ink' : 'text-secondary'}`}
                   >
                     {h.name}
                   </span>
                   <span
                     className={`ml-auto shrink-0 inline-flex items-center gap-1 text-xs font-medium tabular-nums ${
-                      met ? t.text : 'text-gray-400'
+                      met ? t.text : 'text-faint'
                     }`}
                   >
                     {met && <Check size={12} strokeWidth={3} />}

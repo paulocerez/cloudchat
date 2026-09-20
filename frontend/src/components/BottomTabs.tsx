@@ -13,7 +13,7 @@ export function BottomTabs() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
-    <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-gray-900/[0.07] bg-white/90 backdrop-blur-xl">
+    <nav className="chrome-blur lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-line bg-page/90 backdrop-blur-xl">
       <div className="max-w-2xl mx-auto grid grid-cols-3 pb-[env(safe-area-inset-bottom)]">
         {TABS.map(({ to, label, Icon }) => {
           const active = isTabActive(to, pathname);
@@ -23,7 +23,7 @@ export function BottomTabs() {
               to={to}
               aria-current={active ? 'page' : undefined}
               className={`flex flex-col items-center justify-center gap-1 h-14 transition-colors duration-150 active:scale-[0.97] ${
-                active ? 'text-[#17171C]' : 'text-[#A6A6B0]'
+                active ? 'text-ink' : 'text-faint'
               }`}
             >
               {/* Stroke weight carries the active state — no pill, so the bar

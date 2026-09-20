@@ -144,7 +144,7 @@ function inline(text: string): ReactNode[] {
     const at = m.index ?? 0;
     if (at > last) out.push(text.slice(last, at));
     out.push(
-      <strong key={k++} className="font-medium text-gray-900">
+      <strong key={k++} className="font-medium text-ink">
         {m[1]}
       </strong>
     );
@@ -165,7 +165,7 @@ export function PocketSummary({ markdown }: { markdown: string }) {
           return (
             <h4
               key={i}
-              className="text-xs font-medium tracking-wide uppercase text-gray-400 pt-1.5 first:pt-0"
+              className="text-xs font-medium tracking-wide uppercase text-faint pt-1.5 first:pt-0"
             >
               {block.text}
             </h4>
@@ -173,7 +173,7 @@ export function PocketSummary({ markdown }: { markdown: string }) {
 
         if (block.kind === 'paragraph')
           return (
-            <p key={i} className="text-sm text-gray-600 leading-relaxed">
+            <p key={i} className="text-sm text-secondary leading-relaxed">
               {inline(block.text)}
             </p>
           );
@@ -182,8 +182,8 @@ export function PocketSummary({ markdown }: { markdown: string }) {
           return (
             <ul key={i} className="space-y-1.5">
               {block.items.map((item, j) => (
-                <li key={j} className="flex gap-2 text-sm text-gray-600 leading-relaxed">
-                  <span className="text-gray-300 select-none">•</span>
+                <li key={j} className="flex gap-2 text-sm text-secondary leading-relaxed">
+                  <span className="text-faintest select-none">•</span>
                   <span>{inline(item)}</span>
                 </li>
               ))}
@@ -193,17 +193,17 @@ export function PocketSummary({ markdown }: { markdown: string }) {
         if (block.kind === 'timeline')
           return (
             <div key={i} className="pt-1.5">
-              <p className="text-xs font-medium tracking-wide uppercase text-gray-400 mb-2">
+              <p className="text-xs font-medium tracking-wide uppercase text-faint mb-2">
                 {block.title}
               </p>
-              <ol className="border-l border-gray-200 space-y-2.5 pl-3.5">
+              <ol className="border-l border-line space-y-2.5 pl-3.5">
                 {block.rows.map((cells, j) => (
                   <li key={j} className="relative">
-                    <span className="absolute -left-[18px] top-[7px] w-1.5 h-1.5 rounded-md bg-gray-300" />
-                    <span className="text-sm text-gray-900">{cells[0]}</span>
-                    {cells[1] && <span className="text-sm text-gray-500"> · {cells[1]}</span>}
+                    <span className="absolute -left-[18px] top-[7px] w-1.5 h-1.5 rounded-md bg-line-strong" />
+                    <span className="text-sm text-ink">{cells[0]}</span>
+                    {cells[1] && <span className="text-sm text-muted"> · {cells[1]}</span>}
                     {cells[2] && (
-                      <span className="block text-xs text-gray-400 leading-relaxed mt-0.5">
+                      <span className="block text-xs text-faint leading-relaxed mt-0.5">
                         {cells[2]}
                       </span>
                     )}
@@ -215,21 +215,21 @@ export function PocketSummary({ markdown }: { markdown: string }) {
 
         return (
           <div key={i} className="pt-1.5">
-            <p className="text-xs font-medium tracking-wide uppercase text-gray-400 mb-2">
+            <p className="text-xs font-medium tracking-wide uppercase text-faint mb-2">
               {block.title}
             </p>
             {block.question && (
-              <p className="text-sm text-gray-600 leading-relaxed mb-2">{block.question}</p>
+              <p className="text-sm text-secondary leading-relaxed mb-2">{block.question}</p>
             )}
             <div className="space-y-2">
               {block.branches.map((b, j) => (
-                <div key={j} className="rounded-md bg-gray-50 px-3 py-2">
-                  <p className="text-sm text-gray-900">
+                <div key={j} className="rounded-md bg-sunken px-3 py-2">
+                  <p className="text-sm text-ink">
                     {b.label}
-                    {b.heading && <span className="text-gray-400 font-normal"> — {b.heading}</span>}
+                    {b.heading && <span className="text-faint font-normal"> — {b.heading}</span>}
                   </p>
                   {b.body && (
-                    <p className="text-xs text-gray-400 leading-relaxed mt-0.5">{b.body}</p>
+                    <p className="text-xs text-faint leading-relaxed mt-0.5">{b.body}</p>
                   )}
                 </div>
               ))}

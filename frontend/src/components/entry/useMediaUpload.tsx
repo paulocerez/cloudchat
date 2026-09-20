@@ -116,16 +116,16 @@ export function UploadStatus({
     <div className="mb-3 animate-fade-up">
       {progress !== null && (
         <div className="flex items-center gap-2.5">
-          <div className="h-1.5 flex-1 rounded-md bg-gray-100 overflow-hidden">
+          <div className="h-1.5 flex-1 rounded-md bg-sunken overflow-hidden">
             <div
-              className="h-full rounded-md bg-[#241F2E] transition-[width] duration-200"
+              className="h-full rounded-md bg-ink transition-[width] duration-200"
               style={{ width: `${progress}%` }}
             />
           </div>
-          <span className="text-xs tabular-nums text-[#71717D]">Uploading {progress}%</span>
+          <span className="text-xs tabular-nums text-muted">Uploading {progress}%</span>
         </div>
       )}
-      {error && <p className="text-xs text-rose-500">{error}</p>}
+      {error && <p className="text-xs text-danger">{error}</p>}
     </div>
   );
 }

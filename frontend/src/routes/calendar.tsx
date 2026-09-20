@@ -116,7 +116,7 @@ function CalendarPage() {
       {/* Range picking is a mode, so it gets a banner you can't miss — and an
           exit that isn't hidden among the month controls. */}
       {selecting && (
-        <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-md bg-gray-900 text-white animate-fade-up">
+        <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-md bg-ink text-on-ink animate-fade-up">
           <CalendarRange size={15} strokeWidth={2.5} className="shrink-0" />
           <p className="text-xs flex-1 min-w-0">
             {rangeStart
@@ -126,7 +126,7 @@ function CalendarPage() {
           <button
             type="button"
             onClick={cancelSelect}
-            className="shrink-0 h-8 px-2.5 -mr-1.5 rounded-md text-xs font-medium text-white/70 hover:text-white hover:bg-white/10 active:scale-[0.97] transition-all"
+            className="shrink-0 h-8 px-2.5 -mr-1.5 rounded-md text-xs font-medium text-on-ink/70 hover:text-on-ink hover:bg-on-ink/10 active:scale-[0.97] transition-all"
           >
             <X size={14} strokeWidth={2.5} className="inline mr-1" />
             Cancel
@@ -136,7 +136,7 @@ function CalendarPage() {
 
       <div className="grid grid-cols-7 gap-1.5 mb-2">
         {WEEKDAYS.map((d) => (
-          <div key={d} className="text-center text-xs font-medium text-gray-400 uppercase tracking-wide">
+          <div key={d} className="text-center text-xs font-medium text-faint uppercase tracking-wide">
             {d}
           </div>
         ))}
@@ -157,15 +157,15 @@ function CalendarPage() {
           const base =
             'relative h-11 rounded-md flex items-center justify-center text-sm transition-all duration-150';
           const tint = !inMonth
-            ? 'text-gray-300'
+            ? 'text-faintest'
             : isRangeStart
-              ? 'bg-gray-900 text-white font-medium'
+              ? 'bg-ink text-on-ink font-medium'
               : highlighted
-                ? 'bg-amber-50 text-amber-800 ring-2 ring-amber-300 ring-offset-1 ring-offset-white font-medium'
+                ? 'bg-amber-50 dark:bg-amber-400/15 text-amber-800 dark:text-amber-200 ring-2 ring-amber-300 dark:ring-amber-400/50 ring-offset-1 ring-offset-page font-medium'
                 : entry
-                  ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  : 'text-gray-400 hover:bg-gray-50';
-          const selectHover = selecting ? 'cursor-pointer hover:ring-2 hover:ring-gray-300' : '';
+                  ? 'bg-sunken text-strong hover:bg-sunken-hover'
+                  : 'text-faint hover:bg-hover';
+          const selectHover = selecting ? 'cursor-pointer hover:ring-2 hover:ring-line-strong' : '';
 
           const content = (
             <>
@@ -219,18 +219,18 @@ function CalendarPage() {
         })}
       </div>
 
-      <div className="flex flex-wrap items-center gap-4 mt-6 text-xs text-gray-400">
+      <div className="flex flex-wrap items-center gap-4 mt-6 text-xs text-faint">
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-md bg-gray-100 border border-gray-200" /> has entry
+          <span className="w-3 h-3 rounded-md bg-sunken border border-line" /> has entry
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-md bg-amber-50 ring-1 ring-amber-300" /> highlighted
+          <span className="w-3 h-3 rounded-md bg-amber-50 dark:bg-amber-400/15 ring-1 ring-amber-300 dark:ring-amber-400/50" /> highlighted
         </span>
       </div>
 
       {activePeriods.length > 0 && (
         <div className="mt-6">
-          <h2 className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">Periods</h2>
+          <h2 className="text-xs font-medium text-faint uppercase tracking-wide mb-2">Periods</h2>
           <div className="flex flex-col gap-1">
             {activePeriods.map((p) => {
               const Icon = iconFor(p.icon);
@@ -239,12 +239,12 @@ function CalendarPage() {
                   key={p.id}
                   type="button"
                   onClick={() => setEditing(p)}
-                  className="flex items-center gap-2.5 px-2 py-1.5 -mx-2 rounded-md text-sm text-left hover:bg-gray-50 transition-colors"
+                  className="flex items-center gap-2.5 px-2 py-1.5 -mx-2 rounded-md text-sm text-left hover:bg-hover transition-colors"
                 >
                   <span className={`w-1 self-stretch min-h-4 rounded-md ${tone(p.color).line}`} />
                   <Icon size={14} strokeWidth={2.25} className={`shrink-0 ${tone(p.color).text}`} />
-                  <span className="font-medium text-gray-800 truncate">{p.name}</span>
-                  <span className="ml-auto shrink-0 text-xs text-gray-400">
+                  <span className="font-medium text-ink truncate">{p.name}</span>
+                  <span className="ml-auto shrink-0 text-xs text-faint">
                     {format(new Date(p.startDate), 'MMM d')} – {format(new Date(p.endDate), 'MMM d')}
                   </span>
                 </button>

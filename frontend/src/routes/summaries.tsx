@@ -38,7 +38,7 @@ function SummariesPage() {
       />
 
       <section className="mb-10">
-        <p className="text-xs text-gray-400 font-medium uppercase tracking-wide mb-3">
+        <p className="text-xs text-faint font-medium uppercase tracking-wide mb-3">
           Generate new
         </p>
         <div className="grid grid-cols-2 gap-3 stagger">
@@ -61,22 +61,22 @@ function SummariesPage() {
       </section>
 
       <section>
-        <p className="text-xs text-gray-400 font-medium uppercase tracking-wide mb-3">
+        <p className="text-xs text-faint font-medium uppercase tracking-wide mb-3">
           Past summaries
         </p>
         {isLoading ? (
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-line">
             {[1, 2].map((i) => (
               <div key={i} className="py-4 animate-pulse">
-                <div className="h-2.5 bg-gray-100 rounded-md w-20 mb-2" />
-                <div className="h-4 bg-gray-100 rounded-md w-2/3" />
+                <div className="h-2.5 bg-sunken rounded-md w-20 mb-2" />
+                <div className="h-4 bg-sunken rounded-md w-2/3" />
               </div>
             ))}
           </div>
         ) : !summaries || summaries.length === 0 ? (
-          <p className="text-gray-400 text-sm">No summaries yet. Generate your first one above.</p>
+          <p className="text-faint text-sm">No summaries yet. Generate your first one above.</p>
         ) : (
-          <div className="divide-y divide-gray-100 stagger">
+          <div className="divide-y divide-line stagger">
             {summaries.map((s) => (
               <SummaryCard key={s.id} summary={s} />
             ))}
@@ -99,15 +99,15 @@ function EarlierWeeks() {
   });
 
   return (
-    <div className="mt-3 flex items-center gap-2 rounded-md bg-white border border-gray-200 p-3">
-      <span className="text-xs text-gray-400 shrink-0">Earlier week</span>
+    <div className="mt-3 flex items-center gap-2 rounded-md bg-surface border border-line p-3">
+      <span className="text-xs text-faint shrink-0">Earlier week</span>
       <select
         value={sel}
         onChange={(e) => {
           setSel(Number(e.target.value));
           reset();
         }}
-        className="flex-1 min-w-0 text-sm text-gray-900 bg-transparent focus:outline-none cursor-pointer"
+        className="flex-1 min-w-0 text-sm text-ink bg-transparent focus:outline-none cursor-pointer"
       >
         {weeks.map((w, i) => (
           <option key={`${w.year}-${w.index}`} value={i}>
@@ -118,11 +118,11 @@ function EarlierWeeks() {
       <button
         onClick={() => mutate()}
         disabled={isPending || isSuccess}
-        className="shrink-0 text-xs font-medium rounded-md px-3 py-1.5 bg-gray-900 text-white transition-all duration-150 hover:bg-gray-700 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-gray-900"
+        className="shrink-0 text-xs font-medium rounded-md px-3 py-1.5 bg-ink text-on-ink transition-all duration-150 hover:bg-ink-hover active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-ink"
       >
         {isPending ? (
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-md border-2 border-white/40 border-t-white animate-spin-slow" />
+            <span className="w-3 h-3 rounded-md border-2 border-on-ink/40 border-t-on-ink animate-spin-slow" />
             Generating…
           </span>
         ) : isSuccess ? (
@@ -164,20 +164,20 @@ function GenerateCard({
     <button
       onClick={() => mutate()}
       disabled={isPending || done}
-      className="group text-left rounded-md bg-white border border-gray-200 p-4 transition-all duration-200 hover:border-gray-400 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:hover:border-gray-200"
+      className="group text-left rounded-md bg-surface border border-line p-4 transition-all duration-200 hover:border-line-strong hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:shadow-sm disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:hover:border-line"
     >
-      <p className="text-xs text-gray-400 mb-0.5">{sublabel}</p>
-      <p className="text-sm text-gray-900 font-medium leading-tight">{label}</p>
+      <p className="text-xs text-faint mb-0.5">{sublabel}</p>
+      <p className="text-sm text-ink font-medium leading-tight">{label}</p>
       <div className="mt-2 h-4 flex items-center">
         {isPending ? (
-          <span className="flex items-center gap-1.5 text-xs text-gray-400">
-            <span className="w-3 h-3 rounded-md border-2 border-gray-300 border-t-gray-600 animate-spin-slow" />
+          <span className="flex items-center gap-1.5 text-xs text-faint">
+            <span className="w-3 h-3 rounded-md border-2 border-line-strong border-t-secondary animate-spin-slow" />
             Generating…
           </span>
         ) : done ? (
-          <span className="inline-flex items-center gap-1 text-xs text-gray-600 animate-pop"><Check size={13} strokeWidth={3} /> Done</span>
+          <span className="inline-flex items-center gap-1 text-xs text-secondary animate-pop"><Check size={13} strokeWidth={3} /> Done</span>
         ) : (
-          <span className="text-xs text-gray-400 transition-transform duration-150 group-hover:translate-x-0.5 inline-block">
+          <span className="text-xs text-faint transition-transform duration-150 group-hover:translate-x-0.5 inline-block">
             Generate →
           </span>
         )}
@@ -200,17 +200,17 @@ function SummaryCard({ summary }: { summary: AISummary }) {
         year: String(summary.year),
         index: String(summary.periodIndex),
       }}
-      className="flex items-start justify-between gap-4 py-4 -mx-3 px-3 rounded-md transition-all duration-200 hover:bg-gray-50 group"
+      className="flex items-start justify-between gap-4 py-4 -mx-3 px-3 rounded-md transition-all duration-200 hover:bg-hover group"
     >
-      <span className="mt-1 w-0.5 h-12 rounded-md bg-gray-200 shrink-0 transition-colors duration-200 group-hover:bg-gray-400" />
+      <span className="mt-1 w-0.5 h-12 rounded-md bg-line-strong shrink-0 transition-colors duration-200 group-hover:bg-muted" />
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-gray-400 capitalize mb-0.5">{summary.period}</p>
-        <p className="text-sm font-medium text-gray-900 mb-1">{label}</p>
-        <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">{summary.summary}</p>
+        <p className="text-xs text-faint capitalize mb-0.5">{summary.period}</p>
+        <p className="text-sm font-medium text-ink mb-1">{label}</p>
+        <p className="text-sm text-muted line-clamp-2 leading-relaxed">{summary.summary}</p>
       </div>
-      <div className="flex items-center gap-2 shrink-0 text-xs text-gray-400 mt-1">
+      <div className="flex items-center gap-2 shrink-0 text-xs text-faint mt-1">
         {summary.imageUrls.length > 0 && <span>{summary.imageUrls.length} photos</span>}
-        <span className="inline-block transition-transform duration-200 group-hover:translate-x-1 text-gray-300 group-hover:text-gray-600">
+        <span className="inline-block transition-transform duration-200 group-hover:translate-x-1 text-faintest group-hover:text-secondary">
           →
         </span>
       </div>

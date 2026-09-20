@@ -61,7 +61,7 @@ export function IconPicker({
             className={`aspect-square rounded-md flex items-center justify-center transition-transform active:scale-90 ${
               selected
                 ? `${t.soft} ${t.text} scale-105`
-                : 'bg-gray-100 text-gray-400 hover:text-gray-600 hover:scale-105'
+                : 'bg-sunken text-faint hover:text-secondary hover:scale-105'
             }`}
           >
             <Icon size={16} strokeWidth={2} />

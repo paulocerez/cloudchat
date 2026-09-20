@@ -7,6 +7,24 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Paulo's Journal</title>
+    <script>
+      // Runs before first paint so a dark session never flashes white — the
+      // module script is deferred and arrives far too late for this.
+      // Key and colours are duplicated in src/lib/theme.ts; change both.
+      (function () {
+        try {
+          var t = localStorage.getItem('journal_theme') || 'system';
+          var dark =
+            t === 'dark' ||
+            (t !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          var el = document.documentElement;
+          el.classList.toggle('dark', dark);
+          el.style.colorScheme = dark ? 'dark' : 'light';
+          var m = document.querySelector('meta[name="theme-color"]');
+          if (m) m.setAttribute('content', dark ? '#0d0d11' : '#ffffff');
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

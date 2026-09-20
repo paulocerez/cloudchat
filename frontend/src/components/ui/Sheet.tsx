@@ -187,7 +187,7 @@ export function Sheet({
           onDragEnd={onDragEnd}
           style={{ y }}
           className={cn(
-            'flex flex-col bg-white shadow-2xl ring-1 ring-gray-900/[0.08]',
+            'flex flex-col bg-surface-2 shadow-2xl ring-1 ring-line',
             centered ? 'max-h-[85dvh] rounded-md' : '',
             bottom ? 'max-h-[88dvh] rounded-t-md' : '',
             variant === 'auto' && 'max-h-[88dvh] sm:max-h-[85dvh] rounded-t-md sm:rounded-md'
@@ -201,7 +201,7 @@ export function Sheet({
               variant === 'auto' && 'sm:hidden'
             )}
           >
-            <span className="h-1 w-10 rounded-md bg-[#D6D6DE]" />
+            <span className="h-1 w-10 rounded-md bg-line-strong" />
           </div>
           <div
             className={cn(
@@ -223,12 +223,12 @@ export function Sheet({
 export function SheetHeader({ title, onClose }: { title: string; onClose: () => void }) {
   return (
     <div className="flex items-center justify-between mb-3">
-      <h2 className="text-[15px] font-semibold text-[#17171C] tracking-[-0.01em]">{title}</h2>
+      <h2 className="text-[15px] font-semibold text-ink tracking-[-0.01em]">{title}</h2>
       <button
         type="button"
         onClick={onClose}
         aria-label="Close"
-        className="h-9 w-9 -mr-2 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-500/10 active:scale-90 transition-all"
+        className="h-9 w-9 -mr-2 flex items-center justify-center rounded-md text-faint hover:text-strong hover:bg-hover active:scale-90 transition-all"
       >
         <X size={16} strokeWidth={2.5} />
       </button>

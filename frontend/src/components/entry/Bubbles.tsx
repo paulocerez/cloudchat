@@ -18,7 +18,7 @@ import { mediaUrl } from './shared';
 // every touch device, and long-press alone is undiscoverable — nothing on
 // screen tells you it's there.
 const HANDLE =
-  'shrink-0 h-7 w-7 flex items-center justify-center rounded-md text-[#B8B8C2] hover:text-[#241F2E] hover:bg-gray-900/[0.05] active:scale-90 transition-all';
+  'shrink-0 h-7 w-7 flex items-center justify-center rounded-md text-faintest hover:text-ink hover:bg-hover active:scale-90 transition-all';
 
 export function MessageBubble({ msg, date }: { msg: TextMessage; date: string }) {
   const time = format(new Date(msg.timestamp), 'HH:mm');
@@ -48,8 +48,8 @@ export function MessageBubble({ msg, date }: { msg: TextMessage; date: string })
         {...longPress}
         className={`max-w-[80%] md:max-w-md rounded-md px-4 py-3 squish ${
           msg.fromUser
-            ? 'bg-[#241F2E] text-white shadow-[0_6px_18px_-6px_rgba(36,31,46,0.45)]'
-            : 'surface text-[#241F2E]'
+            ? 'bg-ink text-on-ink rounded-md shadow-[0_6px_18px_-6px_var(--ink-shadow)]'
+            : 'surface text-ink rounded-md'
         }`}
       >
         {text && <p className="text-[15px] leading-relaxed">{text}</p>}
@@ -133,11 +133,11 @@ export function VoiceBubble({
         <VoicePlayer src={src} time={time} />
         <div className="mt-2 flex items-start gap-1.5" {...longPress}>
           {memo.transcription ? (
-            <p className="text-[15px] text-[#241F2E] leading-relaxed italic flex-1">
+            <p className="text-[15px] text-ink leading-relaxed italic flex-1">
               "{memo.transcription}"
             </p>
           ) : (
-            <p className="text-xs text-gray-400 italic flex-1">Transcription pending…</p>
+            <p className="text-xs text-faint italic flex-1">Transcription pending…</p>
           )}
           <button
             type="button"
@@ -208,7 +208,7 @@ function TranscriptionDialog({
         onChange={(e) => onChange(e.target.value)}
         rows={8}
         autoFocus
-        className="w-full text-sm text-gray-700 leading-relaxed rounded-md border border-gray-300 bg-white/70 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-y"
+        className="w-full text-sm text-strong leading-relaxed rounded-md border border-line-strong bg-field px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-focus focus:border-transparent resize-y"
       />
       <div className="flex items-center justify-end gap-2 mt-4">
         <Button variant="ghost" onClick={onCancel}>
@@ -230,8 +230,8 @@ export function ImageBubble({ image, date }: { image: JournalImage; date: string
         <AnnotatedImage image={image} date={date} />
         <div className="px-4 py-2 flex items-end justify-between gap-1">
           <div>
-            {image.caption && <p className="text-xs text-gray-600">{image.caption}</p>}
-            <p className="text-xs text-gray-400 mt-0.5">{time}</p>
+            {image.caption && <p className="text-xs text-secondary">{image.caption}</p>}
+            <p className="text-xs text-faint mt-0.5">{time}</p>
           </div>
           <MoveToDayButton
             date={date}
@@ -252,8 +252,8 @@ export function VideoBubble({ video }: { video: JournalVideo }) {
       <div className="max-w-[85%] md:max-w-md rounded-md surface overflow-hidden">
         <video controls preload="metadata" src={video.url} className="w-full bg-black max-h-96" />
         <div className="px-4 py-2">
-          {video.caption && <p className="text-xs text-gray-600">{video.caption}</p>}
-          <p className="text-xs text-gray-400 mt-0.5">{time}</p>
+          {video.caption && <p className="text-xs text-secondary">{video.caption}</p>}
+          <p className="text-xs text-faint mt-0.5">{time}</p>
         </div>
       </div>
     </div>

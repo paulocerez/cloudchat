@@ -5,6 +5,7 @@ import { MapPin, Plus, X } from 'lucide-react';
 import type { JournalEntry } from '@cloudchat/shared';
 import { api } from '~/lib/api';
 import { staticMapUrl } from '~/lib/mapbox';
+import { useTheme } from '~/lib/theme';
 import { Sheet, SheetHeader } from '~/components/ui/Sheet';
 import { Button } from '~/components/ui/Button';
 
@@ -21,7 +22,8 @@ export function LocationSheet({
   const [name, setName] = useState('');
   const locations = entry.locations ?? [];
   const scanned = Boolean(entry.locationsScannedAt);
-  const mapUrl = staticMapUrl(locations);
+  const { resolved } = useTheme();
+  const mapUrl = staticMapUrl(locations, 600, 240, resolved);
 
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ['entry', entry.date] });
@@ -55,15 +57,15 @@ export function LocationSheet({
         <img
           src={mapUrl}
           alt="Map of places mentioned"
-          className="w-full block rounded-md mb-3 ring-1 ring-gray-900/[0.06]"
+          className="w-full block rounded-md mb-3 ring-1 ring-line"
         />
       )}
 
       <div className="flex items-center gap-1.5 mb-3">
         <span
-          className={`w-1.5 h-1.5 rounded-md ${scanned ? 'bg-emerald-500' : 'bg-gray-300'}`}
+          className={`w-1.5 h-1.5 rounded-md ${scanned ? 'bg-emerald-500' : 'bg-line-strong'}`}
         />
-        <span className={`text-xs font-medium ${scanned ? 'text-emerald-600' : 'text-gray-400'}`}>
+        <span className={`text-xs font-medium ${scanned ? 'text-emerald-600 dark:text-emerald-400' : 'text-faint'}`}>
           {status}
         </span>
       </div>
@@ -73,7 +75,7 @@ export function LocationSheet({
           {locations.map((loc) => (
             <span
               key={loc.name}
-              className="flex items-center gap-1 h-9 pl-2.5 pr-1 rounded-md bg-gray-100 text-gray-600 text-xs font-medium"
+              className="flex items-center gap-1 h-9 pl-2.5 pr-1 rounded-md bg-sunken text-secondary text-xs font-medium"
             >
               <MapPin size={12} strokeWidth={2.5} />
               {loc.name}
@@ -82,7 +84,7 @@ export function LocationSheet({
                 onClick={() => remove.mutate(loc.name)}
                 disabled={remove.isPending}
                 aria-label={`Remove ${loc.name}`}
-                className="h-7 w-7 flex items-center justify-center rounded-md text-gray-400 hover:text-gray-700 hover:bg-gray-200 active:scale-90 transition-all disabled:opacity-50"
+                className="h-7 w-7 flex items-center justify-center rounded-md text-faint hover:text-strong hover:bg-sunken-hover active:scale-90 transition-all disabled:opacity-50"
               >
                 <X size={12} strokeWidth={2.5} />
               </button>
@@ -102,7 +104,7 @@ export function LocationSheet({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Add a place…"
-          className="flex-1 min-w-0 text-sm text-gray-700 rounded-md border border-gray-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+          className="flex-1 min-w-0 text-sm text-strong rounded-md border border-line-strong px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-focus focus:border-transparent"
         />
         <Button
           type="submit"
@@ -115,7 +117,7 @@ export function LocationSheet({
         </Button>
       </form>
       {add.isError && (
-        <p className="text-xs text-rose-500 mt-2">
+        <p className="text-xs text-danger mt-2">
           Couldn't find that place. Try a more specific name.
         </p>
       )}

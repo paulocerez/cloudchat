@@ -105,14 +105,14 @@ export function AnnotatedImage({
 
       <Sheet open={editing} onClose={() => setEditing(false)} className="max-w-md">
         <SheetHeader title="Annotate image" onClose={() => setEditing(false)} />
-        <img src={src} alt="" className="w-full max-h-56 object-contain rounded-md bg-gray-100 mb-3" />
+        <img src={src} alt="" className="w-full max-h-56 object-contain rounded-md bg-sunken mb-3" />
         <textarea
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           rows={3}
           autoFocus
           placeholder="Add a note for this photo…"
-          className="w-full text-sm text-gray-700 leading-relaxed rounded-md border border-gray-300 bg-white/70 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent resize-y"
+          className="w-full text-sm text-strong leading-relaxed rounded-md border border-line-strong bg-field px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-focus focus:border-transparent resize-y"
         />
         <div className="flex items-center justify-end gap-2 mt-4">
           <Button variant="ghost" onClick={() => setEditing(false)}>

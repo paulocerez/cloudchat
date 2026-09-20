@@ -70,7 +70,7 @@ export function PullToRefresh({
         <RefreshCw
           size={17}
           strokeWidth={2.25}
-          className={`text-[#71717D] ${busy ? 'ptr-spin' : ''}`}
+          className={`text-muted ${busy ? 'ptr-spin' : ''}`}
           style={{
             opacity: Math.min(1, pull / TRIGGER),
             transform: busy ? undefined : `rotate(${(pull / TRIGGER) * 180}deg)`,

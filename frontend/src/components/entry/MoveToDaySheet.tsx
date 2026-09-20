@@ -34,17 +34,17 @@ export function MoveToDaySheet({
   return (
     <Sheet open={open} onClose={onClose} className="max-w-sm">
       <SheetHeader title={title} onClose={onClose} />
-      <label className="block text-xs font-medium text-gray-500 mb-1.5">{label}</label>
+      <label className="block text-xs font-medium text-muted mb-1.5">{label}</label>
       <input
         type="date"
         value={moveTo}
         onChange={(e) => setMoveTo(e.target.value)}
-        className="w-full text-sm text-gray-700 rounded-md border border-gray-300 bg-white/70 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+        className="w-full text-sm text-strong rounded-md border border-line-strong bg-field px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-focus focus:border-transparent"
       />
-      <p className="text-xs text-gray-400 mt-2 leading-relaxed">
+      <p className="text-xs text-faint mt-2 leading-relaxed">
         It keeps its time of day. If that day has no entry yet, one will be created.
       </p>
-      {m.isError && <p className="text-xs text-rose-500 mt-2">Couldn't move it. Try again.</p>}
+      {m.isError && <p className="text-xs text-danger mt-2">Couldn't move it. Try again.</p>}
       <div className="flex items-center justify-end gap-2 mt-4">
         <Button variant="ghost" onClick={onClose}>
           Cancel
@@ -81,7 +81,7 @@ export function MoveToDayButton({
   const btnClass =
     variant === 'overlay'
       ? 'p-1.5 rounded-md bg-black/45 text-white hover:bg-black/70 transition-colors'
-      : 'shrink-0 p-1 rounded-md text-gray-300 hover:text-gray-700 hover:bg-gray-100 transition-colors';
+      : 'shrink-0 p-1 rounded-md text-faintest hover:text-strong hover:bg-hover transition-colors';
 
   return (
     <>

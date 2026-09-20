@@ -1,13 +1,158 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Class-driven rather than prefers-color-scheme, so the toggle can pin Light or
+   Dark against the OS. `.dark` goes on <html>, which portals inherit too. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* `inline` matters: without it Tailwind emits `--color-ink: var(--ink)` into
+   :root and the substitution freezes at the light value. */
+@theme inline {
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-hover: var(--surface-hover);
+  --color-raised: var(--raised);
+  --color-raised-hover: var(--raised-hover);
+  --color-sunken: var(--sunken);
+  --color-sunken-hover: var(--sunken-hover);
+  --color-field: var(--field);
+  --color-hover: var(--hover);
+  --color-active: var(--active);
+
+  --color-ink: var(--ink);
+  --color-ink-hover: var(--ink-hover);
+  --color-on-ink: var(--on-ink);
+  --color-strong: var(--strong);
+  --color-secondary: var(--secondary);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-faintest: var(--faintest);
+  --color-placeholder: var(--placeholder);
+  --color-disabled: var(--disabled);
+
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-focus: var(--focus);
+
+  --color-warm: var(--warm);
+  --color-warm-line: var(--warm-line);
+  --color-accent: var(--accent);
+  --color-danger: var(--danger);
+  --color-danger-wash: var(--danger-wash);
+  --color-spotify: var(--spotify);
+}
+
+:root {
+  color-scheme: light;
+
+  --page: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #ffffff;
+  /* A solid surface can't hover by taking on a translucent film — that would
+     darken it in light and darken it again in dark. It steps to its own value. */
+  --surface-hover: #f5f5f7;
+  --raised: #ffffff;
+  --raised-hover: #f0f0f3;
+  --sunken: #f1f1f4;
+  --sunken-hover: #e6e6ec;
+  --field: #ffffff;
+  --hover: rgb(23 23 28 / 0.05);
+  --active: rgb(23 23 28 / 0.07);
+
+  --ink: #17171c;
+  --ink-hover: #2c2c34;
+  --on-ink: #ffffff;
+  --strong: #3f3f49;
+  --secondary: #55555f;
+  --muted: #71717d;
+  --faint: #a6a6b0;
+  --faintest: #b8b8c2;
+  --placeholder: #94949e;
+  --disabled: #e6e6ec;
+
+  --line: rgb(23 23 28 / 0.09);
+  --line-strong: #d6d6de;
+  --focus: #17171c;
+  --ink-shadow: rgb(23 23 28 / 0.45);
+
+  --warm: #fffaf0;
+  --warm-line: rgb(214 158 46 / 0.35);
+  --accent: #f5a524;
+  --danger: #e11d48;
+  --danger-wash: rgb(244 63 94 / 0.1);
+  --spotify: #1db954;
+
+  --surface-shadow:
+    0 0 0 1px rgb(23 23 28 / 0.06),
+    0 1px 2px 0 rgb(23 23 28 / 0.04),
+    0 8px 24px -14px rgb(23 23 28 / 0.14);
+  --surface-solid-shadow: 0 0 0 1px rgb(23 23 28 / 0.07);
+  --surface-warm-shadow:
+    0 0 0 1px var(--warm-line),
+    0 1px 2px 0 rgb(23 23 28 / 0.04),
+    0 8px 24px -14px rgb(180 120 20 / 0.2);
+  --shimmer-gradient: linear-gradient(90deg, #111 0%, #444 40%, #111 60%, #111 100%);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --page: #0d0d11;
+  --surface: #17171c;
+  --surface-2: #201f27;
+  --surface-hover: #21212a;
+  --raised: #2a2a33;
+  --raised-hover: #34343f;
+  --sunken: #1c1c22;
+  --sunken-hover: #26262e;
+  --field: #1c1c23;
+  --hover: rgb(255 255 255 / 0.07);
+  --active: rgb(255 255 255 / 0.1);
+
+  --ink: #f2f2f6;
+  --ink-hover: #e2e2ea;
+  --on-ink: #17171c;
+  --strong: #d4d4dd;
+  --secondary: #b9b9c4;
+  --muted: #9a9aa6;
+  --faint: #85858f;
+  --faintest: #61616b;
+  --placeholder: #6e6e79;
+  --disabled: #33333d;
+
+  --line: rgb(255 255 255 / 0.12);
+  --line-strong: #3a3a45;
+  --focus: #e2e2ea;
+  --ink-shadow: rgb(0 0 0 / 0.6);
+
+  --warm: #241c10;
+  --warm-line: rgb(245 165 36 / 0.3);
+  --danger: #fb7185;
+  --danger-wash: rgb(251 113 133 / 0.14);
+
+  /* A drop shadow does nothing over a near-black page. Definition comes from
+     the surface sitting one luminance step above the page, plus a brighter
+     hairline; the drops stay only for card-over-card and sheet-over-page. */
+  --surface-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.09),
+    0 1px 2px 0 rgb(0 0 0 / 0.5),
+    0 10px 28px -16px rgb(0 0 0 / 0.75);
+  --surface-solid-shadow: 0 0 0 1px rgb(255 255 255 / 0.11);
+  --surface-warm-shadow:
+    0 0 0 1px var(--warm-line),
+    0 1px 2px 0 rgb(0 0 0 / 0.5),
+    0 10px 28px -16px rgb(0 0 0 / 0.7);
+  --shimmer-gradient: linear-gradient(90deg, #e2e2ea 0%, #ffffff 40%, #e2e2ea 60%, #e2e2ea 100%);
+}
+
 * {
   -webkit-font-smoothing: antialiased;
 }
 
 body {
-  background-color: #fff;
-  /* iOS rubber-band overscroll stays white */
+  background-color: var(--page);
+  /* iOS rubber-band overscroll matches the page */
   overscroll-behavior-y: none;
 }
 
@@ -102,7 +247,7 @@ label,
   transition: background-position 0s;
 }
 .btn-shimmer:hover {
-  background-image: linear-gradient(90deg, #111 0%, #444 40%, #111 60%, #111 100%);
+  background-image: var(--shimmer-gradient);
   animation: shimmer 1.2s linear infinite;
 }
 
@@ -123,7 +268,7 @@ label,
   100% { opacity: 0; transform: translateY(-24px) rotate(16deg) scale(1.05); }
 }
 .music-note {
-  color: #1db954;
+  color: var(--spotify);
   transform-origin: bottom center;
   animation: note-float 2.6s ease-in-out infinite;
 }
@@ -167,27 +312,23 @@ label,
 /* ── Card ───────────────────────────────────────────────────────
    On a white page a card can't be white-on-wash, so definition comes
    from a hairline plus a soft drop — enough to lift it off the page
-   without turning the list into a stack of boxes. */
+   without turning the list into a stack of boxes. In dark the drop
+   stops carrying it and the luminance step does the work instead;
+   both recipes live in the --surface-*-shadow tokens. */
 .surface {
-  background-color: #fff;
-  box-shadow:
-    0 0 0 1px rgb(23 23 28 / 0.06),
-    0 1px 2px 0 rgb(23 23 28 / 0.04),
-    0 8px 24px -14px rgb(23 23 28 / 0.14);
+  background-color: var(--surface);
+  box-shadow: var(--surface-shadow);
 }
 /* The quieter variant: for blocks sitting inside another card, and for
    anything dense enough that a shadow would fight the text. */
 .surface-solid {
-  background-color: #fff;
-  box-shadow: 0 0 0 1px rgb(23 23 28 / 0.07);
+  background-color: var(--surface);
+  box-shadow: var(--surface-solid-shadow);
 }
 /* A tinted card, for the day you marked. */
 .surface-warm {
-  background-color: #fffaf0;
-  box-shadow:
-    0 0 0 1px rgb(214 158 46 / 0.35),
-    0 1px 2px 0 rgb(23 23 28 / 0.04),
-    0 8px 24px -14px rgb(180 120 20 / 0.2);
+  background-color: var(--warm);
+  box-shadow: var(--surface-warm-shadow);
 }
 
 /* Press feedback for anything card-shaped. */
@@ -264,13 +405,18 @@ label,
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  .surface,
-  .glass-surface {
-    background: #fff !important;
+  .surface {
+    background: var(--surface) !important;
+    backdrop-filter: none !important;
+  }
+  /* The sticky blurred bars — nav, tabs, entry header, composer. At 85% they
+     are still see-through, so they need the opaque page, not just no blur. */
+  .chrome-blur {
+    background: var(--page) !important;
     backdrop-filter: none !important;
   }
   .glass-scrim {
-    background: rgba(0, 0, 0, 0.6) !important;
+    background: rgb(0 0 0 / 0.72) !important;
     backdrop-filter: none !important;
   }
 }

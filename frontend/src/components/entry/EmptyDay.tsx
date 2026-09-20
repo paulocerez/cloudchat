@@ -5,9 +5,9 @@ import { MessageSquare } from 'lucide-react';
 export function EmptyDay() {
   return (
     <div className="flex flex-col items-center gap-2 py-12 text-center animate-fade-up">
-      <MessageSquare size={28} strokeWidth={1.5} className="text-gray-300" />
-      <p className="text-sm text-gray-400">Nothing captured for this day</p>
-      <p className="text-xs text-gray-300">Add a note below, or send yourself a WhatsApp message</p>
+      <MessageSquare size={28} strokeWidth={1.5} className="text-faintest" />
+      <p className="text-sm text-faint">Nothing captured for this day</p>
+      <p className="text-xs text-faintest">Add a note below, or send yourself a WhatsApp message</p>
     </div>
   );
 }

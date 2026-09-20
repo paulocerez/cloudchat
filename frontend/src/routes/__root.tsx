@@ -23,7 +23,7 @@ function RootLayout() {
   const showTabs = !isLogin && !isDetail;
 
   return (
-    <div className="min-h-screen text-[#17171C]">
+    <div className="min-h-screen text-ink">
       <Nav />
       <main
         className={`max-w-2xl mx-auto px-4 sm:px-6 md:px-8 py-8 ${

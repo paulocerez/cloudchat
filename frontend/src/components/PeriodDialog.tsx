@@ -64,7 +64,7 @@ export function PeriodDialog({ open, onClose, period, defaultRange }: PeriodDial
       <div className="space-y-5">
         {/* Name */}
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1.5">Name</label>
+          <label className="block text-xs font-medium text-muted mb-1.5">Name</label>
           <div className="flex items-center gap-2">
             {/* Live preview of the icon + colour this period will carry. */}
             <span
@@ -77,7 +77,7 @@ export function PeriodDialog({ open, onClose, period, defaultRange }: PeriodDial
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Summer in Italy"
-              className="flex-1 px-3 py-2 rounded-md border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300"
+              className="flex-1 px-3 py-2 rounded-md border border-line text-sm text-ink placeholder:text-placeholder focus:outline-none focus:ring-2 focus:ring-focus/20 focus:border-line-strong"
             />
           </div>
         </div>
@@ -85,39 +85,39 @@ export function PeriodDialog({ open, onClose, period, defaultRange }: PeriodDial
         {/* Dates */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1.5">Start</label>
+            <label className="block text-xs font-medium text-muted mb-1.5">Start</label>
             <input
               type="date"
               value={startDate}
               max={endDate || undefined}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300"
+              className="w-full px-3 py-2 rounded-md border border-line text-sm text-ink focus:outline-none focus:ring-2 focus:ring-focus/20 focus:border-line-strong"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1.5">End</label>
+            <label className="block text-xs font-medium text-muted mb-1.5">End</label>
             <input
               type="date"
               value={endDate}
               min={startDate || undefined}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-300"
+              className="w-full px-3 py-2 rounded-md border border-line text-sm text-ink focus:outline-none focus:ring-2 focus:ring-focus/20 focus:border-line-strong"
             />
           </div>
         </div>
         {rangeInvalid && (
-          <p className="text-xs text-rose-500 -mt-2">End date must be after the start date.</p>
+          <p className="text-xs text-danger -mt-2">End date must be after the start date.</p>
         )}
 
         {/* Icon */}
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1.5">Icon</label>
+          <label className="block text-xs font-medium text-muted mb-1.5">Icon</label>
           <IconPicker value={icon} onChange={setIcon} color={color} />
         </div>
 
         {/* Color */}
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1.5">Color</label>
+          <label className="block text-xs font-medium text-muted mb-1.5">Color</label>
           <ColorPicker value={color} onChange={setColor} />
         </div>
 
@@ -130,7 +130,7 @@ export function PeriodDialog({ open, onClose, period, defaultRange }: PeriodDial
             type="button"
             onClick={() => remove.mutate()}
             disabled={remove.isPending}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium text-rose-600 hover:bg-rose-50 active:scale-[0.97] transition-all disabled:opacity-50"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium text-danger hover:bg-danger-wash active:scale-[0.97] transition-all disabled:opacity-50"
           >
             <Trash2 size={15} strokeWidth={2} />
             Delete
@@ -142,7 +142,7 @@ export function PeriodDialog({ open, onClose, period, defaultRange }: PeriodDial
           <button
             type="button"
             onClick={onClose}
-            className="px-3 py-2 rounded-md text-sm font-medium text-gray-500 hover:bg-gray-500/10 active:scale-[0.97] transition-all"
+            className="px-3 py-2 rounded-md text-sm font-medium text-muted hover:bg-hover active:scale-[0.97] transition-all"
           >
             Cancel
           </button>
@@ -150,7 +150,7 @@ export function PeriodDialog({ open, onClose, period, defaultRange }: PeriodDial
             type="button"
             onClick={() => save.mutate()}
             disabled={!canSave || save.isPending}
-            className="px-4 py-2 rounded-md text-sm font-medium bg-gray-900 text-white hover:bg-gray-800 active:scale-[0.97] transition-all disabled:opacity-40"
+            className="px-4 py-2 rounded-md text-sm font-medium bg-ink text-on-ink hover:bg-ink-hover active:scale-[0.97] transition-all disabled:opacity-40"
           >
             {save.isPending ? 'Saving…' : editing ? 'Save' : 'Add period'}
           </button>
@@ -158,7 +158,7 @@ export function PeriodDialog({ open, onClose, period, defaultRange }: PeriodDial
       </div>
 
       {(save.isError || remove.isError) && (
-        <p className="text-xs text-rose-500 mt-3">Something went wrong. Please try again.</p>
+        <p className="text-xs text-danger mt-3">Something went wrong. Please try again.</p>
       )}
     </Modal>
   );

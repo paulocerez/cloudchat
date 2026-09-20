@@ -2,13 +2,15 @@ import { Link, useRouterState } from '@tanstack/react-router';
 import { Logo } from './Logo';
 import { isAuthenticated } from '~/lib/auth';
 import { isTabActive, TABS } from './navTabs';
+import { ThemeToggle } from './ThemeToggle';
 
 /**
- * Desktop top bar: mark and tabs grouped at the left edge. There's no overflow
- * button — settings and logout are gone, and an empty "…" is worse than none.
+ * Desktop top bar: mark and tabs grouped at the left edge, theme at the right.
+ * Still no overflow button — the theme toggle is its own control, not a "…"
+ * with one thing hidden behind it.
  *
  * There is no top bar below `lg`. The bottom tab bar carries navigation there,
- * and each page's own heading names it.
+ * each page's own heading names it, and the Timeline header carries the theme.
  */
 export default function Nav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -16,7 +18,7 @@ export default function Nav() {
   if (!isAuthenticated() || pathname === '/login') return null;
 
   return (
-    <header className="hidden lg:block sticky top-0 z-30 h-14 bg-white/85 backdrop-blur-xl border-b border-gray-900/[0.07]">
+    <header className="chrome-blur hidden lg:block sticky top-0 z-30 h-14 bg-page/85 backdrop-blur-xl border-b border-line">
       <div className="h-full px-5 flex items-center gap-5">
         <Link to="/" className="shrink-0 transition-opacity hover:opacity-70" aria-label="Timeline">
           <Logo size="md" variant="plain" />
@@ -32,8 +34,8 @@ export default function Nav() {
                 aria-current={active ? 'page' : undefined}
                 className={`flex items-center gap-1.5 h-8 px-3 rounded-md text-[13.5px] font-medium transition-colors duration-150 ${
                   active
-                    ? 'bg-gray-900/[0.06] text-[#17171C]'
-                    : 'text-[#71717D] hover:text-[#17171C] hover:bg-gray-900/[0.04]'
+                    ? 'bg-active text-ink'
+                    : 'text-muted hover:text-ink hover:bg-hover'
                 }`}
               >
                 <Icon size={15} strokeWidth={active ? 2 : 1.75} />
@@ -42,6 +44,10 @@ export default function Nav() {
             );
           })}
         </nav>
+
+        <div className="ml-auto flex items-center">
+          <ThemeToggle size="sm" />
+        </div>
       </div>
     </header>
   );

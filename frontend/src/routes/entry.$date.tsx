@@ -47,8 +47,8 @@ function EntryPage() {
 
   if (isLoading)
     return (
-      <div className="flex items-center justify-center py-16 gap-2 text-[#71717D] animate-fade-up">
-        <span className="w-4 h-4 rounded-md border-2 border-[#E2E2E8] border-t-[#71717D] animate-spin-slow" />
+      <div className="flex items-center justify-center py-16 gap-2 text-muted animate-fade-up">
+        <span className="w-4 h-4 rounded-md border-2 border-line-strong border-t-muted animate-spin-slow" />
         <span className="text-sm">Loading…</span>
       </div>
     );
@@ -56,8 +56,8 @@ function EntryPage() {
   if (isError || !entry)
     return (
       <div className="text-center py-8 animate-fade-up">
-        <p className="text-[#55555F] text-sm">Entry not found</p>
-        <Link to="/" className="text-[#241F2E] underline text-sm mt-2 block">
+        <p className="text-secondary text-sm">Entry not found</p>
+        <Link to="/" className="text-ink underline text-sm mt-2 block">
           ← Back to timeline
         </Link>
       </div>
@@ -80,7 +80,7 @@ function EntryPage() {
           <div className="mt-4">
             <UploadStatus progress={media.progress} error={media.error} />
             {entry.summary ? (
-              <p className="text-[16px] text-[#55555F] leading-[1.55]">{entry.summary}</p>
+              <p className="text-[16px] text-secondary leading-[1.55]">{entry.summary}</p>
             ) : (
               <GenerateSummaryRow date={entry.date} />
             )}
@@ -142,7 +142,7 @@ function GenerateSummaryRow({ date }: { date: string }) {
       type="button"
       onClick={() => mutate()}
       disabled={isPending}
-      className="inline-flex items-center gap-1.5 h-9 -ml-1 px-2 rounded-md text-sm text-[#71717D] hover:text-[#241F2E] hover:bg-gray-900/[0.04] active:scale-[0.97] transition-all disabled:opacity-50"
+      className="inline-flex items-center gap-1.5 h-9 -ml-1 px-2 rounded-md text-sm text-muted hover:text-ink hover:bg-hover active:scale-[0.97] transition-all disabled:opacity-50"
     >
       <WandSparkles size={15} strokeWidth={2} />
       {isPending ? 'Generating summary…' : isError ? 'Retry summary' : 'Generate summary'}
