@@ -11,7 +11,6 @@ import { EntryHeader } from '~/components/entry/EntryHeader';
 import { HabitSheet } from '~/components/entry/HabitSheet';
 import { LocationSheet } from '~/components/entry/LocationSheet';
 import { OrganizedView } from '~/components/entry/OrganizedView';
-import { PocketSection } from '~/components/entry/PocketSection';
 import { SwipeDays } from '~/components/entry/SwipeDays';
 import { TimelineView } from '~/components/entry/TimelineView';
 import { TodosSheet } from '~/components/entry/TodosSheet';
@@ -92,8 +91,6 @@ function EntryPage() {
           </div>
 
           {view === 'timeline' ? <TimelineView entry={entry} /> : <OrganizedView entry={entry} />}
-
-          <PocketSection entry={entry} />
         </div>
       </SwipeDays>
 
