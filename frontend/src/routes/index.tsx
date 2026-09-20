@@ -1,10 +1,11 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { MessageCircle, Mic, Image as ImageIcon, Music, MapPin, Flame, CalendarRange, Plus, Film, Play } from 'lucide-react';
-import { subDays, format as formatDate } from 'date-fns';
+import { MessageCircle, Mic, Image as ImageIcon, Music, MapPin, CalendarRange, Plus, Film, Play } from 'lucide-react';
+import { format as formatDate } from 'date-fns';
 import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
+import { fillDays, isEmptyDay } from '~/lib/days';
 import { extractSpotifyLinks, stripSpotifyLinks } from '~/lib/spotify';
 import { staticMapUrl } from '~/lib/mapbox';
 import { tone, coversDate } from '~/lib/periods';
@@ -40,6 +41,10 @@ function Timeline() {
   const [addOpen, setAddOpen] = useState(false);
   const [editing, setEditing] = useState<TimePeriod | null>(null);
 
+  // One row per calendar day, not per stored day — the gaps are part of the
+  // story, and a quiet day is the one you most want to be able to tap into.
+  const days = useMemo(() => fillDays(entries ?? []), [entries]);
+
   // The nav no longer names the page on a phone, so the heading stays put even
   // while there's nothing under it.
   if (isLoading || isError || !entries || entries.length === 0)
@@ -61,7 +66,6 @@ function Timeline() {
         subtitle={<TimelineMeta entries={entries} periods={activePeriods} />}
         actions={
           <>
-            <StreakBadge entries={entries} />
             <Link
               to="/entry/$date"
               params={{ date: formatDate(new Date(), 'yyyy-MM-dd') }}
@@ -89,7 +93,7 @@ function Timeline() {
       />
 
       <PullToRefresh onRefresh={() => qc.invalidateQueries({ queryKey: ['entries'] })}>
-        <PeriodTimeline entries={entries} periods={activePeriods} onEditPeriod={setEditing} />
+        <PeriodTimeline entries={days} periods={activePeriods} onEditPeriod={setEditing} />
       </PullToRefresh>
 
       {addOpen && <PeriodDialog open onClose={() => setAddOpen(false)} />}
@@ -246,7 +250,7 @@ function PeriodTimeline({
                   {month}
                 </p>
               )}
-              <EntryCard entry={entry} />
+              {isEmptyDay(entry) ? <QuietDay date={entry.date} /> : <EntryCard entry={entry} />}
             </div>
           );
         })}
@@ -269,30 +273,24 @@ function TimelineMeta({ entries, periods }: { entries: JournalEntry[]; periods: 
   return <>{parts.join(' · ')}</>;
 }
 
-function StreakBadge({ entries }: { entries: JournalEntry[] }) {
-  const hasContent = (e: JournalEntry) =>
-    e.messages.length > 0 || e.voiceMemos.length > 0 || e.images.length > 0;
-  const days = new Set(entries.filter(hasContent).map((e) => e.date));
-
-  let streak = 0;
-  let cursor = new Date();
-  // If today has no entry yet, don't break the streak — start counting from yesterday.
-  if (!days.has(formatDate(cursor, 'yyyy-MM-dd'))) cursor = subDays(cursor, 1);
-  while (days.has(formatDate(cursor, 'yyyy-MM-dd'))) {
-    streak += 1;
-    cursor = subDays(cursor, 1);
-  }
-
-  if (streak === 0) return null;
-
+// A day where nothing happened still gets a row — small, quiet, and tappable,
+// so the archive reads as a continuous calendar and every day has a way in.
+function QuietDay({ date }: { date: string }) {
   return (
-    <span
-      title={`${streak} day streak`}
-      className="shrink-0 inline-flex items-center gap-1.5 h-9 px-2.5 rounded-md bg-orange-50 dark:bg-orange-400/12 text-orange-600 dark:text-orange-300 text-xs font-medium tabular-nums"
-    >
-      <Flame size={15} strokeWidth={2.5} className="fill-orange-400 text-orange-500" />
-      {streak}
-    </span>
+    <div data-entry-date={date} className="mb-2.5">
+      <Link
+        to="/entry/$date"
+        params={{ date }}
+        className="squish flex items-center justify-between gap-3 py-2 px-4 rounded-md group cursor-pointer surface hover:bg-surface-hover"
+      >
+        <p className="text-xs text-faintest font-medium tracking-wide uppercase">
+          {formatEntryDate(date)}
+        </p>
+        <span className="hidden sm:inline-block transition-transform duration-200 group-hover:translate-x-1 text-transparent group-hover:text-faint text-xs">
+          +
+        </span>
+      </Link>
+    </div>
   );
 }
 

@@ -19,9 +19,18 @@ type HabitInput = {
 
 const BASE = `${import.meta.env.VITE_API_URL ?? ''}/api`;
 
+// Carries the status so callers can tell "this day has no document yet" (404)
+// apart from a backend that's actually unhappy.
+export class HttpError extends Error {
+  constructor(readonly status: number, message: string) {
+    super(message);
+    this.name = 'HttpError';
+  }
+}
+
 async function get<T>(path: string): Promise<T> {
   const res = await fetch(`${BASE}${path}`);
-  if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+  if (!res.ok) throw new HttpError(res.status, `${res.status} ${await res.text()}`);
   return res.json();
 }
 
@@ -31,13 +40,13 @@ async function put<T>(path: string, body: unknown): Promise<T> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
-  if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+  if (!res.ok) throw new HttpError(res.status, `${res.status} ${await res.text()}`);
   return res.json();
 }
 
 async function del(path: string): Promise<void> {
   const res = await fetch(`${BASE}${path}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+  if (!res.ok) throw new HttpError(res.status, `${res.status} ${await res.text()}`);
 }
 
 async function post<T>(path: string, body: unknown): Promise<T> {
@@ -46,7 +55,7 @@ async function post<T>(path: string, body: unknown): Promise<T> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
-  if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+  if (!res.ok) throw new HttpError(res.status, `${res.status} ${await res.text()}`);
   return res.json();
 }
 
