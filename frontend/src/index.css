@@ -60,9 +60,7 @@
   --color-toast: var(--toast);
   --color-toast-ink: var(--toast-ink);
 
-  /* Inter first, system-ui behind it so the page still renders in the swap
-     window and on the one platform where SF is the better answer anyway. */
-  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sans: var(--sans);
 
   /* The radius scale. There was exactly one radius before this (rounded-md,
      6px); these are the tiers, smallest thing to largest:
@@ -86,6 +84,10 @@
      var(): an `inline` theme token is substituted into Tailwind utilities and
      never reaches :root, so var() would resolve to nothing and take the whole
      `animation` shorthand down with it — leaving .stagger rows at opacity 0. */
+  /* Inter first, system-ui behind it so the page still renders in the swap
+     window and on the one platform where SF is the better answer anyway. */
+  --sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
   --ease-out-quint: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
   --dur-fast: 160ms;
@@ -202,7 +204,7 @@
 }
 
 body {
-  font-family: var(--font-sans);
+  font-family: var(--sans);
   /* cv11 = single-storey a/g, ss01 = alternate digits. Inter's defaults are
      rounder than the texture we're after. */
   font-feature-settings: 'cv11', 'ss01';

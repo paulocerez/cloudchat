@@ -262,14 +262,9 @@ function PeriodTimeline({
                 <Plus size={14} strokeWidth={2.5} />
               </Link>
             </div>
-            {/* One hairline-separated list per month rather than a stack of
-                boxes — the month grouping already says where a day belongs, so
-                a card around each row is saying it twice. */}
-            <div className="rounded-xl surface-solid divide-y divide-line overflow-hidden">
-              {rows.map((entry) => (
-                <EntryCard key={entry.id} entry={entry} />
-              ))}
-            </div>
+            {rows.map((entry) => (
+              <EntryCard key={entry.id} entry={entry} />
+            ))}
           </section>
         ))}
       </div>
@@ -335,14 +330,12 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
       : null;
 
   return (
-    <div data-entry-date={entry.date}>
+    <div data-entry-date={entry.date} className="mb-2.5">
     <Link
       to="/entry/$date"
       params={{ date: entry.date }}
-      className={`squish flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 py-3.5 px-4 group cursor-pointer ${
-        // The row carries the highlight as a tint now — the warm card's
-        // hairline and drop would fight the divider it sits between.
-        entry.highlight ? 'bg-warm' : 'hover:bg-surface-hover'
+      className={`squish flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 py-3.5 px-4 rounded-xl group cursor-pointer ${
+        entry.highlight ? 'surface-warm' : 'surface hover:bg-surface-hover'
       }`}
     >
       {/* Left column: date, summary, songs, images */}
