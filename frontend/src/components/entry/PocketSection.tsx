@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { Check, ChevronDown } from 'lucide-react';
+import { ChevronDown, Circle, CircleCheck } from 'lucide-react';
 import type { JournalEntry, VoiceMemo } from '@cloudchat/shared';
 import { api } from '~/lib/api';
 import { PocketSummary } from '~/components/PocketSummary';
@@ -21,7 +21,7 @@ export function PocketSection({ entry }: { entry: JournalEntry }) {
     >
       {/* Matches the Section headers used elsewhere on the page. */}
       <div className="flex items-baseline gap-2 mb-3">
-        <h2 className="text-xs font-medium tracking-wide uppercase text-faint">Pocket</h2>
+        <h2 className="text-xs font-medium text-muted">Pocket</h2>
         <span className="text-xs text-faintest">
           {recordings.length} recording{recordings.length === 1 ? '' : 's'}
           {tasks > 0 && ` · ${tasks} action item${tasks === 1 ? '' : 's'}`}
@@ -29,7 +29,7 @@ export function PocketSection({ entry }: { entry: JournalEntry }) {
       </div>
       {/* One hairline-separated list rather than 7 boxes — at a recording an
           hour, stacked cards turn the foot of the page into a wall. */}
-      <div className="rounded-md surface divide-y divide-line overflow-hidden">
+      <div className="rounded-xl surface-solid divide-y divide-line overflow-hidden">
         {recordings.map((memo) => (
           <PocketCard key={memo.id} memo={memo} date={entry.date} />
         ))}
@@ -80,13 +80,11 @@ function PocketCard({ memo, date }: { memo: VoiceMemo; date: string }) {
         <ul className="px-4 pb-3 pl-[4.25rem] space-y-1.5">
           {items.map((item) => (
             <li key={item.id} className="flex items-start gap-2 text-sm">
-              <span
-                className={`mt-[3px] shrink-0 w-3.5 h-3.5 rounded-md border flex items-center justify-center ${
-                  item.isCompleted ? 'bg-ink border-ink' : 'border-line-strong'
-                }`}
-              >
-                {item.isCompleted && <Check size={9} strokeWidth={3.5} className="text-on-ink" />}
-              </span>
+              {item.isCompleted ? (
+                <CircleCheck size={14} strokeWidth={2.25} className="mt-[3px] shrink-0 text-ink" aria-hidden />
+              ) : (
+                <Circle size={14} strokeWidth={2.25} className="mt-[3px] shrink-0 text-faint" aria-hidden />
+              )}
               <span className="min-w-0">
                 <span className={item.isCompleted ? 'text-faint line-through' : 'text-strong'}>
                   {item.title}

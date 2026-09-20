@@ -2,6 +2,7 @@ import { createRootRoute, Outlet, redirect, useRouterState } from '@tanstack/rea
 import { isAuthenticated } from '~/lib/auth';
 import Nav from '~/components/Nav';
 import { BottomTabs } from '~/components/BottomTabs';
+import { ToastProvider } from '~/components/ui/Toast';
 
 export const rootRoute = createRootRoute({
   beforeLoad: ({ location }) => {
@@ -23,6 +24,7 @@ function RootLayout() {
   const showTabs = !isLogin && !isDetail;
 
   return (
+    <ToastProvider>
     <div className="min-h-screen text-ink">
       <Nav />
       <main
@@ -31,7 +33,7 @@ function RootLayout() {
           isEntry
             ? ''
             : showTabs
-              ? 'pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-16'
+              ? 'pb-[calc(4.75rem+env(safe-area-inset-bottom))] lg:pb-16'
               : 'pb-16'
         }`}
       >
@@ -39,5 +41,6 @@ function RootLayout() {
       </main>
       {showTabs && <BottomTabs />}
     </div>
+    </ToastProvider>
   );
 }

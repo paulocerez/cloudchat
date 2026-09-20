@@ -4,6 +4,7 @@ import type { JournalEntry } from '@cloudchat/shared';
 import { api } from '~/lib/api';
 import { Sheet } from '~/components/ui/Sheet';
 import { Button } from '~/components/ui/Button';
+import { useToast } from '~/components/ui/Toast';
 
 /**
  * The overflow menu behind the header's "…". Everything that used to be a row
@@ -30,13 +31,16 @@ export function EntryActionsSheet({
   onUploadVideo: () => void;
 }) {
   const qc = useQueryClient();
+  const toast = useToast();
 
   const generate = useMutation({
     mutationFn: () => api.summaries.generateDaily(entry.date),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['entry', entry.date] });
       qc.invalidateQueries({ queryKey: ['entries'] });
+      toast('Summary generated');
     },
+    onError: () => toast("Couldn't generate the summary", 'error'),
   });
 
   const run = (fn: () => void) => () => {

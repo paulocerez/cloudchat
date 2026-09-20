@@ -1,6 +1,21 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Inter Variable, latin only and hand-rolled rather than importing the
+   package's index.css — that pulls every subset and italic (~30 woff2 files)
+   when the app only ever renders latin. The `opsz` axis is the one the h1s
+   already ask for with [font-optical-sizing:auto]. */
+@font-face {
+  font-family: 'Inter Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('@fontsource-variable/inter/files/inter-latin-opsz-normal.woff2') format('woff2-variations');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 /* Class-driven rather than prefers-color-scheme, so the toggle can pin Light or
    Dark against the OS. `.dark` goes on <html>, which portals inherit too. */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -41,10 +56,41 @@
   --color-danger: var(--danger);
   --color-danger-wash: var(--danger-wash);
   --color-spotify: var(--spotify);
+
+  --color-toast: var(--toast);
+  --color-toast-ink: var(--toast-ink);
+
+  /* Inter first, system-ui behind it so the page still renders in the swap
+     window and on the one platform where SF is the better answer anyway. */
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* The radius scale. There was exactly one radius before this (rounded-md,
+     6px); these are the tiers, smallest thing to largest:
+     sm  inline chips and inputs
+     md  the default, and where most of the old rounded-md uses stay
+     lg  buttons, pills, list rows
+     xl  cards, property trays, grouped row containers
+     2xl sheets and the floating tab capsule */
+  --radius-sm: 6px;
+  --radius-md: 9px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 22px;
 }
 
 :root {
   color-scheme: light;
+
+  /* `ease-out-quint` was pasted as a literal in nine places before this. These
+     live here rather than in @theme because the keyframes below read them with
+     var(): an `inline` theme token is substituted into Tailwind utilities and
+     never reaches :root, so var() would resolve to nothing and take the whole
+     `animation` shorthand down with it — leaving .stagger rows at opacity 0. */
+  --ease-out-quint: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --dur-fast: 160ms;
+  --dur-base: 280ms;
+  --dur-slow: 420ms;
 
   --page: #ffffff;
   --surface: #ffffff;
@@ -82,6 +128,11 @@
   --danger: #e11d48;
   --danger-wash: rgb(244 63 94 / 0.1);
   --spotify: #1db954;
+
+  /* Deliberately not --ink: the toast stays near-black in both themes, so it
+     reads as an overlay rather than as inverted page content. */
+  --toast: #1c1c22;
+  --toast-ink: #f2f2f6;
 
   --surface-shadow:
     0 0 0 1px rgb(23 23 28 / 0.06),
@@ -151,6 +202,10 @@
 }
 
 body {
+  font-family: var(--font-sans);
+  /* cv11 = single-storey a/g, ss01 = alternate digits. Inter's defaults are
+     rounder than the texture we're after. */
+  font-feature-settings: 'cv11', 'ss01';
   background-color: var(--page);
   /* iOS rubber-band overscroll matches the page */
   overscroll-behavior-y: none;
@@ -178,13 +233,13 @@ label,
   to   { opacity: 1; transform: translateY(0); }
 }
 .animate-fade-up {
-  animation: fade-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: fade-up 0.35s var(--ease-out-quint) both;
 }
 
 /* ── Staggered children ─────────────────────────────────────── */
 .stagger > * {
   opacity: 0;
-  animation: fade-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: fade-up 0.3s var(--ease-out-quint) both;
 }
 .stagger > *:nth-child(1)  { animation-delay: 0.04s; }
 .stagger > *:nth-child(2)  { animation-delay: 0.08s; }
@@ -203,7 +258,7 @@ label,
   to   { opacity: 1; transform: translateX(0); }
 }
 .animate-slide-right {
-  animation: slide-in-right 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: slide-in-right var(--dur-base) var(--ease-out-quint) both;
 }
 
 /* ── Slide in from left (system bubbles) ───────────────────── */
@@ -212,7 +267,7 @@ label,
   to   { opacity: 1; transform: translateX(0); }
 }
 .animate-slide-left {
-  animation: slide-in-left 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: slide-in-left var(--dur-base) var(--ease-out-quint) both;
 }
 
 /* ── Input shake on error ───────────────────────────────────── */
@@ -234,7 +289,7 @@ label,
   100% { opacity: 1; transform: scale(1); }
 }
 .animate-logo {
-  animation: logo-enter 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: logo-enter 0.55s var(--ease-out-quint) both;
 }
 
 /* ── Button shimmer ─────────────────────────────────────────── */
@@ -258,7 +313,7 @@ label,
   100% { transform: scale(1); opacity: 1; }
 }
 .animate-pop {
-  animation: pop 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: pop 0.3s var(--ease-out-quint) both;
 }
 
 /* ── Floating Spotify music notes ───────────────────────────── */
@@ -305,7 +360,7 @@ label,
   }
 }
 .animate-materialize {
-  animation: materialize 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: materialize var(--dur-slow) var(--ease-out-quint) both;
   transform-origin: center;
 }
 
@@ -334,8 +389,8 @@ label,
 /* Press feedback for anything card-shaped. */
 .squish {
   transition:
-    transform 0.16s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.16s ease;
+    transform var(--dur-fast) var(--ease-out-quint),
+    box-shadow var(--dur-fast) ease;
 }
 .squish:active {
   transform: scale(0.985);
@@ -355,25 +410,25 @@ label,
   to   { transform: translateY(0); }
 }
 .animate-sheet-up {
-  animation: sheet-up 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: sheet-up var(--dur-slow) var(--ease-out-quint) both;
 }
 
 /* The sheet's entrance has to match the shape the breakpoint gave it, and the
    breakpoint is CSS — so the choice lives here rather than in a JS branch that
    can render the wrong one for a frame. */
 .sheet-enter-bottom {
-  animation: sheet-up 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: sheet-up var(--dur-slow) var(--ease-out-quint) both;
 }
 .sheet-enter-center {
-  animation: materialize 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: materialize var(--dur-slow) var(--ease-out-quint) both;
   transform-origin: center;
 }
 .sheet-enter {
-  animation: sheet-up 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: sheet-up var(--dur-slow) var(--ease-out-quint) both;
 }
 @media (min-width: 640px) {
   .sheet-enter {
-    animation: materialize 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: materialize var(--dur-slow) var(--ease-out-quint) both;
     transform-origin: center;
   }
 }
@@ -413,6 +468,12 @@ label,
      are still see-through, so they need the opaque page, not just no blur. */
   .chrome-blur {
     background: var(--page) !important;
+    backdrop-filter: none !important;
+  }
+  /* The floating tab capsule and the toast are the two pieces of chrome that
+     aren't .chrome-blur — they sit over the page rather than against an edge. */
+  .tab-capsule {
+    background: var(--surface-2) !important;
     backdrop-filter: none !important;
   }
   .glass-scrim {

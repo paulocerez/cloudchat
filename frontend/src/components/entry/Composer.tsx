@@ -33,7 +33,11 @@ export function Composer({
   const canSend = content.trim().length > 0 && !isPending;
 
   return (
-    <div className="chrome-blur fixed bottom-0 inset-x-0 z-40 border-t border-line bg-page/90 backdrop-blur-xl">
+    // No border and no blurred slab: the track fades into the page so the
+    // composer reads as floating over the thread rather than docked under it.
+    // The gradient is opaque by the time it reaches the safe area, so text
+    // never scrolls into the controls.
+    <div className="fixed bottom-0 inset-x-0 z-40 pt-8 bg-gradient-to-t from-page via-page to-transparent">
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -54,7 +58,7 @@ export function Composer({
           placeholder="Add a note…"
           enterKeyHint="send"
           // 16px keeps iOS Safari from zooming the viewport on focus.
-          className="flex-1 min-w-0 h-10 text-base sm:text-sm text-ink rounded-md surface-solid px-4 placeholder:text-placeholder focus:outline-none focus:ring-2 focus:ring-focus/70 transition-shadow"
+          className="flex-1 min-w-0 h-11 text-base sm:text-sm text-ink rounded-full bg-field ring-1 ring-line px-4 placeholder:text-placeholder focus:outline-none focus:ring-2 focus:ring-focus/70 transition-shadow"
         />
 
         <Button
@@ -63,7 +67,7 @@ export function Composer({
           size="icon"
           disabled={!canSend}
           aria-label="Add note"
-          className={`rounded-md transition-all duration-200 ${
+          className={`rounded-full transition-all duration-200 ${
             canSend ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none'
           }`}
         >

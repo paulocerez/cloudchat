@@ -188,9 +188,9 @@ export function Sheet({
           style={{ y }}
           className={cn(
             'flex flex-col bg-surface-2 shadow-2xl ring-1 ring-line',
-            centered ? 'max-h-[85dvh] rounded-md' : '',
-            bottom ? 'max-h-[88dvh] rounded-t-md' : '',
-            variant === 'auto' && 'max-h-[88dvh] sm:max-h-[85dvh] rounded-t-md sm:rounded-md'
+            centered ? 'max-h-[85dvh] rounded-2xl' : '',
+            bottom ? 'max-h-[88dvh] rounded-t-2xl' : '',
+            variant === 'auto' && 'max-h-[88dvh] sm:max-h-[85dvh] rounded-t-2xl sm:rounded-2xl'
           )}
         >
           <div
@@ -201,7 +201,7 @@ export function Sheet({
               variant === 'auto' && 'sm:hidden'
             )}
           >
-            <span className="h-1 w-10 rounded-md bg-line-strong" />
+            <span className="h-1 w-10 rounded-full bg-line-strong" />
           </div>
           <div
             className={cn(

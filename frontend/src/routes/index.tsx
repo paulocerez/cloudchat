@@ -107,6 +107,18 @@ interface Band {
   lane: number;
 }
 
+// Entries arrive newest-first, so a single pass keeps them in order.
+function groupByMonth(entries: JournalEntry[]): { month: string; rows: JournalEntry[] }[] {
+  const groups: { month: string; rows: JournalEntry[] }[] = [];
+  for (const entry of entries) {
+    const month = formatDate(new Date(entry.date + 'T00:00:00'), 'MMMM yyyy');
+    const last = groups[groups.length - 1];
+    if (last && last.month === month) last.rows.push(entry);
+    else groups.push({ month, rows: [entry] });
+  }
+  return groups;
+}
+
 const LANE_WIDTH = 22; // horizontal spacing between overlapping period lines
 
 // Renders the entry list with a measured left gutter of vertical period lines.
@@ -233,23 +245,33 @@ function PeriodTimeline({
       </div>
 
       <div className="stagger" ref={listRef}>
-        {entries.map((entry, i) => {
-          const month = formatDate(new Date(entry.date + 'T00:00:00'), 'MMMM yyyy');
-          const prev =
-            i > 0 ? formatDate(new Date(entries[i - 1].date + 'T00:00:00'), 'MMMM yyyy') : null;
-          return (
-            <div key={entry.id}>
-              {/* A sticky marker per month, so scrolling a long archive never
-                  leaves you wondering which year you're in. */}
-              {month !== prev && (
-                <p className="sticky top-0 lg:top-14 z-10 -mx-1 px-1 py-1.5 mt-5 first:mt-0 mb-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted backdrop-blur-sm">
-                  {month}
-                </p>
-              )}
-              <EntryCard entry={entry} />
+        {groupByMonth(entries).map(({ month, rows }) => (
+          <section key={month} className="mt-5 first:mt-0">
+            {/* A sticky marker per month, so scrolling a long archive never
+                leaves you wondering which year you're in. Sentence case and
+                muted: it's a divider, not a heading competing with the rows. */}
+            <div className="sticky top-0 lg:top-14 z-10 -mx-1 px-1 py-1.5 mb-1.5 flex items-center gap-2 backdrop-blur-sm">
+              <h2 className="text-xs font-medium text-muted">{month}</h2>
+              <Link
+                to="/entry/$date"
+                params={{ date: rows[0].date }}
+                aria-label={`Open the most recent day in ${month}`}
+                title={`Open the most recent day in ${month}`}
+                className="ml-auto -mr-1 h-6 w-6 grid place-items-center rounded-md text-faint hover:text-ink hover:bg-hover active:scale-90 transition-all"
+              >
+                <Plus size={14} strokeWidth={2.5} />
+              </Link>
             </div>
-          );
-        })}
+            {/* One hairline-separated list per month rather than a stack of
+                boxes — the month grouping already says where a day belongs, so
+                a card around each row is saying it twice. */}
+            <div className="rounded-xl surface-solid divide-y divide-line overflow-hidden">
+              {rows.map((entry) => (
+                <EntryCard key={entry.id} entry={entry} />
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
     </div>
   );
@@ -313,21 +335,20 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
       : null;
 
   return (
-    <div
-      data-entry-date={entry.date}
-      className="mb-2.5"
-    >
+    <div data-entry-date={entry.date}>
     <Link
       to="/entry/$date"
       params={{ date: entry.date }}
-      className={`squish flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 py-3.5 px-4 rounded-md group cursor-pointer ${
-        entry.highlight ? 'surface-warm' : 'surface hover:bg-surface-hover'
+      className={`squish flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 py-3.5 px-4 group cursor-pointer ${
+        // The row carries the highlight as a tint now — the warm card's
+        // hairline and drop would fight the divider it sits between.
+        entry.highlight ? 'bg-warm' : 'hover:bg-surface-hover'
       }`}
     >
       {/* Left column: date, summary, songs, images */}
       <div className="contents sm:flex sm:flex-col sm:flex-1 sm:min-w-0 sm:gap-2">
         {/* Date */}
-        <p className="order-1 sm:order-none text-xs text-faint font-medium tracking-wide uppercase">
+        <p className="order-1 sm:order-none text-xs text-faint font-medium">
           {formatEntryDate(entry.date)}
         </p>
 
@@ -419,7 +440,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
               </span>
             )}
             {videos.length > 0 && (
-              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-slate-100 dark:bg-slate-400/15 text-slate-600 dark:text-slate-300 font-medium">
+              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-sunken text-secondary font-medium">
                 <Film size={13} strokeWidth={2.5} />
                 {videos.length}
               </span>
@@ -499,7 +520,7 @@ function EmptyState() {
         <div className="w-16 h-16 rounded-md bg-sunken flex items-center justify-center">
           <MessageCircle size={28} strokeWidth={1.5} className="text-faint" />
         </div>
-        <span className="absolute -top-1 -right-1 w-4 h-4 rounded-md bg-green-400 border-2 border-page" />
+        <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-spotify border-2 border-page" />
       </div>
       <p className="text-ink font-semibold text-base mb-1.5">Nothing here yet</p>
       <p className="text-faint text-sm max-w-[220px] text-center leading-relaxed">

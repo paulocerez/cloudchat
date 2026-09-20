@@ -1,25 +1,33 @@
-import { ListChecks, MapPin, Mic, Sprout } from 'lucide-react';
+import { ListChecks, MapPin, Mic, Plus, Sprout } from 'lucide-react';
 import type { JournalEntry } from '@cloudchat/shared';
+import { Pill, PillTray } from '~/components/ui/Pill';
 import { useHabits } from './HabitSheet';
 import { pocketMemos, sectionId } from './shared';
 
 /**
- * The day at a glance, as a row of tiles you can actually hit.
+ * The day at a glance, as one tray of properties you can actually hit.
  *
  * This replaces the collapsed "Actions" fold, which put everything about the
- * day one tap away behind a summary line nobody reads. A tile shows its number
+ * day one tap away behind a summary line nobody reads. A chip shows its number
  * without being opened and opens straight to the thing it counts.
+ *
+ * The chips wrap inside a single recessed tray rather than scrolling in a rail.
+ * The rail existed because a four-tile grid left an orphan on its own row —
+ * wrapping chips don't have that problem, and collecting them into one tray
+ * reads as "everything about this day" instead of four unrelated cards.
  */
 export function DayStats({
   entry,
   onOpenPlaces,
   onOpenHabits,
   onOpenTodos,
+  onAdd,
 }: {
   entry: JournalEntry;
   onOpenPlaces: () => void;
   onOpenHabits: () => void;
   onOpenTodos: () => void;
+  onAdd: () => void;
 }) {
   const { habits } = useHabits(entry.date);
 
@@ -34,7 +42,7 @@ export function DayStats({
       .getElementById(sectionId('pocket'))
       ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-  const tiles = [
+  const chips = [
     {
       key: 'places',
       Icon: MapPin,
@@ -73,29 +81,22 @@ export function DayStats({
     onClick: () => void;
   }[];
 
-  if (tiles.length === 0) return null;
-
   return (
-    // A scrolling rail rather than a grid: a day with four of these left an
-    // orphan tile on its own row, and the count genuinely varies by day.
-    <div className="mt-4 -mx-4 sm:-mx-6 md:-mx-8 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      <div className="flex gap-2.5 px-4 sm:px-6 md:px-8 snap-x snap-mandatory">
-        {tiles.map((tile) => (
-          <button
-            key={tile.key}
-            type="button"
-            onClick={tile.onClick}
-            title={tile.caption}
-            className="surface squish shrink-0 snap-start w-[6.5rem] rounded-md px-3 py-2.5 text-left hover:bg-surface-hover"
-          >
-            <tile.Icon size={16} strokeWidth={2} className="block text-muted" />
-            <span className="block mt-1.5 text-[17px] font-semibold leading-none text-ink tabular-nums">
-              {tile.value}
-            </span>
-            <span className="block mt-1 text-[11px] text-muted truncate">{tile.label}</span>
-          </button>
-        ))}
-      </div>
-    </div>
+    <PillTray className="mt-4">
+      {chips.map((chip) => (
+        <Pill
+          key={chip.key}
+          icon={chip.Icon}
+          label={chip.label}
+          value={chip.value}
+          title={chip.caption}
+          onClick={chip.onClick}
+          active
+        />
+      ))}
+      {/* The tray always ends in a way to put something else in it — without
+          this it reads as a readout rather than as the day's properties. */}
+      <Pill icon={Plus} title="Add to this day" onClick={onAdd} />
+    </PillTray>
   );
 }

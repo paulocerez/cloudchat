@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { Check } from 'lucide-react';
+import { Circle, CircleCheck } from 'lucide-react';
 import type { JournalEntry } from '@cloudchat/shared';
 import { Sheet, SheetHeader } from '~/components/ui/Sheet';
 import { pocketMemos } from './shared';
@@ -38,21 +38,27 @@ export function TodosSheet({
         <div className="space-y-5">
           {groups.map(({ memo, items }) => (
             <section key={memo.id}>
-              <p className="text-xs font-medium uppercase tracking-wide text-faint mb-2">
+              <p className="text-xs font-medium text-muted mb-2">
                 {format(new Date(memo.timestamp), 'HH:mm')} · {memo.title || 'Recording'}
               </p>
               <ul className="space-y-2">
                 {items.map((item) => (
                   <li key={item.id} className="flex items-start gap-2.5 text-sm">
-                    <span
-                      className={`mt-[3px] shrink-0 w-4 h-4 rounded-md border flex items-center justify-center ${
-                        item.isCompleted ? 'bg-ink border-ink' : 'border-line-strong'
-                      }`}
-                    >
-                      {item.isCompleted && (
-                        <Check size={10} strokeWidth={3.5} className="text-on-ink" />
-                      )}
-                    </span>
+                    {item.isCompleted ? (
+                      <CircleCheck
+                        size={16}
+                        strokeWidth={2.25}
+                        className="mt-[3px] shrink-0 text-ink"
+                        aria-hidden
+                      />
+                    ) : (
+                      <Circle
+                        size={16}
+                        strokeWidth={2.25}
+                        className="mt-[3px] shrink-0 text-faint"
+                        aria-hidden
+                      />
+                    )}
                     <span className="min-w-0">
                       <span
                         className={item.isCompleted ? 'text-faint line-through' : 'text-strong'}
