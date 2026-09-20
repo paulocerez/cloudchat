@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { createRoute, Link } from '@tanstack/react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { WandSparkles } from 'lucide-react';
-import { api } from '~/lib/api';
+import { api, HttpError } from '~/lib/api';
+import { emptyEntry, isEmptyDay } from '~/lib/days';
 import { Composer } from '~/components/entry/Composer';
 import { DayStats } from '~/components/entry/DayStats';
 import { EditEntrySheet } from '~/components/entry/EditEntrySheet';
@@ -11,7 +12,6 @@ import { EntryHeader } from '~/components/entry/EntryHeader';
 import { HabitSheet } from '~/components/entry/HabitSheet';
 import { LocationSheet } from '~/components/entry/LocationSheet';
 import { OrganizedView } from '~/components/entry/OrganizedView';
-import { PocketSection } from '~/components/entry/PocketSection';
 import { SwipeDays } from '~/components/entry/SwipeDays';
 import { TimelineView } from '~/components/entry/TimelineView';
 import { TodosSheet } from '~/components/entry/TodosSheet';
@@ -42,7 +42,14 @@ function EntryPage() {
 
   const { data: entry, isLoading, isError } = useQuery({
     queryKey: ['entry', date],
-    queryFn: () => api.entries.get(date),
+    // A day with no document yet isn't an error, it's an empty day. The backend
+    // creates the document on the first write, so this is all the UI needs.
+    queryFn: () =>
+      api.entries.get(date).catch((err) =>
+        err instanceof HttpError && err.status === 404
+          ? emptyEntry(date)
+          : Promise.reject(err)
+      ),
   });
 
   if (isLoading)
@@ -82,7 +89,7 @@ function EntryPage() {
             <UploadStatus progress={media.progress} error={media.error} />
             {entry.summary ? (
               <p className="text-[16px] text-secondary leading-[1.55]">{entry.summary}</p>
-            ) : (
+            ) : isEmptyDay(entry) ? null : (
               <GenerateSummaryRow date={entry.date} />
             )}
           </div>
@@ -92,8 +99,6 @@ function EntryPage() {
           </div>
 
           {view === 'timeline' ? <TimelineView entry={entry} /> : <OrganizedView entry={entry} />}
-
-          <PocketSection entry={entry} />
         </div>
       </SwipeDays>
 

@@ -1,46 +1,38 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { ChevronDown, Circle, CircleCheck } from 'lucide-react';
-import type { JournalEntry, VoiceMemo } from '@cloudchat/shared';
+import { ChevronDown, Circle, CircleCheck, Radio } from 'lucide-react';
+import type { VoiceMemo } from '@cloudchat/shared';
 import { api } from '~/lib/api';
 import { PocketSummary } from '~/components/PocketSummary';
 import { MoveToDayButton } from './MoveToDaySheet';
 import { VoicePlayer } from './VoicePlayer';
-import { formatDuration, mediaUrl, pocketMemos, sectionId } from './shared';
+import { formatDuration, mediaUrl } from './shared';
 
-export function PocketSection({ entry }: { entry: JournalEntry }) {
-  const recordings = pocketMemos(entry);
-  if (recordings.length === 0) return null;
-
-  const tasks = recordings.reduce((n, m) => n + (m.actionItems?.length ?? 0), 0);
-
+// One hairline-separated list rather than a box per recording — at a recording an
+// hour, stacked cards turn a day into a wall. Used by the Organized view, and by
+// the Timeline view for each run of consecutive recordings.
+export function PocketList({
+  memos,
+  date,
+  id,
+}: {
+  memos: VoiceMemo[];
+  date: string;
+  id?: string;
+}) {
+  if (memos.length === 0) return null;
   return (
-    <section
-      id={sectionId('pocket')}
-      className="mt-10 pt-6 border-t border-line scroll-mt-32 animate-fade-up"
-    >
-      {/* Matches the Section headers used elsewhere on the page. */}
-      <div className="flex items-baseline gap-2 mb-3">
-        <h2 className="text-xs font-medium text-muted">Pocket</h2>
-        <span className="text-xs text-faintest">
-          {recordings.length} recording{recordings.length === 1 ? '' : 's'}
-          {tasks > 0 && ` · ${tasks} action item${tasks === 1 ? '' : 's'}`}
-        </span>
-      </div>
-      {/* One hairline-separated list rather than 7 boxes — at a recording an
-          hour, stacked cards turn the foot of the page into a wall. */}
-      <div className="rounded-xl surface-solid divide-y divide-line overflow-hidden">
-        {recordings.map((memo) => (
-          <PocketCard key={memo.id} memo={memo} date={entry.date} />
-        ))}
-      </div>
-    </section>
+    <div id={id} className="rounded-xl surface-solid divide-y divide-line overflow-hidden scroll-mt-32">
+      {memos.map((memo) => (
+        <PocketCard key={memo.id} memo={memo} date={date} />
+      ))}
+    </div>
   );
 }
 
 // Collapsed a recording shows only what's scannable — time, title, and the
 // tasks it produced. The summary and hour-long transcript stay folded away.
-function PocketCard({ memo, date }: { memo: VoiceMemo; date: string }) {
+export function PocketCard({ memo, date }: { memo: VoiceMemo; date: string }) {
   const [open, setOpen] = useState(false);
   const [showTranscript, setShowTranscript] = useState(false);
   const time = format(new Date(memo.timestamp), 'HH:mm');
@@ -62,9 +54,15 @@ function PocketCard({ memo, date }: { memo: VoiceMemo; date: string }) {
           <span className="block text-[15px] font-semibold text-ink leading-snug">
             {memo.title || 'Recording'}
           </span>
-          <span className="block text-xs text-faint mt-0.5">
-            {duration}
-            {items.length > 0 && ` · ${items.length} action item${items.length === 1 ? '' : 's'}`}
+          {/* Sitting in the timeline next to WhatsApp voice notes, a recording
+              needs to say where it came from. */}
+          <span className="flex items-center gap-1.5 text-xs text-faint mt-0.5">
+            <Radio size={12} strokeWidth={2} className="shrink-0" aria-hidden />
+            <span>
+              Pocket
+              {duration && ` · ${duration}`}
+              {items.length > 0 && ` · ${items.length} action item${items.length === 1 ? '' : 's'}`}
+            </span>
           </span>
         </span>
         <ChevronDown

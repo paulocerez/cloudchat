@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { Film, Image as ImageIcon, MessageSquare, Mic, Music } from 'lucide-react';
+import { Film, Image as ImageIcon, MessageSquare, Mic, Music, Radio } from 'lucide-react';
 import type { JournalEntry } from '@cloudchat/shared';
 import {
   extractSpotifyLinks,
@@ -10,19 +10,23 @@ import {
 import { AnnotatedImage } from './AnnotatedImage';
 import { VoiceBubble } from './Bubbles';
 import { EmptyDay } from './EmptyDay';
-import { sectionId, whatsappMemos } from './shared';
+import { PocketList } from './Pocket';
+import { pocketMemos, sectionId, whatsappMemos } from './shared';
 
 export function OrganizedView({ entry }: { entry: JournalEntry }) {
   const songs: SpotifyLink[] = entry.messages.flatMap((m) => extractSpotifyLinks(m.content));
   const textMessages = entry.messages.filter((m) => stripSpotifyLinks(m.content).length > 0);
 
   const videos = entry.videos ?? [];
-  // Pocket recordings get their own block at the bottom of the page.
+  // Pocket recordings carry their own title and summary, so they group apart
+  // from the WhatsApp voice notes rather than mixing in with them.
   const memos = whatsappMemos(entry);
+  const recordings = pocketMemos(entry);
   const isEmpty =
     songs.length === 0 &&
     entry.images.length === 0 &&
     memos.length === 0 &&
+    recordings.length === 0 &&
     videos.length === 0 &&
     textMessages.length === 0;
 
@@ -81,6 +85,12 @@ export function OrganizedView({ entry }: { entry: JournalEntry }) {
               <VoiceBubble key={memo.id} memo={memo} date={entry.date} align="left" />
             ))}
           </div>
+        </Section>
+      )}
+
+      {recordings.length > 0 && (
+        <Section id={sectionId('pocket')} icon={Radio} title="Pocket" count={recordings.length}>
+          <PocketList memos={recordings} date={entry.date} />
         </Section>
       )}
 

@@ -4,6 +4,15 @@ export interface EntryLocation {
   latitude: number;
 }
 
+// A candidate place returned by /api/places/search, before the user picks one.
+export interface PlaceSuggestion {
+  name: string; // "Vue Omni"
+  context: string; // "Leith Walk, Edinburgh, Scotland"
+  label: string; // what gets saved — name plus context when there is one
+  longitude: number;
+  latitude: number;
+}
+
 export interface JournalEntry {
   id: string;
   date: string; // YYYY-MM-DD
