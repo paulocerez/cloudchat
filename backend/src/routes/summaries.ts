@@ -5,9 +5,9 @@ import {
   saveSummary,
   getEntriesInRange,
   getEntry,
-  updateEntrySummary,
 } from '../services/firestore';
-import { generateSummary, generateDaySummary } from '../services/groq';
+import { ensureDaySummary } from '../services/daySummary';
+import { generateSummary } from '../services/groq';
 import { geocodePlaces } from '../services/mapbox';
 import { AISummary } from '../types';
 import { berlinToday } from '../utils/date';
@@ -25,40 +25,40 @@ router.get('/daily', async (req: Request, res: Response) => {
   }
 
   const date = (req.query.date as string) || berlinToday();
-  const entry = await getEntry(date);
-  if (!entry) {
+  if (!(await getEntry(date))) {
     res.status(404).json({ error: 'No entry for that date' });
     return;
   }
 
-  const { title, summary, locations } = await generateDaySummary(entry);
-  if (!summary && !title) {
+  const updated = await ensureDaySummary(date);
+  if (!updated) {
     res.json({ ok: true, date, summary: null, note: 'No content to summarize' });
     return;
   }
 
-  const geocoded = locations.length > 0 ? await geocodePlaces(locations) : [];
-  await updateEntrySummary(date, { title, summary, locations: geocoded });
-  res.json({ ok: true, date, title, summary, locations: geocoded });
+  res.json({
+    ok: true,
+    date,
+    title: updated.title,
+    summary: updated.summary,
+    locations: updated.locations ?? [],
+  });
 });
 
 // Manual (re)generation triggered from the app UI for a specific date.
 router.post('/daily/:date', async (req: Request, res: Response) => {
   const { date } = req.params;
-  const entry = await getEntry(date);
-  if (!entry) {
+  if (!(await getEntry(date))) {
     res.status(404).json({ error: 'No entry for that date' });
     return;
   }
 
-  const { title, summary, locations } = await generateDaySummary(entry);
-  if (!summary && !title) {
+  const updated = await ensureDaySummary(date);
+  if (!updated) {
     res.status(422).json({ error: 'No content to summarize' });
     return;
   }
 
-  const geocoded = locations.length > 0 ? await geocodePlaces(locations) : [];
-  const updated = await updateEntrySummary(date, { title, summary, locations: geocoded });
   res.json(updated);
 });
 

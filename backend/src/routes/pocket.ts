@@ -8,6 +8,7 @@ import {
   toVoiceMemo,
   verifyPocketSignature,
 } from '../services/pocket';
+import { ensureDaySummary } from '../services/daySummary';
 import { getPocketWebhookSecret } from '../services/config';
 import { berlinDate } from '../utils/date';
 import { PocketRecording, PocketWebhookBody } from '../types';
@@ -97,6 +98,17 @@ router.post('/', async (req: Request, res: Response) => {
     }
 
     await upsertPocketMemo(date, toVoiceMemo(recording, transcript, summarizations));
+
+    // A recording is enough on its own to give the day an entry. summary.completed
+    // is the first moment it has usable content, and skipIfPresent keeps this to one
+    // Groq call per day — later recordings and hand-edited summaries are left alone.
+    if (body.event === 'summary.completed') {
+      try {
+        await ensureDaySummary(date, { skipIfPresent: true });
+      } catch (err) {
+        console.error('Pocket day-summary generation failed:', err);
+      }
+    }
   } catch (err) {
     console.error('Pocket webhook processing error:', err);
   }
