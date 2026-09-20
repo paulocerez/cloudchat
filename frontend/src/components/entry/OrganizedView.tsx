@@ -121,7 +121,7 @@ function Section({
     <section id={id} className="scroll-mt-32">
       <div className="flex items-center gap-2 mb-3">
         <Icon size={15} strokeWidth={2} className="text-faint" />
-        <h2 className="text-xs font-medium tracking-wide uppercase text-faint">{title}</h2>
+        <h2 className="text-xs font-medium text-muted">{title}</h2>
         <span className="text-xs text-faintest">{count}</span>
       </div>
       {children}

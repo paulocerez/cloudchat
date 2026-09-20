@@ -170,7 +170,7 @@ function CalendarPage() {
           const content = (
             <>
               {isToday(day) && !highlighted && !isRangeStart && (
-                <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-md bg-blue-400" />
+                <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-accent" />
               )}
               {highlighted && !isRangeStart && (
                 <Star size={11} className="absolute top-1 right-1 fill-amber-400 text-amber-400" />

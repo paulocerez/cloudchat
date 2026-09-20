@@ -83,6 +83,7 @@ function EntryPage() {
             onOpenPlaces={() => setSheet('places')}
             onOpenHabits={() => setSheet('habits')}
             onOpenTodos={() => setSheet('todos')}
+            onAdd={() => setSheet('actions')}
           />
 
           <div className="mt-4">

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { JournalEntry } from '@cloudchat/shared';
 import { api } from '~/lib/api';
+import { useToast } from '~/components/ui/Toast';
 import { Sheet, SheetHeader } from '~/components/ui/Sheet';
 import { Button } from '~/components/ui/Button';
 
@@ -15,6 +16,7 @@ export function EditEntrySheet({
   onClose: () => void;
 }) {
   const qc = useQueryClient();
+  const toast = useToast();
   const [title, setTitle] = useState(entry.title ?? '');
   const [summary, setSummary] = useState(entry.summary ?? '');
 
@@ -33,7 +35,10 @@ export function EditEntrySheet({
       qc.invalidateQueries({ queryKey: ['entry', entry.date] });
       qc.invalidateQueries({ queryKey: ['entries'] });
       onClose();
+      // The sheet closes on save, so without this the write leaves no trace.
+      toast('Day saved');
     },
+    onError: () => toast("Couldn't save the day", 'error'),
   });
 
   return (
