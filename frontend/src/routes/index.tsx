@@ -15,7 +15,7 @@ import { PeriodDialog } from '~/components/PeriodDialog';
 import { Button } from '~/components/ui/Button';
 import { PageHeader } from '~/components/ui/PageHeader';
 import { PullToRefresh } from '~/components/PullToRefresh';
-import { ThemeToggle } from '~/components/ThemeToggle';
+import { HeaderActionsMenu } from '~/components/HeaderActionsMenu';
 import { useTheme } from '~/lib/theme';
 import { mediaUrl } from '~/components/entry/shared';
 import type { JournalEntry, TextMessage, VoiceMemo, JournalImage, JournalVideo, TimePeriod } from '@cloudchat/shared';
@@ -45,15 +45,44 @@ function Timeline() {
   // story, and a quiet day is the one you most want to be able to tap into.
   const days = useMemo(() => fillDays(entries ?? []), [entries]);
 
+  // Identical in every state: a first run still needs to reach the theme, and
+  // still wants to be able to mark a period before there's an entry to show.
+  const headerActions = (
+    <>
+      {/* Above lg this stays out in the open; below it, the "…" holds it. */}
+      <Button
+        variant="bare"
+        size="icon"
+        className="hidden lg:inline-flex"
+        onClick={() => setAddOpen(true)}
+        title="Mark a period"
+        aria-label="Mark a period"
+      >
+        <CalendarRange size={18} strokeWidth={2} />
+      </Button>
+      <HeaderActionsMenu
+        items={[
+          { icon: CalendarRange, label: 'Mark a period', onSelect: () => setAddOpen(true) },
+        ]}
+      />
+    </>
+  );
+
+  const dialogs = (
+    <>
+      {addOpen && <PeriodDialog open onClose={() => setAddOpen(false)} />}
+      {editing && <PeriodDialog open period={editing} onClose={() => setEditing(null)} />}
+    </>
+  );
+
   // The nav no longer names the page on a phone, so the heading stays put even
   // while there's nothing under it.
   if (isLoading || isError || !entries || entries.length === 0)
     return (
       <div className="animate-fade-up">
-        {/* The toggle rides along even here — it's the only way to reach it on
-            a phone, and a first run has no entries to hang a header off. */}
-        <PageHeader title="Timeline" actions={<ThemeToggle className="lg:hidden" />} />
+        <PageHeader title="Timeline" actions={headerActions} />
         {isLoading ? <LoadingState /> : isError ? <ErrorState /> : <EmptyState />}
+        {dialogs}
       </div>
     );
 
@@ -64,42 +93,14 @@ function Timeline() {
       <PageHeader
         title="Timeline"
         subtitle={<TimelineMeta entries={entries} periods={activePeriods} />}
-        actions={
-          <>
-            <Link
-              to="/entry/$date"
-              params={{ date: formatDate(new Date(), 'yyyy-MM-dd') }}
-              title="Go to today"
-              className="h-9 px-3 inline-flex items-center rounded-md surface-solid text-[13px] font-semibold text-ink hover:bg-surface-hover active:scale-[0.96] transition-transform"
-            >
-              Today
-            </Link>
-            {/* An explicit button, not a second "…" — the nav already owns that
-                glyph, and two of them in one corner reads as a mistake. */}
-            <Button
-              variant="bare"
-              size="icon"
-              onClick={() => setAddOpen(true)}
-              title="Mark a period"
-              aria-label="Mark a period"
-            >
-              <CalendarRange size={18} strokeWidth={2} />
-            </Button>
-            {/* Desktop reaches the theme from the top bar; below lg there is no
-                top bar, so it lives here instead. */}
-            <ThemeToggle className="lg:hidden" />
-          </>
-        }
+        actions={headerActions}
       />
 
       <PullToRefresh onRefresh={() => qc.invalidateQueries({ queryKey: ['entries'] })}>
         <PeriodTimeline entries={days} periods={activePeriods} onEditPeriod={setEditing} />
       </PullToRefresh>
 
-      {addOpen && <PeriodDialog open onClose={() => setAddOpen(false)} />}
-      {editing && (
-        <PeriodDialog open period={editing} onClose={() => setEditing(null)} />
-      )}
+      {dialogs}
     </div>
   );
 }

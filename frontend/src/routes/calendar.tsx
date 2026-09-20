@@ -17,6 +17,7 @@ import { api } from '~/lib/api';
 import { tone, coversDate } from '~/lib/periods';
 import { iconFor } from '~/lib/icons';
 import { PeriodDialog } from '~/components/PeriodDialog';
+import { HeaderActionsMenu } from '~/components/HeaderActionsMenu';
 import { Button } from '~/components/ui/Button';
 import { PageHeader } from '~/components/ui/PageHeader';
 import type { JournalEntry, TimePeriod } from '@cloudchat/shared';
@@ -100,15 +101,23 @@ function CalendarPage() {
             >
               <ChevronRight size={19} />
             </Button>
+            {/* Above lg this stays out in the open; below it, the "…" holds it
+                so the month stepper keeps the row to itself. */}
             <Button
               variant="bare"
               size="icon"
+              className="hidden lg:inline-flex"
               onClick={() => setSelecting(true)}
               title="Mark a period"
               aria-label="Mark a period"
             >
               <CalendarRange size={18} strokeWidth={2} />
             </Button>
+            <HeaderActionsMenu
+              items={[
+                { icon: CalendarRange, label: 'Mark a period', onSelect: () => setSelecting(true) },
+              ]}
+            />
           </>
         }
       />

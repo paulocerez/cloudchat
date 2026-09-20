@@ -28,6 +28,7 @@ export function MenuSheet({
   onClose,
   title,
   items,
+  footer,
   closeOnSelect = true,
   anchorRef,
   align = 'end',
@@ -36,6 +37,8 @@ export function MenuSheet({
   onClose: () => void;
   title?: string;
   items: MenuItem[];
+  /** Content under the rows, for controls that aren't a tappable row. */
+  footer?: React.ReactNode;
   /** Off for rows that report progress in place, like "Generating…". */
   closeOnSelect?: boolean;
   /** Anchor for the desktop dropdown. Without it, desktop gets the dialog. */
@@ -69,6 +72,7 @@ export function MenuSheet({
             {item.label}
           </button>
         ))}
+        {footer && <div className="mt-1 pt-1 border-t border-line">{footer}</div>}
       </AnchoredMenu>
     );
   }
@@ -94,6 +98,7 @@ export function MenuSheet({
             {item.label}
           </Button>
         ))}
+        {footer && <div className="mt-2 pt-2 border-t border-line">{footer}</div>}
       </div>
     </Sheet>
   );
