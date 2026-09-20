@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { MessageCircle, Mic, Image as ImageIcon, Music, MapPin, CalendarRange, Plus, Film, Play } from 'lucide-react';
@@ -8,7 +8,8 @@ import { formatEntryDate } from '~/lib/utils';
 import { fillDays, isEmptyDay } from '~/lib/days';
 import { extractSpotifyLinks, stripSpotifyLinks } from '~/lib/spotify';
 import { staticMapUrl } from '~/lib/mapbox';
-import { tone, coversDate } from '~/lib/periods';
+import { tone } from '~/lib/periods';
+import { orderPeriods, buildPeriodTree, type PeriodNode } from '~/lib/periodTree';
 import { iconFor } from '~/lib/icons';
 import { SpotifyChip } from '~/components/SpotifyChip';
 import { PeriodDialog } from '~/components/PeriodDialog';
@@ -105,13 +106,6 @@ function Timeline() {
   );
 }
 
-interface Band {
-  period: TimePeriod;
-  top: number;
-  height: number;
-  lane: number;
-}
-
 // Entries arrive newest-first, so a single pass keeps them in order.
 function groupByMonth(entries: JournalEntry[]): { month: string; rows: JournalEntry[] }[] {
   const groups: { month: string; rows: JournalEntry[] }[] = [];
@@ -124,10 +118,68 @@ function groupByMonth(entries: JournalEntry[]): { month: string; rows: JournalEn
   return groups;
 }
 
-const LANE_WIDTH = 22; // horizontal spacing between overlapping period lines
+function renderNodes(nodes: PeriodNode[], onEditPeriod: (p: TimePeriod) => void) {
+  return nodes.map((node) =>
+    node.kind === 'entry' ? (
+      isEmptyDay(node.entry) ? (
+        <QuietDay key={node.entry.id} date={node.entry.date} />
+      ) : (
+        <EntryCard key={node.entry.id} entry={node.entry} />
+      )
+    ) : (
+      <PeriodBlock key={node.period.id} period={node.period} onEdit={onEditPeriod}>
+        {renderNodes(node.children, onEditPeriod)}
+      </PeriodBlock>
+    )
+  );
+}
 
-// Renders the entry list with a measured left gutter of vertical period lines.
-// Each line brackets the rows its date range covers.
+// A named span of days, drawn as a tinted panel around the rows it covers.
+// The header is the only way into the period's dialog from the timeline.
+function PeriodBlock({
+  period,
+  onEdit,
+  children,
+}: {
+  period: TimePeriod;
+  onEdit: (p: TimePeriod) => void;
+  children: ReactNode;
+}) {
+  const t = tone(period.color);
+  const Icon = iconFor(period.icon);
+  // The range is what tells you a panel is one half of a period that crosses a
+  // month boundary — cheaper than a "continues below" affordance. A single day
+  // reads as one date, not as an arrow pointing at itself.
+  const day = (d: string) => formatDate(new Date(d + 'T00:00:00'), 'MMM d');
+  const range =
+    period.startDate === period.endDate
+      ? day(period.startDate)
+      : `${day(period.startDate)} → ${day(period.endDate)}`;
+
+  return (
+    <section className={`mb-2.5 rounded-xl p-1.5 ${t.soft}`}>
+      <button
+        type="button"
+        onClick={() => onEdit(period)}
+        title={`${period.name} · ${period.startDate} → ${period.endDate}`}
+        className={`w-full flex items-center gap-1.5 px-2 py-1 rounded-lg ${t.text} ${t.softHover} transition-colors`}
+      >
+        <Icon size={13} strokeWidth={2.25} className="shrink-0" />
+        <span className="text-[11px] font-semibold uppercase tracking-wide truncate">
+          {period.name}
+        </span>
+        <span className="ml-auto shrink-0 text-[10px] font-medium opacity-70">{range}</span>
+      </button>
+      {/* The rows carry their own bottom margin; the last one would otherwise
+          leave dead space inside the panel. */}
+      <div className="mt-1 [&>:last-child]:mb-0">{children}</div>
+    </section>
+  );
+}
+
+// The entry list, with each period's days wrapped in a panel of their own.
+// Months stay the outer grouping, so a period crossing a boundary renders as
+// one panel per month — both named.
 function PeriodTimeline({
   entries,
   periods,
@@ -137,146 +189,30 @@ function PeriodTimeline({
   periods: TimePeriod[];
   onEditPeriod: (p: TimePeriod) => void;
 }) {
-  const listRef = useRef<HTMLDivElement>(null);
-  const [bands, setBands] = useState<Band[]>([]);
-
-  useLayoutEffect(() => {
-    const el = listRef.current;
-    if (!el || periods.length === 0) {
-      setBands([]);
-      return;
-    }
-
-    const measure = () => {
-      const contTop = el.getBoundingClientRect().top;
-      const rects = new Map<string, { top: number; bottom: number }>();
-      el.querySelectorAll<HTMLElement>('[data-entry-date]').forEach((row) => {
-        const r = row.getBoundingClientRect();
-        rects.set(row.dataset.entryDate!, { top: r.top - contTop, bottom: r.bottom - contTop });
-      });
-
-      // entries are rendered newest-first (desc by date)
-      const raw = periods
-        .map((period) => {
-          const covered = entries
-            .filter((e) => coversDate(period, e.date))
-            .map((e) => rects.get(e.date))
-            .filter((r): r is { top: number; bottom: number } => Boolean(r));
-
-          let top: number;
-          let bottom: number;
-          if (covered.length > 0) {
-            top = Math.min(...covered.map((c) => c.top));
-            bottom = Math.max(...covered.map((c) => c.bottom));
-          } else {
-            // No entries in range — anchor the line at the gap between the
-            // nearest older and newer neighbours so it still reads as a marker.
-            const olderTop = entries
-              .filter((e) => e.date < period.startDate)
-              .map((e) => rects.get(e.date)?.top)
-              .find((v): v is number => v !== undefined);
-            const newerBottom = [...entries]
-              .filter((e) => e.date > period.endDate)
-              .reverse()
-              .map((e) => rects.get(e.date)?.bottom)
-              .find((v): v is number => v !== undefined);
-            const anchor = newerBottom ?? olderTop ?? 0;
-            top = anchor;
-            bottom = anchor + 28;
-          }
-          return { period, top, height: Math.max(bottom - top, 20) };
-        })
-        .sort((a, b) => a.top - b.top);
-
-      // Greedy lane assignment so overlapping lines sit side by side.
-      const laneEnds: number[] = [];
-      const placed: Band[] = raw.map((b) => {
-        let lane = laneEnds.findIndex((end) => b.top >= end - 1);
-        if (lane === -1) {
-          lane = laneEnds.length;
-          laneEnds.push(0);
-        }
-        laneEnds[lane] = b.top + b.height;
-        return { ...b, lane };
-      });
-      setBands(placed);
-    };
-
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    window.addEventListener('resize', measure);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener('resize', measure);
-    };
-  }, [entries, periods]);
-
-  const laneCount = bands.reduce((max, b) => Math.max(max, b.lane + 1), 0);
-  const gutter = laneCount > 0 ? 20 + laneCount * LANE_WIDTH : 0;
+  const ordered = useMemo(() => orderPeriods(periods), [periods]);
 
   return (
-    <div className="relative" style={{ paddingLeft: gutter }}>
-      {/* Period lines live in the left gutter, absolutely positioned. */}
-      <div className="pointer-events-none absolute inset-0">
-        {bands.map((b) => {
-          const t = tone(b.period.color);
-          const Icon = iconFor(b.period.icon);
-          const left = 8 + b.lane * LANE_WIDTH;
-          return (
-            <button
-              key={b.period.id}
-              type="button"
-              onClick={() => onEditPeriod(b.period)}
-              title={`${b.period.name} · ${b.period.startDate} → ${b.period.endDate}`}
-              className="pointer-events-auto absolute flex flex-col items-center group/period focus:outline-none"
-              style={{ top: b.top, height: b.height, left }}
+    <div className="stagger">
+      {groupByMonth(entries).map(({ month, rows }) => (
+        <section key={month} className="mt-5 first:mt-0">
+          {/* A sticky marker per month, so scrolling a long archive never
+              leaves you wondering which year you're in. Sentence case and
+              muted: it's a divider, not a heading competing with the rows. */}
+          <div className="sticky top-0 lg:top-14 z-10 -mx-1 px-1 py-1.5 mb-1.5 flex items-center gap-2 backdrop-blur-sm">
+            <h2 className="text-xs font-medium text-muted">{month}</h2>
+            <Link
+              to="/entry/$date"
+              params={{ date: rows[0].date }}
+              aria-label={`Open the most recent day in ${month}`}
+              title={`Open the most recent day in ${month}`}
+              className="ml-auto -mr-1 h-6 w-6 grid place-items-center rounded-md text-faint hover:text-ink hover:bg-hover active:scale-90 transition-all"
             >
-              <Icon
-                size={14}
-                strokeWidth={2.25}
-                className={`mb-1 shrink-0 ${t.text} transition-transform group-hover/period:scale-125`}
-              />
-              <span className={`w-1.5 flex-1 rounded-md ${t.line} transition-all group-hover/period:w-2`} />
-              <span
-                className={`absolute top-7 left-2.5 [writing-mode:vertical-rl] text-[10px] font-semibold uppercase tracking-wide ${t.text} whitespace-nowrap overflow-hidden`}
-                style={{ maxHeight: Math.max(b.height - 32, 0) }}
-              >
-                {b.period.name}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="stagger" ref={listRef}>
-        {groupByMonth(entries).map(({ month, rows }) => (
-          <section key={month} className="mt-5 first:mt-0">
-            {/* A sticky marker per month, so scrolling a long archive never
-                leaves you wondering which year you're in. Sentence case and
-                muted: it's a divider, not a heading competing with the rows. */}
-            <div className="sticky top-0 lg:top-14 z-10 -mx-1 px-1 py-1.5 mb-1.5 flex items-center gap-2 backdrop-blur-sm">
-              <h2 className="text-xs font-medium text-muted">{month}</h2>
-              <Link
-                to="/entry/$date"
-                params={{ date: rows[0].date }}
-                aria-label={`Open the most recent day in ${month}`}
-                title={`Open the most recent day in ${month}`}
-                className="ml-auto -mr-1 h-6 w-6 grid place-items-center rounded-md text-faint hover:text-ink hover:bg-hover active:scale-90 transition-all"
-              >
-                <Plus size={14} strokeWidth={2.5} />
-              </Link>
-            </div>
-            {rows.map((entry) =>
-              isEmptyDay(entry) ? (
-                <QuietDay key={entry.id} date={entry.date} />
-              ) : (
-                <EntryCard key={entry.id} entry={entry} />
-              )
-            )}
-          </section>
-        ))}
-      </div>
+              <Plus size={14} strokeWidth={2.5} />
+            </Link>
+          </div>
+          {renderNodes(buildPeriodTree(rows, ordered), onEditPeriod)}
+        </section>
+      ))}
     </div>
   );
 }
@@ -299,7 +235,7 @@ function TimelineMeta({ entries, periods }: { entries: JournalEntry[]; periods: 
 // so the archive reads as a continuous calendar and every day has a way in.
 function QuietDay({ date }: { date: string }) {
   return (
-    <div data-entry-date={date} className="mb-1">
+    <div className="mb-1">
       <Link
         to="/entry/$date"
         params={{ date }}
@@ -333,7 +269,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
       : null;
 
   return (
-    <div data-entry-date={entry.date} className="mb-2.5">
+    <div className="mb-2.5">
     <Link
       to="/entry/$date"
       params={{ date: entry.date }}
