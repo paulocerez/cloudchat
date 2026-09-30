@@ -11,6 +11,7 @@ export interface AppConfig {
   hevyApiKey?: string;
   hevyWebhookToken?: string;
   hevyLastSyncAt?: string; // ISO — cursor for /workouts/events
+  hevySyncFrom?: string; // YYYY-MM-DD — workouts starting earlier are ignored
 }
 
 const DOC = 'config/main';
@@ -93,4 +94,11 @@ export async function getHevyApiKey(): Promise<string> {
 export async function getHevyWebhookToken(): Promise<string> {
   const cfg = await getConfig();
   return cfg.hevyWebhookToken ?? process.env.HEVY_WEBHOOK_TOKEN ?? '';
+}
+
+// Workouts that start before this journal day (YYYY-MM-DD) are never synced, so
+// an import of old history doesn't stretch the journal back years. Empty = all.
+export async function getHevySyncFrom(): Promise<string> {
+  const cfg = await getConfig();
+  return cfg.hevySyncFrom ?? process.env.HEVY_SYNC_FROM ?? '';
 }

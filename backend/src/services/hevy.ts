@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-import { getConfig, getHevyApiKey, updateConfig } from './config';
+import { getConfig, getHevyApiKey, getHevySyncFrom, updateConfig } from './config';
 import { indexWorkouts, removeWorkout, upsertWorkout } from './firestore';
 import { berlinDate } from '../utils/date';
 import { HevyWorkout, HevyWorkoutEvent, Workout } from '../types';
@@ -68,6 +68,11 @@ export function toWorkout(w: HevyWorkout): Workout {
   };
 }
 
+// True when the workout's journal day is earlier than the sync cutoff.
+export function isBeforeCutoff(w: HevyWorkout, from: string): boolean {
+  return Boolean(from) && berlinDate(w.start_time) < from;
+}
+
 // ── Sync ────────────────────────────────────────────────────
 // Catches up on everything since the stored cursor: the safety net for missed
 // or never-sent webhooks, and the backfill when `since` is passed explicitly.
@@ -88,6 +93,7 @@ export async function syncWorkouts(
 
   // Events arrive newest first; apply oldest first so the latest state wins.
   const index = await indexWorkouts();
+  const cutoff = await getHevySyncFrom();
   const dates = new Set<string>();
   let imported = 0;
   let removed = 0;
@@ -98,7 +104,7 @@ export async function syncWorkouts(
         dates.add(date);
         removed++;
       }
-    } else if (event.workout?.id) {
+    } else if (event.workout?.id && !isBeforeCutoff(event.workout, cutoff)) {
       const date = berlinDate(event.workout.start_time);
       await upsertWorkout(date, toWorkout(event.workout), index);
       dates.add(date);
