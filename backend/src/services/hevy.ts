@@ -39,26 +39,6 @@ export async function listWorkoutEvents(
   };
 }
 
-// ── Webhook subscription ────────────────────────────────────
-// Not in the published OpenAPI spec, but live behind the same api-key auth.
-// Hevy POSTs { workoutId } to `url` with `Authorization: <authToken>`.
-export async function getWebhookSubscription(): Promise<unknown> {
-  const http = await client();
-  const { data } = await http.get('/webhook-subscription');
-  return data;
-}
-
-export async function subscribeWebhook(url: string, authToken: string): Promise<unknown> {
-  const http = await client();
-  const { data } = await http.post('/webhook-subscription', { webhook: { url, authToken } });
-  return data;
-}
-
-export async function deleteWebhookSubscription(): Promise<void> {
-  const http = await client();
-  await http.delete('/webhook-subscription');
-}
-
 // ── Mapping ─────────────────────────────────────────────────
 export function toWorkout(w: HevyWorkout): Workout {
   const byIndex = <T extends { index: number }>(a: T[] = []) =>

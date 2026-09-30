@@ -88,7 +88,8 @@ export async function getHevyApiKey(): Promise<string> {
   return cfg.hevyApiKey ?? process.env.HEVY_API_KEY ?? '';
 }
 
-// Shared secret Hevy echoes back in the Authorization header of each delivery.
+// Secret entered as the authorization header in Hevy's webhook settings
+// (hevy.com/settings?developer), checked on every delivery.
 export async function getHevyWebhookToken(): Promise<string> {
   const cfg = await getConfig();
   return cfg.hevyWebhookToken ?? process.env.HEVY_WEBHOOK_TOKEN ?? '';
