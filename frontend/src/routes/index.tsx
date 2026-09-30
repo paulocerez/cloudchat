@@ -1,7 +1,7 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { createRoute, Link } from '@tanstack/react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { MessageCircle, Mic, Image as ImageIcon, Music, MapPin, CalendarRange, Plus, Film, Play } from 'lucide-react';
+import { MessageCircle, Mic, Image as ImageIcon, Music, MapPin, CalendarRange, Plus, Film, Play, Dumbbell } from 'lucide-react';
 import { format as formatDate } from 'date-fns';
 import { api } from '~/lib/api';
 import { formatEntryDate } from '~/lib/utils';
@@ -258,6 +258,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
   const memoCount = entry.voiceMemos.length;
   const imageCount = entry.images.length;
   const videos = entry.videos ?? [];
+  const workouts = entry.workouts ?? [];
   const firstMessage = entry.messages.find((m: TextMessage) => m.fromUser)?.content;
   const preview = entry.title || (firstMessage ? stripSpotifyLinks(firstMessage) : undefined);
   const hasTranscript = entry.voiceMemos.some((v: VoiceMemo) => v.transcription);
@@ -387,6 +388,12 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
               <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-rose-50 dark:bg-rose-400/12 text-danger dark:text-rose-300 font-medium">
                 <MapPin size={13} strokeWidth={2.5} />
                 {entry.locations.length}
+              </span>
+            )}
+            {workouts.length > 0 && (
+              <span className="flex items-center gap-1 px-1.5 py-1 rounded-md bg-orange-50 dark:bg-orange-400/12 text-orange-600 dark:text-orange-300 font-medium">
+                <Dumbbell size={13} strokeWidth={2.5} />
+                {workouts.length}
               </span>
             )}
           </div>
