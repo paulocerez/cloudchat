@@ -34,6 +34,7 @@ export function isEmptyDay(entry: JournalEntry): boolean {
     entry.voiceMemos.length === 0 &&
     entry.images.length === 0 &&
     (entry.videos?.length ?? 0) === 0 &&
+    (entry.workouts?.length ?? 0) === 0 &&
     (entry.locations?.length ?? 0) === 0 &&
     !entry.title &&
     !entry.summary

@@ -4,9 +4,11 @@ import type {
   JournalVideo,
   TextMessage,
   VoiceMemo,
+  Workout,
 } from '@cloudchat/shared';
 import { ImageBubble, MessageBubble, VideoBubble, VoiceBubble } from './Bubbles';
 import { PocketList } from './Pocket';
+import { WorkoutCard } from './Workout';
 import { pocketMemos, sectionId, whatsappMemos } from './shared';
 import { EmptyDay } from './EmptyDay';
 
@@ -15,7 +17,10 @@ type Item =
   | { kind: 'voice'; data: VoiceMemo }
   | { kind: 'pocket'; data: VoiceMemo }
   | { kind: 'image'; data: JournalImage }
-  | { kind: 'video'; data: JournalVideo };
+  | { kind: 'video'; data: JournalVideo }
+  | { kind: 'workout'; data: Workout };
+
+const at = (item: Item) => (item.kind === 'workout' ? item.data.startTime : item.data.timestamp);
 
 export function TimelineView({ entry }: { entry: JournalEntry }) {
   const items: Item[] = [
@@ -24,7 +29,8 @@ export function TimelineView({ entry }: { entry: JournalEntry }) {
     ...pocketMemos(entry).map((v: VoiceMemo): Item => ({ kind: 'pocket', data: v })),
     ...entry.images.map((img: JournalImage): Item => ({ kind: 'image', data: img })),
     ...(entry.videos ?? []).map((v: JournalVideo): Item => ({ kind: 'video', data: v })),
-  ].sort((a, b) => a.data.timestamp.localeCompare(b.data.timestamp));
+    ...(entry.workouts ?? []).map((w: Workout): Item => ({ kind: 'workout', data: w })),
+  ].sort((a, b) => at(a).localeCompare(at(b)));
 
   if (items.length === 0) return <EmptyDay />;
 
@@ -44,6 +50,7 @@ export function TimelineView({ entry }: { entry: JournalEntry }) {
 
   // The DayStats recordings chip scrolls here.
   let anchored = false;
+  let workoutAnchored = false;
 
   return (
     <div className="space-y-2 stagger">
@@ -54,6 +61,11 @@ export function TimelineView({ entry }: { entry: JournalEntry }) {
           return (
             <PocketList key={item.memos[0].id} memos={item.memos} date={entry.date} id={id} />
           );
+        }
+        if (item.kind === 'workout') {
+          const id = workoutAnchored ? undefined : sectionId('workouts');
+          workoutAnchored = true;
+          return <WorkoutCard key={item.data.id} workout={item.data} id={id} />;
         }
         if (item.kind === 'message')
           return <MessageBubble key={item.data.id} msg={item.data} date={entry.date} />;

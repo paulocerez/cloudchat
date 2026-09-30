@@ -20,6 +20,7 @@ export interface JournalEntry {
   voiceMemos: VoiceMemo[];
   images: JournalImage[];
   videos?: JournalVideo[]; // manually uploaded video clips
+  workouts?: Workout[]; // synced from Hevy
   title?: string; // few-word headline for the day
   summary?: string; // one-sentence reflection
   locations?: EntryLocation[]; // geocoded places mentioned that day
@@ -65,6 +66,33 @@ export interface PocketActionItem {
   isCompleted: boolean;
   context?: string; // Pocket's one-line justification for the item
   priority?: string; // 'high' | 'medium' | 'low'
+}
+
+// A strength/cardio session synced from Hevy, keyed by hevyWorkoutId.
+export interface Workout {
+  id: string;
+  hevyWorkoutId: string;
+  title: string;
+  description?: string;
+  startTime: string; // ISO 8601
+  endTime: string;
+  exercises: WorkoutExercise[];
+}
+
+export interface WorkoutExercise {
+  title: string;
+  notes?: string;
+  supersetId?: number | null;
+  sets: WorkoutSet[];
+}
+
+export interface WorkoutSet {
+  type: string; // 'normal' | 'warmup' | 'dropset' | 'failure'
+  weightKg?: number | null;
+  reps?: number | null;
+  distanceM?: number | null;
+  durationS?: number | null;
+  rpe?: number | null;
 }
 
 export interface JournalImage {
@@ -259,3 +287,40 @@ export interface PocketWebhookBody {
   summarizations?: PocketSummarizations;
   transcript?: PocketTranscript;
 }
+
+// ── Hevy ────────────────────────────────────────────────────
+// https://api.hevyapp.com/docs — snake_case REST shapes.
+
+export interface HevySet {
+  index: number;
+  type: string;
+  weight_kg?: number | null;
+  reps?: number | null;
+  distance_meters?: number | null;
+  duration_seconds?: number | null;
+  rpe?: number | null;
+}
+
+export interface HevyExercise {
+  index: number;
+  title: string;
+  notes?: string;
+  exercise_template_id?: string;
+  superset_id?: number | null;
+  sets: HevySet[];
+}
+
+export interface HevyWorkout {
+  id: string;
+  title: string;
+  description?: string;
+  start_time: string;
+  end_time: string;
+  updated_at?: string;
+  created_at?: string;
+  exercises: HevyExercise[];
+}
+
+export type HevyWorkoutEvent =
+  | { type: 'updated'; workout: HevyWorkout }
+  | { type: 'deleted'; id: string; deleted_at?: string };

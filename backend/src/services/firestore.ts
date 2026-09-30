@@ -1,6 +1,6 @@
 import admin from 'firebase-admin';
 import { v4 as uuidv4 } from 'uuid';
-import { JournalEntry, AISummary, TextMessage, VoiceMemo, JournalImage, JournalVideo, EntryLocation, TimePeriod, Habit } from '../types';
+import { JournalEntry, AISummary, TextMessage, VoiceMemo, JournalImage, JournalVideo, EntryLocation, TimePeriod, Habit, Workout } from '../types';
 
 let db: admin.firestore.Firestore;
 
@@ -243,6 +243,67 @@ export async function removePocketMemo(date: string, recordingId: string): Promi
   const memos = (entry.voiceMemos ?? []).filter((m) => m.pocketRecordingId !== recordingId);
   if (memos.length === (entry.voiceMemos ?? []).length) return;
   await ref.update({ voiceMemos: memos, updatedAt: new Date().toISOString() });
+}
+
+// ── Hevy workouts ───────────────────────────────────────────
+// Deleted-workout events carry only an id, and editing a workout's start time
+// can move it to another day, so both need to know which day holds it now.
+// One scan of the `workouts` field builds that index; a sync reuses it.
+export type WorkoutIndex = Map<string, string>; // hevyWorkoutId -> date
+
+export async function indexWorkouts(): Promise<WorkoutIndex> {
+  const snap = await db.collection('entries').select('workouts').get();
+  const index: WorkoutIndex = new Map();
+  for (const doc of snap.docs) {
+    for (const w of (doc.data().workouts ?? []) as Workout[]) index.set(w.hevyWorkoutId, doc.id);
+  }
+  return index;
+}
+
+async function pullWorkout(date: string, hevyWorkoutId: string): Promise<Workout | null> {
+  const ref = db.collection('entries').doc(date);
+  const snap = await ref.get();
+  if (!snap.exists) return null;
+  const workouts = ((snap.data() as JournalEntry).workouts ?? []);
+  const found = workouts.find((w) => w.hevyWorkoutId === hevyWorkoutId) ?? null;
+  if (!found) return null;
+  await ref.update({
+    workouts: workouts.filter((w) => w.hevyWorkoutId !== hevyWorkoutId),
+    updatedAt: new Date().toISOString(),
+  });
+  return found;
+}
+
+// Merges by hevyWorkoutId so repeat deliveries and edits replace the row.
+export async function upsertWorkout(
+  date: string,
+  workout: Workout,
+  index: WorkoutIndex
+): Promise<void> {
+  let id: string | undefined;
+  const prev = index.get(workout.hevyWorkoutId);
+  if (prev && prev !== date) id = (await pullWorkout(prev, workout.hevyWorkoutId))?.id;
+
+  await getOrCreateEntry(date);
+  const ref = db.collection('entries').doc(date);
+  const workouts = ((await ref.get()).data() as JournalEntry).workouts ?? [];
+  const i = workouts.findIndex((w) => w.hevyWorkoutId === workout.hevyWorkoutId);
+  // Keep the original local id so links to this workout stay stable.
+  const next =
+    i >= 0
+      ? workouts.map((w, j) => (j === i ? { ...workout, id: w.id } : w))
+      : [...workouts, { ...workout, id: id ?? workout.id }];
+
+  await ref.update({ workouts: next, updatedAt: new Date().toISOString() });
+  index.set(workout.hevyWorkoutId, date);
+}
+
+export async function removeWorkout(hevyWorkoutId: string, index: WorkoutIndex): Promise<string | null> {
+  const date = index.get(hevyWorkoutId);
+  if (!date) return null;
+  await pullWorkout(date, hevyWorkoutId);
+  index.delete(hevyWorkoutId);
+  return date;
 }
 
 export async function updateImageAnnotation(

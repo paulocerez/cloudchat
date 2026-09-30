@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { Film, Image as ImageIcon, MessageSquare, Mic, Music, Radio } from 'lucide-react';
+import { Dumbbell, Film, Image as ImageIcon, MessageSquare, Mic, Music, Radio } from 'lucide-react';
 import type { JournalEntry } from '@cloudchat/shared';
 import {
   extractSpotifyLinks,
@@ -11,6 +11,7 @@ import { AnnotatedImage } from './AnnotatedImage';
 import { VoiceBubble } from './Bubbles';
 import { EmptyDay } from './EmptyDay';
 import { PocketList } from './Pocket';
+import { WorkoutCard } from './Workout';
 import { pocketMemos, sectionId, whatsappMemos } from './shared';
 
 export function OrganizedView({ entry }: { entry: JournalEntry }) {
@@ -22,12 +23,14 @@ export function OrganizedView({ entry }: { entry: JournalEntry }) {
   // from the WhatsApp voice notes rather than mixing in with them.
   const memos = whatsappMemos(entry);
   const recordings = pocketMemos(entry);
+  const workouts = [...(entry.workouts ?? [])].sort((a, b) => a.startTime.localeCompare(b.startTime));
   const isEmpty =
     songs.length === 0 &&
     entry.images.length === 0 &&
     memos.length === 0 &&
     recordings.length === 0 &&
     videos.length === 0 &&
+    workouts.length === 0 &&
     textMessages.length === 0;
 
   if (isEmpty) return <EmptyDay />;
@@ -91,6 +94,16 @@ export function OrganizedView({ entry }: { entry: JournalEntry }) {
       {recordings.length > 0 && (
         <Section id={sectionId('pocket')} icon={Radio} title="Pocket" count={recordings.length}>
           <PocketList memos={recordings} date={entry.date} />
+        </Section>
+      )}
+
+      {workouts.length > 0 && (
+        <Section id={sectionId('workouts')} icon={Dumbbell} title="Workouts" count={workouts.length}>
+          <div className="space-y-2">
+            {workouts.map((w) => (
+              <WorkoutCard key={w.id} workout={w} />
+            ))}
+          </div>
         </Section>
       )}
 

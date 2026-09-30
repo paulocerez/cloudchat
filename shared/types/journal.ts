@@ -20,6 +20,7 @@ export interface JournalEntry {
   voiceMemos: VoiceMemo[];
   images: JournalImage[];
   videos?: JournalVideo[]; // manually uploaded video clips
+  workouts?: Workout[]; // synced from Hevy
   title?: string; // few-word headline for the day
   summary?: string; // one-sentence reflection
   locations?: EntryLocation[]; // geocoded places mentioned that day
@@ -65,6 +66,33 @@ export interface PocketActionItem {
   isCompleted: boolean;
   context?: string; // Pocket's one-line justification for the item
   priority?: string; // 'high' | 'medium' | 'low'
+}
+
+// A strength/cardio session synced from Hevy, keyed by hevyWorkoutId.
+export interface Workout {
+  id: string;
+  hevyWorkoutId: string;
+  title: string;
+  description?: string;
+  startTime: string; // ISO 8601
+  endTime: string;
+  exercises: WorkoutExercise[];
+}
+
+export interface WorkoutExercise {
+  title: string;
+  notes?: string;
+  supersetId?: number | null;
+  sets: WorkoutSet[];
+}
+
+export interface WorkoutSet {
+  type: string; // 'normal' | 'warmup' | 'dropset' | 'failure'
+  weightKg?: number | null;
+  reps?: number | null;
+  distanceM?: number | null;
+  durationS?: number | null;
+  rpe?: number | null;
 }
 
 export interface JournalImage {

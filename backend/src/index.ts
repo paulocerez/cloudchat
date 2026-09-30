@@ -5,6 +5,7 @@ import { initFirestore } from './services/firestore';
 import { initGroq } from './services/groq';
 import webhookRouter from './routes/webhook';
 import pocketWebhookRouter, { pocketApiRouter } from './routes/pocket';
+import hevyWebhookRouter, { hevyApiRouter } from './routes/hevy';
 import entriesRouter from './routes/entries';
 import summariesRouter from './routes/summaries';
 import periodsRouter from './routes/periods';
@@ -33,8 +34,10 @@ app.use(
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
 app.use('/webhook/pocket', pocketWebhookRouter);
+app.use('/webhook/hevy', hevyWebhookRouter);
 app.use('/webhook', webhookRouter);
 app.use('/api/pocket', pocketApiRouter);
+app.use('/api/hevy', hevyApiRouter);
 app.use('/api/entries', entriesRouter);
 app.use('/api/summaries', summariesRouter);
 app.use('/api/periods', periodsRouter);

@@ -7,6 +7,8 @@ import {
   getEntry,
 } from '../services/firestore';
 import { ensureDaySummary } from '../services/daySummary';
+import { syncWorkouts } from '../services/hevy';
+import { getHevyApiKey } from '../services/config';
 import { generateSummary } from '../services/groq';
 import { geocodePlaces } from '../services/mapbox';
 import { AISummary } from '../types';
@@ -22,6 +24,16 @@ router.get('/daily', async (req: Request, res: Response) => {
   if (secret && req.headers.authorization !== `Bearer ${secret}`) {
     res.sendStatus(401);
     return;
+  }
+
+  // Catch any Hevy workout whose webhook never arrived before summarizing —
+  // a workout alone is enough to give the day an entry.
+  if (await getHevyApiKey()) {
+    try {
+      await syncWorkouts();
+    } catch (err) {
+      console.error('Nightly Hevy sync failed:', err);
+    }
   }
 
   const date = (req.query.date as string) || berlinToday();

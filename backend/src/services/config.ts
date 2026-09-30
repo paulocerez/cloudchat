@@ -8,6 +8,9 @@ export interface AppConfig {
   cronSchedule?: string;
   pocketApiKey?: string;
   pocketWebhookSecret?: string;
+  hevyApiKey?: string;
+  hevyWebhookToken?: string;
+  hevyLastSyncAt?: string; // ISO — cursor for /workouts/events
 }
 
 const DOC = 'config/main';
@@ -77,4 +80,16 @@ export async function getPocketApiKey(): Promise<string> {
 export async function getPocketWebhookSecret(): Promise<string> {
   const cfg = await getConfig();
   return cfg.pocketWebhookSecret ?? process.env.POCKET_WEBHOOK_SECRET ?? '';
+}
+
+// Hevy public API key (UUID from hevy.com/settings?developer — Pro only).
+export async function getHevyApiKey(): Promise<string> {
+  const cfg = await getConfig();
+  return cfg.hevyApiKey ?? process.env.HEVY_API_KEY ?? '';
+}
+
+// Shared secret Hevy echoes back in the Authorization header of each delivery.
+export async function getHevyWebhookToken(): Promise<string> {
+  const cfg = await getConfig();
+  return cfg.hevyWebhookToken ?? process.env.HEVY_WEBHOOK_TOKEN ?? '';
 }

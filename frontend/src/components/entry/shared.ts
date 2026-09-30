@@ -34,7 +34,14 @@ export function mediaUrl(path: string): string {
 }
 
 // Section anchors, so a count pill in the header can jump to its block.
-export type EntrySection = 'messages' | 'images' | 'videos' | 'memos' | 'songs' | 'pocket';
+export type EntrySection =
+  | 'messages'
+  | 'images'
+  | 'videos'
+  | 'memos'
+  | 'songs'
+  | 'pocket'
+  | 'workouts';
 
 export function sectionId(section: EntrySection): string {
   return `entry-${section}`;

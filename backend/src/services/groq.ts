@@ -1,6 +1,6 @@
 import Groq from 'groq-sdk';
 import type { ChatCompletionCreateParamsNonStreaming } from 'groq-sdk/resources/chat/completions';
-import { JournalEntry, VoiceMemo } from '../types';
+import { JournalEntry, VoiceMemo, Workout } from '../types';
 
 let client: Groq;
 
@@ -21,6 +21,24 @@ function memoText(v: VoiceMemo): string {
   return [head, body, v.transcription].filter(Boolean).join('\n');
 }
 
+// One line per Hevy workout: "Workout: Push Day (62 min) — Bench Press: 3 sets, top 80 kg × 8".
+function workoutText(w: Workout): string {
+  const mins = Math.round((Date.parse(w.endTime) - Date.parse(w.startTime)) / 60_000);
+  const exercises = w.exercises
+    .map((e) => {
+      const working = e.sets.filter((s) => s.type !== 'warmup');
+      const top = working.reduce<(typeof working)[number] | undefined>(
+        (best, s) => ((s.weightKg ?? 0) > (best?.weightKg ?? 0) ? s : best),
+        undefined
+      );
+      const detail = top?.weightKg ? `, top ${top.weightKg} kg × ${top.reps ?? '?'}` : '';
+      return `${e.title}: ${working.length} sets${detail}`;
+    })
+    .join('; ');
+  const duration = mins > 0 ? ` (${mins} min)` : '';
+  return [`Workout: ${w.title}${duration} — ${exercises}`, w.description].filter(Boolean).join('\n');
+}
+
 export interface DaySummary {
   title: string; // a few words
   summary: string; // one sentence
@@ -33,7 +51,8 @@ export async function generateDaySummary(entry: JournalEntry): Promise<DaySummar
     .map((m) => m.content)
     .join('\n');
   const transcripts = entry.voiceMemos.map(memoText).filter(Boolean).join('\n\n');
-  const content = `${texts}\n${transcripts}`.trim();
+  const workouts = (entry.workouts ?? []).map(workoutText).join('\n');
+  const content = `${texts}\n${transcripts}\n${workouts}`.trim();
 
   if (!content) return { title: '', summary: '', locations: [] };
 
