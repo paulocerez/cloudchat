@@ -1,14 +1,22 @@
 import { Router, Request, Response } from 'express';
+import { waitUntil } from '@vercel/functions';
 import { upsertPocketMemo, removePocketMemo } from '../services/firestore';
 import {
   getRecording,
   listRecordings,
   needsRefetch,
+  plainText,
   recordedAt,
   toVoiceMemo,
   verifyPocketSignature,
 } from '../services/pocket';
 import { ensureDaySummary } from '../services/daySummary';
+import { isArticle } from '../services/articleDetection';
+import {
+  enqueueArticle,
+  processDueForwards,
+  runForwardInBackground,
+} from '../services/quotesForward';
 import { getPocketWebhookSecret } from '../services/config';
 import { berlinDate } from '../utils/date';
 import { PocketRecording, PocketWebhookBody } from '../types';
@@ -32,6 +40,14 @@ const UPSERT_EVENTS = new Set([
   'action_items.updated',
   'speakers.labeled',
   'translation.completed',
+]);
+
+// Events after which the transcript is final. Pocket has no partial flag;
+// recording.created can still arrive before transcription finishes.
+const FINAL_TRANSCRIPT_EVENTS = new Set([
+  'transcription.completed',
+  'transcript.edited',
+  'summary.completed',
 ]);
 
 // Pocket has no verification handshake — respond OK to any GET health check.
@@ -99,6 +115,21 @@ router.post('/', async (req: Request, res: Response) => {
 
     await upsertPocketMemo(date, toVoiceMemo(recording, transcript, summarizations));
 
+    // Articles go to the Quotes app. Only the outbox write happens here; the
+    // 1–2 minute send runs after the response via waitUntil.
+    if (FINAL_TRANSCRIPT_EVENTS.has(body.event)) {
+      const text = plainText(transcript);
+      if (isArticle(text)) {
+        try {
+          if (await enqueueArticle(recording.id, text)) {
+            waitUntil(runForwardInBackground(recording.id));
+          }
+        } catch (err) {
+          console.error('Quotes forward enqueue failed:', err);
+        }
+      }
+    }
+
     // A recording is enough on its own to give the day an entry. summary.completed
     // is the first moment it has usable content, and skipIfPresent keeps this to one
     // Groq call per day — later recordings and hand-edited summaries are left alone.
@@ -112,6 +143,12 @@ router.post('/', async (req: Request, res: Response) => {
   } catch (err) {
     console.error('Pocket webhook processing error:', err);
   }
+
+  // No minute-level cron on Hobby, so each delivery also sends any Quotes
+  // forwards whose retry backoff has elapsed.
+  waitUntil(
+    processDueForwards().catch((err) => console.error('Quotes retry sweep failed:', err))
+  );
 
   // Always 200 — Pocket retries 3× with backoff, and a bug on our side
   // shouldn't turn into a retry storm.

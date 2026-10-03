@@ -14,6 +14,7 @@ import configRouter from './routes/config';
 import mediaRouter from './routes/media';
 import chatRouter from './routes/chat';
 import placesRouter from './routes/places';
+import quotesRouter from './routes/quotes';
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
@@ -46,6 +47,7 @@ app.use('/api/config', configRouter);
 app.use('/api/media', mediaRouter);
 app.use('/api/chat', chatRouter);
 app.use('/api/places', placesRouter);
+app.use('/api/quotes', quotesRouter);
 
 initFirestore();
 initGroq();

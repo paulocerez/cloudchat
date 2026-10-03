@@ -8,6 +8,7 @@ import {
 } from '../services/firestore';
 import { ensureDaySummary } from '../services/daySummary';
 import { syncWorkouts } from '../services/hevy';
+import { processDueForwards } from '../services/quotesForward';
 import { getHevyApiKey } from '../services/config';
 import { generateSummary } from '../services/groq';
 import { geocodePlaces } from '../services/mapbox';
@@ -34,6 +35,13 @@ router.get('/daily', async (req: Request, res: Response) => {
     } catch (err) {
       console.error('Nightly Hevy sync failed:', err);
     }
+  }
+
+  // Retry any article sends to the Quotes app that are still waiting.
+  try {
+    await processDueForwards();
+  } catch (err) {
+    console.error('Nightly Quotes retry sweep failed:', err);
   }
 
   const date = (req.query.date as string) || berlinToday();

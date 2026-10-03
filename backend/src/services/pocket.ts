@@ -108,6 +108,21 @@ function joinSegments(list: PocketTranscriptSegment[]): string {
     .join('\n');
 }
 
+// The words as spoken, without `speaker:` labels — what article detection
+// matches against and what gets forwarded to the Quotes app.
+export function plainText(transcript: PocketTranscript): string {
+  if (!transcript) return '';
+  if (typeof transcript === 'string') return transcript.trim();
+  const list = Array.isArray(transcript)
+    ? transcript
+    : transcript.segments ?? transcript.utterances;
+  if (!list?.length) return Array.isArray(transcript) ? '' : (transcript.text ?? '').trim();
+  return list
+    .map((s) => (s?.text ?? '').trim())
+    .filter(Boolean)
+    .join('\n');
+}
+
 function summarizationList(summarizations: PocketSummarizations): PocketSummarization[] {
   if (!summarizations) return [];
   return Array.isArray(summarizations) ? summarizations : Object.values(summarizations);
